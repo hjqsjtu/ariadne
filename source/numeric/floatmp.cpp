@@ -227,6 +227,10 @@ FloatMP::PrecisionType FloatMP::precision() const {
     return PrecisionType(mpfr_get_prec(this->_mpfr));
 }
 
+FloatMP const& FloatMP::raw() const {
+    return *this;
+}
+
 double FloatMP::get_d() const {
     return mpfr_get_d(this->_mpfr,get_rounding_mode());
 }

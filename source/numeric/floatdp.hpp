@@ -68,7 +68,7 @@ double add_rnd(double x1, double x2);
 double sub_rnd(double x1, double x2);
 double mul_rnd(double x1, double x2);
 double div_rnd(double x1, double x2);
-double fma_rnd(double x1, double x2, double x3);
+double fma_rnd(double x1, double x2, double y);
 double pow_rnd(double x, int n);
 double sqrt_rnd(double x);
 double exp_rnd(double x);

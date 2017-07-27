@@ -39,6 +39,9 @@ namespace Ariadne {
 template<class X> class Vector;
 template<class X> class Covector;
 
+template<class U> struct CovectorExpression;
+template<class U> struct CovectorContainer;
+
 struct DeclareCovectorOperations {
     template<class X> friend Covector<X> operator+(Covector<X> const& v);
     template<class X> friend Covector<NegationType<X>> operator-(Covector<X> const& v);
@@ -54,9 +57,14 @@ struct DeclareCovectorOperations {
     template<class X1, class X2> friend ArithmeticType<X1,X2> operator*(const Covector<X1>& u1, const Vector<X2>& v2);
     template<class X1, class X2> friend EqualsType<X1,X2> operator==(const Covector<X1>& u1, const Covector<X2>& u2);
     template<class X> friend OutputStream& operator<<(OutputStream& os, const Covector<X>& u);
+
+    template<class X1,class U2> friend Covector<InplaceSumType<X1,ScalarType<U2>>>& operator+=(Covector<X1>& u1, CovectorExpression<U2> const& u2);
 };
 
-template<class U> struct CovectorExpression : public DeclareCovectorOperations { const U& operator()() const { return static_cast<const U&>(*this); } };
+template<class U> struct CovectorExpression : public DeclareCovectorOperations {
+    const U& operator()() const { return static_cast<const U&>(*this); }
+    const U& upcast() const { return static_cast<const U&>(*this); }
+};
 template<class U> struct CovectorContainer : public CovectorExpression<U> { };
 
 
@@ -75,10 +83,13 @@ template<class X> class Covector
         Covector(Covector<XX> const& u) : _ary(u._ary) { }
     template<class XX, EnableIf<IsConstructible<X,XX>> =dummy, DisableIf<IsConvertible<XX,X>> =dummy>
         explicit Covector(Covector<XX> const& u) : _ary(u._ary) { }
+    Covector<X>& operator=(Covector<X> const& cv) = default;
     explicit Covector() : _ary() { }
     explicit Covector(SizeType n) : _ary(n) { }
     explicit Covector(SizeType n, const X& x) : _ary(n,x) { }
     explicit Covector(Array<X> ary) : _ary(std::move(ary)) { }
+    template<class... PRS, EnableIf<IsConstructible<X,PRS...>> =dummy>
+        explicit Covector(SizeType n, PRS... prs) : _ary(n,X(prs...)) { }
     static Covector<X> unit(SizeType n, SizeType j) { Covector<X> r(n); r[j]=1; return r; }
     SizeType size() const { return _ary.size(); }
     Void resize(SizeType n) { _ary.resize(n); }
@@ -92,8 +103,8 @@ template<class X> class Covector
     Covector(CovectorExpression<CVE> const& cve) : _ary(cve().size(),cve().zero_element()) {
         for(SizeType i=0; i!=this->size(); ++i) { this->_ary[i]=cve()[i]; } }
     template<class CVE, EnableIf<IsAssignable<typename CVE::ScalarType,X>> =dummy>
-    Covector<X> const& operator=(CovectorExpression<CVE> const& cve) {
-        this->resize(cve.size()); for(SizeType i=0; i!=this->size(); ++i) { this->_ary[i]=cve()[i]; } }
+    Covector<X>& operator=(CovectorExpression<CVE> const& cve) {
+        this->resize(cve().size()); for(SizeType i=0; i!=this->size(); ++i) { this->_ary[i]=cve()[i]; } return *this; }
 };
 
 template<class X> inline Covector<X> const& transpose(Vector<X> const& v) {
@@ -150,6 +161,8 @@ class ProvideCovectorOperations {
         ARIADNE_PRECONDITION(u1.size()==u2.size()); for(SizeType i=0; i!=u1.size(); ++i) { u1[i]-=u2[i]; } return u1; }
 
     template<class X1,class X2> friend Covector<InplaceProductType<X1,X2>>& operator*=(Covector<X1>& u1, X2 const& s2) {
+        InplaceProductType<X1,X2> u10=u1[0];
+        static_assert(IsSame<X1,InplaceProductType<X1,X2>>::value,"");
         for(SizeType i=0; i!=u1.size(); ++i) { u1[i]*=s2; } return u1; }
 
     template<class X1,class X2> friend Covector<InplaceQuotientType<X1,X2>>& operator/=(Covector<X1>& u1, X2 const& s2) {
@@ -165,6 +178,10 @@ class ProvideCovectorOperations {
 
     template<class X> friend OutputStream& operator<<(OutputStream& os, const Covector<X>& u) {
         if(u.size()==0) { os << "{"; } for(SizeType i=0; i!=u.size(); ++i) { os << (i==0u?"{":",") << u[i]; } return os << "}"; }
+
+
+    template<class X1,class U2> friend Covector<InplaceSumType<X1,ScalarType<U2>>>& operator+=(Covector<X1>& u1, CovectorExpression<U2> const& u2) {
+        ARIADNE_PRECONDITION(u1.size()==u2().size()); for(SizeType i=0; i!=u1.size(); ++i) { u1[i]+=u2()[i]; } return u1; }
 
 };
 

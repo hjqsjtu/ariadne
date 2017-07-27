@@ -120,7 +120,7 @@ Void TestContinuousEvolution::test() const
     Real mu=Dyadic(0.5);
     EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,0);
     EffectiveScalarFunction xp=EffectiveScalarFunction::coordinate(2,1);
-    EffectiveVectorFunction vdp={x,mu*(1-x*x)*xp-x};
+    EffectiveVectorFunction vdp={xp,mu*(1-x*x)*xp-x};
 
     VectorField vanderpol(vdp);
     ARIADNE_TEST_PRINT(vanderpol);

@@ -2,7 +2,9 @@
 
 #include "numeric/decimal.hpp"
 #include "numeric/rational.hpp"
-#include "function/c1_taylor_function.hpp"
+#include "function/taylor_model.hpp"
+#include "function/c1_taylor_model.hpp"
+#include "function/chebyshev_model.hpp"
 
 using namespace Ariadne;
 
@@ -90,9 +92,26 @@ Int test_taylor_function() {
     compose(f1,{f1,f2});
 }
 
+void test_chebyshev_model() {
+//    UnivariateChebyshevModel<FloatDP> cm({2,3,5,7,11},dp);
+    UnivariateChebyshevModel<FloatDP> cm({0,0,0,1,1},dp);
+    cm*=rec(FloatDPBounds(5,dp));
+    std::cout << "cm=" << cm << "\n";
+    UnivariateTaylorModel<FloatDP> tm(cm);
+    std::cout << "tm=" << tm << "\n";
+    FloatDPBounds x(3,dp);
+    Vector<FloatDPBounds> v({x});
+    std::cout << "v="<<v<<" tm(v)=" << tm(v) << "\n";
+    std::cout << "x="<<x<<" cm(x)=" << cm(x) << "\n";
+    std::cerr<<"norm(tm)="<<norm(tm)<<", norm(cm)=" << norm(cm) << "\n";
+    UnivariateChebyshevModel<FloatDP> cmp(tm);
+    std::cout << "cmp=" << cmp << "\n";
+    std::cout << "cmp=" << cmp.error().raw()-cm.error().raw() << "\n";
+}
 
 Int main() {
     test_taylor_series();
     test_taylor_function();
+    test_chebyshev_model();
     std::cout << "Done\n";
 }

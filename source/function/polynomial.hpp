@@ -125,6 +125,7 @@ class Polynomial
     DegreeType degree() const;
     //! \brief The value of the polynomial at zero.
     const X& value() const;
+    ExpansionValueReference<X> value();
     //! \brief A reference to the coefficient of the term in \f$x^{a_1}\cdots x^{a_n}\f$.
     X& operator[](const MultiIndex& a);
     //! \brief A constant referent to the coefficient of the term in \f$x^{a_1}\cdots x^{a_n}\f$.

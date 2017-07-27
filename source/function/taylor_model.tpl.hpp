@@ -757,7 +757,7 @@ template<class F> class AlgebraOperations<TaylorModel<ValidatedTag,F>>
     typedef typename ModelType::RangeType RangeType;
   public:
     using NormedAlgebraOperations<TaylorModel<ValidatedTag,F>>::apply;
-    static ModelType apply(Nul, ModelType const& x) {
+    static ModelType apply(Nul, ModelType x) {
         return ModelType(x.argument_size(),x.sweeper()); }
     static ModelType apply(Pos, ModelType x) {
         return std::move(x); }

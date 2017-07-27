@@ -75,6 +75,7 @@ template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>>
 {
     typedef ModelNumericType<P,F> X;
     using NormedAlgebraOperations<TaylorModel<P,F>>::apply;
+    static TaylorModel<P,F> apply(Nul,TaylorModel<P,F> tm);
     static TaylorModel<P,F> apply(Pos,TaylorModel<P,F> tm);
     static TaylorModel<P,F> apply(Neg,TaylorModel<P,F> tm);
     static TaylorModel<P,F> apply(Add,TaylorModel<P,F> tm, X const& c);
@@ -432,6 +433,8 @@ class TaylorModel<ValidatedTag,F>
     PropertiesType properties() const { return this->sweeper(); }
     //! \brief The precision of the coefficients.
     PrecisionType precision() const { return this->sweeper().precision(); }
+    //! \brief The precision of the error term.
+    ErrorPrecisionType error_precision() const { return this->sweeper().precision(); }
     //@}
 
     //@{

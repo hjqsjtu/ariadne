@@ -84,6 +84,9 @@ template<class LHS, class RHS> List<typename LHS::BaseType> left_hand_sides(cons
 template<class LHS, class RHS> List<RHS> right_hand_sides(const List<Assignment<LHS,RHS>>& assignments) {
     return elementwise([](Assignment<LHS,RHS>const&a){return a.rhs;},assignments);
 }
+template<class LHS, class RHS> Vector<RHS> right_hand_sides(const Vector<Assignment<LHS,RHS>>& assignments) {
+    return elementwise([](Assignment<LHS,RHS>const&a){return a.rhs;},assignments);
+}
 
 
 template<class T>

@@ -89,6 +89,8 @@ template<class X> DegreeType Polynomial<X>::degree() const {
     return deg;
 }
 
+template<class X> ExpansionValueReference<X> Polynomial<X>::value() { return this->_expansion[MultiIndex::zero(this->argument_size())]; }
+
 template<class X> const X& Polynomial<X>::value() const { return this->_expansion[MultiIndex::zero(this->argument_size())]; }
 
 template<class X> X& Polynomial<X>::operator[](const MultiIndex& a) { return this->_expansion.at(a); }

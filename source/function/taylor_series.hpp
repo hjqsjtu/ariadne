@@ -50,6 +50,8 @@ template<> class TaylorSeries<FloatDPBounds> {
     Array<FloatDPValue> _expansion;
     FloatDPError _error;
   public:
+    static TaylorSeries coordinate(DoublePrecision pr) { TaylorSeries r(IntervalDomainType(-1,+1),1u); r._expansion[1]=1; return r; }
+
     TaylorSeries(const IntervalDomainType& dom, DegreeType deg) : _domain(dom), _expansion(deg+1), _error(0u) { }
 
     TaylorSeries(const IntervalDomainType& domain, const FloatDPValue& centre, DegreeType degree,
@@ -61,11 +63,13 @@ template<> class TaylorSeries<FloatDPBounds> {
     FloatDPValue const& operator[](DegreeType i) const { return _expansion[i]; }
     Array<FloatDPValue> expansion() const { return _expansion; }
     FloatDPError error() const { return _error; }
+    FloatDPError& error() { return _error; }
     Void sweep(FloatDPValue threshold);
+    PrecisionType<FloatDP> precision() const { return _expansion[0].precision(); }
+    PrecisionType<FloatDP> error_precision() const { return _error.precision(); }
 
     friend OutputStream& operator<<(OutputStream&, TaylorSeries<FloatDPBounds> const&);
 };
-
 
 template<class OP> inline
 TaylorSeries<FloatDPBounds>::TaylorSeries(OP unary_operator, const IntervalDomainType& domain, const FloatDPValue& centre, DegreeType degree)

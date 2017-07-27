@@ -28,6 +28,8 @@ set(UNIT_TESTS_KERNEL
     test_discrete_evolution
     test_continuous_evolution
     test_graphics
+
+    test_c1_taylor_model
 #    test_serialization
 )
 

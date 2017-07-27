@@ -157,6 +157,9 @@ template<class X> class Matrix
     //! Construct a matrix using initializer lists.
     template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy> Matrix(InitializerList<InitializerList<double>> lst, PRS... pr);
 
+    //! Construct from a matrix of type \a Y using parameters of \a X.
+    template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy> explicit Matrix(Matrix<Y> const&, PRS... prs);
+
     //! Construct a matrix as a linear map from functionals.
     Matrix(Vector<Covector<X>>);
 
@@ -829,6 +832,15 @@ Matrix<X>::Matrix(InitializerList<InitializerList<double>> lst, PRS... prs) : _r
         typename InitializerList<double>::const_iterator col_iter=row_iter->begin();
         for(SizeType j=0; j!=this->column_size(); ++j, ++col_iter) {
             this->at(i,j)=X(ExactDouble(*col_iter),prs...);
+        }
+    }
+}
+
+template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>
+Matrix<X>::Matrix(Matrix<Y> const& mx, PRS... prs) : _rs(mx.row_size()), _cs(mx.column_size()), _ary(_rs*_cs,X(prs...)) {
+    for(SizeType i=0; i!=this->row_size(); ++i) {
+        for(SizeType j=0; j!=this->column_size(); ++j) {
+            this->at(i,j)=X(mx[i][j],prs...);
         }
     }
 }

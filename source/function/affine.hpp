@@ -129,6 +129,11 @@ template<class X> struct ProvideAlgebraOperations<Affine<X>,X> {
         friend decltype(auto) operator-(Y const& y, Affine<X> const& x) { return factory(x).create(y)-x; }
     template<class Y, EnableIf<IsGenericNumericType<Y>> =dummy>
         friend decltype(auto) operator*(Y const& y, Affine<X> const& x) { return factory(x).create(y)*x; }
+
+    friend inline Affine<X>& operator+=(Affine<X>& f1, const X& c2) { f1._c+=c2; return f1; }
+    friend inline Affine<X>& operator+=(Affine<X>& f1, const Affine<X>& f2) { f1._c+=f2._c; f1._g+=f2._g; return f1; }
+    friend inline Affine<X>& operator*=(Affine<X>& f1, const X& c2) { f1._c*=c2; f1._g*=c2; return f1; }
+
 };
 
 template<class X> FloatFactory<PrecisionType<X>> factory(Affine<X> const& a) {
@@ -182,9 +187,13 @@ class Affine
     const Covector<X>& a() const { return this->_g; }
     const X& b() const { return this->_c; }
 
+    const X& value() const { return this->_c; }
     const Covector<X>& gradient() const { return this->_g; }
     const X& gradient(SizeType i) const { return this->_g[i]; }
-    const X& value() const { return this->_c; }
+
+    X& value() { return this->_c; }
+    Covector<X>& gradient() { return this->_g; }
+    X& gradient(SizeType i) { return this->_g[i]; }
 
     Void resize(SizeType n) { return this->_g.resize(n); }
     SizeType argument_size() const { return this->_g.size(); }

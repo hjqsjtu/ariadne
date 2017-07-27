@@ -269,6 +269,7 @@ template<> Void export_vector<FloatDPBounds>()
     export_vector_class<X>(vector_class);
     export_vector_arithmetic<X,X>(vector_class);
     def("norm",&__norm__<Vector<X>>);
+    def("midpoint", (Vector<FloatDPValue>(*)(const Vector<FloatDPBounds>&)) &midpoint);
 }
 
 template<> Void export_vector<FloatMPBounds>()
@@ -419,6 +420,7 @@ template<> Void export_matrix<FloatDPBounds>()
 {
     typedef FloatDPBounds X;
     class_< Matrix<X> > matrix_class(python_name<X>("Matrix").c_str(),init<Matrix<X>>());
+    matrix_class.def(init<Matrix<Real>,DoublePrecision>());
     export_matrix_class<X>(matrix_class);
     export_matrix_conversion<FloatDPValue,FloatDPBounds>(matrix_class);
     export_matrix_arithmetic<X,X>(matrix_class);
@@ -429,9 +431,12 @@ template<> Void export_matrix<FloatDPBounds>()
     def("gs_solve", (Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &gs_solve);
     def("lu_solve", (Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &lu_solve);
 
+    def("midpoint", (Matrix<FloatDPValue>(*)(const Matrix<FloatDPBounds>&)) &midpoint);
     def("triangular_decomposition",&triangular_decomposition<X>);
     def("orthogonal_decomposition", &orthogonal_decomposition<X>);
 
+    class_< Matrix<Real> > real_matrix_class(python_name<Real>("Matrix").c_str());
+    from_python<Matrix<Real>>();
     //implicitly_convertible< Matrix<FloatDPApproximation>, Matrix<FloatDPBounds> >();
 }
 

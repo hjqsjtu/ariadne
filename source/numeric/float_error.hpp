@@ -76,6 +76,11 @@ template<class F> class Error
     friend LowerBound<F> operator-(Value<F> const& x1, Error<F> const& x2) { return LowerBound<F>(sub(down,x1._v,x2._e)); }
     friend UpperBound<F> log2(Error<F> const& x) {
         return log(x)/cast_positive(log(Bounds<F>(2u,x.precision()))); }
+    friend Error<F>& operator+=(Error<F>& x1, Error<F> const& x2) { x1._e=add(up,x1._e,x2._e); return x1; }
+    friend Error<F>& operator+=(Error<F>& x1, PositiveValue<F> const& x2) { x1._e=add(up,x1._e,x2._v); return x1; }
+    friend Error<F>& operator+=(Error<F>& x1, PositiveUpperBound<F> const& x2) { x1._e=add(up,x1._e,x2._u); return x1; }
+    friend Error<F>& operator*=(Error<F>& x1, Error<F> const& x2) { x1._e=mul(up,x1._e,x2._e); return x1; }
+    friend Error<F>& operator*=(Error<F>& x1, PositiveUpperBound<F> const& x2) { x1._e=mul(up,x1._e,x2._u); return x1; }
 
     friend Bool same(Error<F> const& x1, Error<F> const& x2) { return x1._e==x2._e; }
     friend Bool refines(Error<F> const& x1, Error<F> const& x2) { return x1._e<=x2._e; }

@@ -113,6 +113,8 @@ template<class X> class Expansion {
         explicit Expansion(SizeType as, PR pr, SizeType cap=DEFAULT_CAPACITY);
     template<class PR, EnableIf<IsConstructible<X,Dbl,PR>> =dummy>
         Expansion(InitializerList<Pair<InitializerList<DegreeType>,Dbl>> lst, PR prs);
+    template<class PR, EnableIf<IsConstructible<X,Int,PR>> =dummy, DisableIf<IsConstructible<X,Dbl,PR>> =dummy>
+        Expansion(InitializerList<Pair<InitializerList<DegreeType>,Int>> lst, PR prs);
     template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy>
         explicit Expansion(Expansion<Y> const&, PRS... prs);
     Expansion(const Expansion<X>&);
@@ -361,6 +363,21 @@ template<class X> template<class PR, EnableIf<IsConstructible<X,PR>>>
 Expansion<X>::Expansion(SizeType as, PR pr, SizeType cap)
     : Expansion(as,X(pr),cap)
 {
+}
+
+template<class X> template<class PR, EnableIf<IsConstructible<X,Int,PR>>, DisableIf<IsConstructible<X,Dbl,PR>>>
+Expansion<X>::Expansion(InitializerList<Pair<InitializerList<DegreeType>,Int>> lst, PR pr)
+    : Expansion( ((ARIADNE_PRECONDITION(lst.size()!=0)),lst.begin()->first.size()), X(pr) )
+{
+    MultiIndex a;
+    X x;
+    for(auto iter=lst.begin();
+        iter!=lst.end(); ++iter)
+    {
+        a=iter->first;
+        x=X(iter->second,pr);
+        if(decide(x!=0)) { this->append(a,x); }
+    }
 }
 
 template<class X> template<class PR, EnableIf<IsConstructible<X,Dbl,PR>>>

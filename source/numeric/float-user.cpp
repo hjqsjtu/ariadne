@@ -1394,7 +1394,8 @@ template<class F, class FE> struct Operations<Ball<F,FE>> {
 };
 
 template<> OutputStream& Operations<FloatBall<MultiplePrecision>>::_write(OutputStream& os, FloatBall<MultiplePrecision> const& x) {
-    // Write based on number of correct digits
+    // Write based on number of correct digits)
+    return os << x.value() << "\u00b1" << x.error();
     static const double log2ten = 3.3219280948873621817;
     static const char pmstr[] = "\u00b1";
     static const char hlfstr[] = "\u00bd";
@@ -2056,6 +2057,7 @@ Bool consistent(FloatMPBall const& x1, FloatMPBall const& x2) { return Operation
 Bool inconsistent(FloatMPBall const& x1, FloatMPBall const& x2) { return Operations<FloatMPBall>::_inconsistent(x1,x2); }
 FloatMPBall refinement(FloatMPBall const& x1, FloatMPBall const& x2) { return Operations<FloatMPBall>::_refinement(x1,x2); }
 
+PositiveFloatMPUpperBound mag(Ball<FloatMP,FloatDP> const& x) { return Operations<Ball<FloatMP,FloatDP>>::_mag(x); }
 
 
 FloatDPError mag(FloatDPValue const& x) { return Operations<FloatDPValue>::_mag(x); }

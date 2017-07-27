@@ -1,7 +1,7 @@
 /***************************************************************************
- *            test_misc.cpp
+ *            function_patch.hpp
  *
- *  Copyright 2008--17 Pieter Collins
+ *  Copyright 2008-17  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,36 +21,35 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <iostream>
-#include "config.h"
-#include "test.hpp"
+/*! \file function_patch.hpp
+ *  \brief Over-approximations of functions on box domains.
+ */
 
-#include "function/c1_taylor_function.hpp"
+#ifndef ARIADNE_FUNCTION_PATCH_HPP
+#define ARIADNE_FUNCTION_PATCH_HPP
 
-namespace Ariadne { }
+#include "function/function_interface.hpp"
+#include "function/function.hpp"
 
-using namespace Ariadne;
+namespace Ariadne {
 
-#define ARIADNE_PRINT(expr) { std::cout << #expr << ": " << (expr) << "\n"; }
+template<class Y> class Upper;
 
-Int main() {
-    C1TaylorSeries x=C1TaylorSeries::coordinate();
-    //C1TaylorSeries e=C1TaylorSeries::uniform_ball();
-    C1TaylorSeries e0=C1TaylorSeries::uniform_ball();
-    C1TaylorSeries e1=C1TaylorSeries::derivative_ball();
-    auto y=x;
+template<> class Upper<ValidatedNumber> : ValidatedUpperNumber { };
 
-    ARIADNE_PRINT(x);
-    ARIADNE_PRINT(x*x);
-    ARIADNE_PRINT(2*x);
-    ARIADNE_PRINT(2*(x*x));
-    ARIADNE_PRINT((2*x)*x);
-    auto f=2*x*x-1+e0/8+e1/8;
-    auto g=(y/2+1)*y+1;
-    auto h=compose(g,f);
-    ARIADNE_PRINT(f);
-    ARIADNE_PRINT(g);
-    ARIADNE_PRINT(h);
-    ARIADNE_PRINT(f*f);
-    ARIADNE_PRINT(f*f/2);
-}
+/*! \ingroup FunctionModelSubModule
+ *  \brief A FunctionPatch is a function defined on an interval, box, or other compact domain.
+ *   It supports the supremum \a norm() method.
+ */
+template<class P, class D, class C> class FunctionPatch
+    : public Function<P,D,C>
+{
+    //! \brief Default constructor.
+    FunctionPatch(Function<P,D,C>);
+
+    Positive<Upper<Number<P>>> norm() const;
+};
+
+} // namespace Ariadne
+
+#endif // ARIADNE_FUNCTION_PATCH_HPP
