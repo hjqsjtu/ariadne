@@ -4,6 +4,7 @@ add_library(ariadne-function OBJECT
     formula.cpp
     procedure.cpp
     function.cpp
+    multifunction.cpp
     function_model.cpp
     affine_model.cpp
     taylor_model.cpp
