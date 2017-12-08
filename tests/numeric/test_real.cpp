@@ -125,20 +125,22 @@ void TestReal::test_conversions() {
 }
 
 void TestReal::test_constructors() {
+    Effort eff(2);
+    DoublePrecision pr;
     ARIADNE_TEST_CONSTRUCT(Real,xv, );
-    ARIADNE_TEST_EQUALS(xv.get(dp),0);
-    ARIADNE_TEST_EQUALS(xv.lower().get(dp).raw(),0);
-    ARIADNE_TEST_EQUALS(xv.upper().get(dp).raw(),0);
+    ARIADNE_TEST_EQUALS(xv.get(pr),0);
+    ARIADNE_TEST_EQUALS(xv.lower().compute(eff).get().raw(),0);
+    ARIADNE_TEST_EQUALS(xv.upper().compute(eff).get().raw(),0);
     ARIADNE_TEST_CONSTRUCT(Real,xz,(1));
-    ARIADNE_TEST_EQUALS(xz.get(dp),1);
+    ARIADNE_TEST_EQUALS(xz.compute(eff).get(),1);
     ARIADNE_TEST_CONSTRUCT(Real,xe,(1.5_exact));
-    ARIADNE_TEST_EQUALS(xe.get(dp),1.5);
+    ARIADNE_TEST_EQUALS(xe.compute(eff).get(),1.5_dy);
     ARIADNE_TEST_CONSTRUCT(Real,xn,(1.1_q));
-    ARIADNE_TEST_COMPARE(Rational(xn.lower().get(dp).raw()),<,Rational(11,10));
-    ARIADNE_TEST_COMPARE(Rational(xn.upper().get(dp).raw()),>,Rational(11,10));
+    ARIADNE_TEST_COMPARE(Rational(xn.lower().compute(eff).get().raw()),<,Rational(11,10));
+    ARIADNE_TEST_COMPARE(Rational(xn.upper().compute(eff).get().raw()),>,Rational(11,10));
     ARIADNE_TEST_CONSTRUCT(Real,xq,(Rational(11,10)));
-    ARIADNE_TEST_COMPARE(Rational(xq.lower().get(dp).raw()),<,Rational(11,10));
-    ARIADNE_TEST_COMPARE(Rational(xq.upper().get(dp).raw()),>,Rational(11,10));
+    ARIADNE_TEST_COMPARE(Rational(xq.lower().compute(eff).get().raw()),<,Rational(11,10));
+    ARIADNE_TEST_COMPARE(Rational(xq.upper().compute_get(eff).raw()),>,Rational(11,10));
 }
 
 void TestReal::test_arithmetic() {
@@ -294,7 +296,7 @@ void TestReal::test_sequence() {
     ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(6u)));
     ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(54)));
     ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(64)));
-    ARIADNE_TEST_FAIL(when({x>=0,+x},{x<=0,1+x}).compute(Effort(5u)));
+    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,1+x}).compute(Effort(5u)));
     ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,1+x}).compute(Effort(6u)));
 
 
