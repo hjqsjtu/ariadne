@@ -174,6 +174,8 @@ class Box
     static Box<I> _product(const Box<I>& bx1, const Box<I>& bx2, const Box<I>& bx3);
     static Box<I> _product(const Box<I>& bx1, const Box<I>& bx2);
     static Box<I> _product(const Box<I>& bx1, const I& ivl2);
+    static Box<I> _product(const I& ivl1, const Box<I>& bx2);
+    static Box<I> _product(const I& ivl1, const I& ivl2);
 
     static Box<I> _project(const Box<I>& bx, const Array<SizeType>& rng);
 };
@@ -200,6 +202,8 @@ template<class I> inline Pair<Box<I>,Box<I>> split(const Vector<I>& bx, SizeType
 //! \relates FloatDPExactBox \brief The cartesian product of two boxes.
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2) { return Box<I>::_product(bx1,bx2); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const I& ivl2) { return Box<I>::_product(bx1,ivl2); }
+template<class I> inline Box<I> product(const I& ivl1, const Box<I>& bx2) { return Box<I>::_product(ivl1,bx2); }
+template<class UB> inline Box<Interval<UB>> product(const Interval<UB>& ivl1, const Interval<UB>& ivl2) { return Box<Interval<UB>>::_product(ivl1,ivl2); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2, const Box<I>& bx3) { return Box<I>::_product(bx1,bx2,bx3); }
 
 template<class S1, class S2, class S3> inline decltype(auto) product(S1 const& s1, S2 const& s2, S3 const& s3) { return product(product(s1,s2),s3); }
