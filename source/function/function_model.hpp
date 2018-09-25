@@ -193,7 +193,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
     ScalarFunctionModel<P,D,PR,PRE>& operator=(const CanonicalNumericType<P,PR,PRE>& c);
     ScalarFunctionModel<P,D,PR,PRE>& operator=(const ScalarFunction<P,D>& f);
     ScalarFunctionModel<P,D,PR,PRE>& operator=(const ScalarFunctionModelInterface<P,D,PR,PRE>& f);
-//    ScalarFunctionModel<P,D,PR,PRE>& operator=(const ValidatedScalarTaylorFunctionModelDP& f);
+//    ScalarFunctionModel<P,D,PR,PRE>& operator=(const ValidatedScalarMultivariateTaylorFunctionModelDP& f);
 
     inline SizeType argument_size() const { return this->_ptr->argument_size(); }
     template<class X> X operator() (const Vector<X>& x) const {
@@ -357,7 +357,7 @@ template<class M> class ScaledFunctionPatch;
 template<class M> class VectorScaledFunctionPatch;
 template<class M> struct Element<VectorScaledFunctionPatch<M>> { typedef ScaledFunctionPatch<M> Type; };
 
-typedef ScaledFunctionPatch<ValidatedTaylorModelDP> ValidatedScalarTaylorFunctionModelDP;
+typedef ScaledFunctionPatch<ValidatedTaylorModelDP> ValidatedScalarMultivariateTaylorFunctionModelDP;
 
 template<class P, class D, class PR, class PRE> class VectorFunctionModelElement
     : public DispatchTranscendentalAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
