@@ -101,35 +101,35 @@ class IntegratorBase
 
 
     virtual Pair<FloatDPValue,UpperBoxType>
-    flow_bounds(const ValidatedVectorFunction& vector_field,
+    flow_bounds(const ValidatedVectorMultivariateFunction& vector_field,
                 const ExactBoxType& state_domain,
                 const RawFloatDP& maximum_time_step) const;
 
-    virtual ValidatedVectorFunctionModelDP
-    flow_step(const ValidatedVectorFunction& vector_field,
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               RawFloatDP& suggested_time_step) const;
 
-    virtual ValidatedVectorFunctionModelDP
-    flow_to(const ValidatedVectorFunction& vector_field,
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_to(const ValidatedVectorMultivariateFunction& vector_field,
          const ExactBoxType& state_domain,
          const Real& time) const;
 
     //! \brief Solve \f$\der{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
-    virtual List<ValidatedVectorFunctionModelDP>
-    flow(const ValidatedVectorFunction& vector_field,
+    virtual List<ValidatedVectorMultivariateFunctionModelDP>
+    flow(const ValidatedVectorMultivariateFunction& vector_field,
          const ExactBoxType& state_domain,
          const Real& minimum_time,
          const Real& maximum_time) const;
 
     //! \brief Solve \f$\der{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
-    virtual List<ValidatedVectorFunctionModelDP>
-    flow(const ValidatedVectorFunction& vector_field,
+    virtual List<ValidatedVectorMultivariateFunctionModelDP>
+    flow(const ValidatedVectorMultivariateFunction& vector_field,
          const ExactBoxType& state_domain,
          const Real& maximum_time) const;
 
-    virtual ValidatedVectorFunctionModelDP
-    flow_step(const ValidatedVectorFunction& vector_field,
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               const FloatDPValue& suggested_time_step,
               const UpperBoxType& bounding_box) const = 0;
@@ -172,8 +172,8 @@ class TaylorPicardIntegrator
     virtual TaylorPicardIntegrator* clone() const { return new TaylorPicardIntegrator(*this); }
     virtual Void write(OutputStream& os) const;
 
-    virtual ValidatedVectorFunctionModelDP
-    flow_step(const ValidatedVectorFunction& vector_field,
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               const FloatDPValue& time_step,
               const UpperBoxType& bounding_box) const;
@@ -231,12 +231,12 @@ class TaylorSeriesIntegrator
     virtual Void write(OutputStream& os) const;
 
     virtual Pair<FloatDPValue,UpperBoxType>
-    flow_bounds(const ValidatedVectorFunction& vector_field,
+    flow_bounds(const ValidatedVectorMultivariateFunction& vector_field,
                 const ExactBoxType& state_domain,
                 const RawFloatDP& suggested_time_step) const;
 
-    virtual ValidatedVectorFunctionModelDP
-    flow_step(const ValidatedVectorFunction& vector_field,
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               const FloatDPValue& time_step,
               const UpperBoxType& bounding_box) const;
@@ -266,8 +266,8 @@ class AffineIntegrator
     virtual AffineIntegrator* clone() const { return new AffineIntegrator(*this); }
     virtual Void write(OutputStream& os) const;
 
-    virtual ValidatedVectorFunctionModelDP
-    flow_step(const ValidatedVectorFunction& vector_field,
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               const FloatDPValue& time_step,
               const UpperBoxType& bounding_box) const;
@@ -276,7 +276,7 @@ class AffineIntegrator
 
     //! \brief Compute the derivative of the flow of f at time zero within \a dom.
     Vector<ValidatedDifferential>
-    flow_derivative(const ValidatedVectorFunction& f,
+    flow_derivative(const ValidatedVectorMultivariateFunction& f,
                     const Vector<ValidatedNumericType>& dom) const;
 };
 
