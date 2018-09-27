@@ -63,45 +63,56 @@ template<class P, class PR, class PRE> class FunctionModelFactory {
     typedef SD ScalarDomainType;
     typedef VD VectorDomainType;
 
-    operator const FunctionModelFactoryInterface<P,PR,PRE>& () const { return *_ptr; }
+    typedef Number<P> NumberType;
+    typedef ScalarFunction<P,VD> ScalarMultivariateFunctionType;
+    typedef VectorFunction<P,VD> VectorMultivariateFunctionType;
 
-    explicit FunctionModelFactory(const FunctionModelFactoryInterface<P,PR,PRE>* p) : _ptr(p) { }
-    explicit FunctionModelFactory(SharedPointer<const FunctionModelFactoryInterface<P,PR,PRE>> p) : _ptr(p) { }
+    typedef CanonicalNumericType<P,PR,PRE> NumberModelType;
+    typedef ScalarFunctionModel<P,VD,PR,PRE> ScalarMultivariateFunctionModelType;
+    typedef VectorFunctionModel<P,VD,PR,PRE> VectorMultivariateFunctionModelType;
+  
+    typedef FunctionModelFactoryInterface<P,PR,PRE> FunctionModelFactoryInterfaceType;
+    typedef FunctionModelFactory<P,PR,PRE> FunctionModelFactoryType;
+  public:    
+    operator const FunctionModelFactoryInterfaceType& () const { return *_ptr; }
 
-    CanonicalNumericType<P,PR,PRE> create(Number<P> const& c) const {
-        return CanonicalNumericType<P,PR,PRE>(this->_ptr->_create(c)); }
-    ScalarFunctionModel<P,VD,PR,PRE> create(VectorDomainType const& dom, ScalarFunction<P,VD> const& f) const {
-        return ScalarFunctionModel<P,VD,PR,PRE>(this->_ptr->_create(dom,f)); }
-    VectorFunctionModel<P,VD,PR,PRE> create(VectorDomainType const& dom, VectorFunction<P,VD> const& f) const {
-        return VectorFunctionModel<P,VD,PR,PRE>(this->_ptr->_create(dom,f)); }
+    explicit FunctionModelFactory(const FunctionModelFactoryInterfaceType* p) : _ptr(p) { }
+    explicit FunctionModelFactory(SharedPointer<const FunctionModelFactoryInterfaceType> p) : _ptr(p) { }
 
-    CanonicalNumericType<P,PR,PRE> create_number(Number<P> const& c) const {
-        return CanonicalNumericType<P,PR,PRE>(this->_ptr->_create(c)); }
-    ScalarFunctionModel<P,VD,PR,PRE> create_zero(VectorDomainType const& dom) const {
-        return ScalarFunctionModel<P,VD,PR,PRE>(this->_ptr->_create_zero(dom)); }
-    ScalarFunctionModel<P,VD,PR,PRE> create_constant(VectorDomainType const& dom, Number<P> const& c) const {
-        return ScalarFunctionModel<P,VD,PR,PRE>(this->_ptr->_create_constant(dom,c)); }
-    ScalarFunctionModel<P,VD,PR,PRE> create_constant(VectorDomainType const& dom, CanonicalNumericType<P,PR,PRE> const& c) const {
-        return ScalarFunctionModel<P,VD,PR,PRE>(this->_ptr->_create_constant(dom,c)); }
-    ScalarFunctionModel<P,VD,PR,PRE> create_coordinate(VectorDomainType const& dom, SizeType j) const {
-        return ScalarFunctionModel<P,VD,PR,PRE>(this->_ptr->_create_coordinate(dom,j)); }
-    VectorFunctionModel<P,VD,PR,PRE> create_zeros(SizeType n, VectorDomainType const& dom) const {
-        return VectorFunctionModel<P,VD,PR,PRE>(this->_ptr->_create_zeros(n,dom)); }
-    VectorFunctionModel<P,VD,PR,PRE> create_identity(VectorDomainType const& dom) const {
-        return VectorFunctionModel<P,VD,PR,PRE>(this->_ptr->_create_identity(dom)); }
+    NumberModelType create(NumberType const& c) const {
+        return NumberModelType(this->_ptr->_create(c)); }
+    ScalarMultivariateFunctionModelType create(VectorDomainType const& dom, ScalarMultivariateFunctionType const& f) const {
+        return ScalarMultivariateFunctionModelType(this->_ptr->_create(dom,f)); }
+    VectorMultivariateFunctionModelType create(VectorDomainType const& dom, VectorMultivariateFunctionType const& f) const {
+        return VectorMultivariateFunctionModelType(this->_ptr->_create(dom,f)); }
+
+    NumberModelType create_number(NumberType const& c) const {
+        return NumberModelType(this->_ptr->_create(c)); }
+    ScalarMultivariateFunctionModelType create_zero(VectorDomainType const& dom) const {
+        return ScalarMultivariateFunctionModelType(this->_ptr->_create_zero(dom)); }
+    ScalarMultivariateFunctionModelType create_constant(VectorDomainType const& dom, NumberType const& c) const {
+        return ScalarMultivariateFunctionModelType(this->_ptr->_create_constant(dom,c)); }
+    ScalarMultivariateFunctionModelType create_constant(VectorDomainType const& dom, NumberModelType const& c) const {
+        return ScalarMultivariateFunctionModelType(this->_ptr->_create_constant(dom,c)); }
+    ScalarMultivariateFunctionModelType create_coordinate(VectorDomainType const& dom, SizeType j) const {
+        return ScalarMultivariateFunctionModelType(this->_ptr->_create_coordinate(dom,j)); }
+    VectorMultivariateFunctionModelType create_zeros(SizeType n, VectorDomainType const& dom) const {
+        return VectorMultivariateFunctionModelType(this->_ptr->_create_zeros(n,dom)); }
+    VectorMultivariateFunctionModelType create_identity(VectorDomainType const& dom) const {
+        return VectorMultivariateFunctionModelType(this->_ptr->_create_identity(dom)); }
 
     // FIXME: Should return a univariate model
-    ScalarFunctionModel<P,VD,PR,PRE> create_identity(ScalarDomainType const& dom) const {
-        return ScalarFunctionModel<P,VD,PR,PRE>(this->_ptr->_create_coordinate(VectorDomainType(1u,dom),0u)); }
-    VectorFunctionModel<P,SD,PR,PRE> create_zeros(SizeType n, ScalarDomainType const& dom) const {
-        ARIADNE_NOT_IMPLEMENTED; }
+    ScalarMultivariateFunctionModelType create_identity(ScalarDomainType const& dom) const {
+        return ScalarMultivariateFunctionModelType(this->_ptr->_create_coordinate(VectorDomainType(1u,dom),0u)); }
+    VectorMultivariateFunctionModelType create_zeros(SizeType n, ScalarDomainType const& dom) const {
+        return VectorMultivariateFunctionModelType(this->_ptr->_create_zeros(n,VectorDomainType(1u,dom))); }
 
-    friend OutputStream& operator<<(OutputStream& os, FunctionModelFactory<P,PR,PRE> const& factory) { return factory._ptr->_write(os); }
+    friend OutputStream& operator<<(OutputStream& os, FunctionModelFactoryType const& factory) { return factory._ptr->_write(os); }
 };
 
 template<class P, class PR, class PRE> auto inline
-FunctionModelFactoryInterface<P,PR,PRE>::create_identity(IntervalDomainType const& dom) const -> ScalarFunctionModel<P,VD,PR,PRE> {
-    return ScalarFunctionModel<P,VD,PR,PRE>(this->create_coordinate(BoxDomainType(1u,dom),0u)); }
+FunctionModelFactoryInterface<P,PR,PRE>::create_identity(IntervalDomainType const& dom) const -> ScalarMultivariateFunctionModelType {
+    return ScalarMultivariateFunctionModelType(this->create_coordinate(BoxDomainType(1u,dom),0u)); }
 
 template<class FCTRY, class D> class FunctionModelCreator {
     typedef typename FCTRY::Paradigm P;
@@ -112,17 +123,27 @@ template<class FCTRY, class D> class FunctionModelCreator {
     typedef D DomainType;
     typedef P Paradigm;
 
+    typedef Number<P> NumberType;
+    typedef ScalarFunction<P,D> ScalarFunctionType;
+    typedef VectorFunction<P,D> VectorFunctionType;
+    
+    typedef CanonicalNumericType<P,PR,PRE> NumberModelType;
+    typedef ScalarFunctionModel<P,D,PR,PRE> ScalarFunctionModelType;
+    typedef VectorFunctionModel<P,D,PR,PRE> VectorFunctionModelType;
+    
     explicit FunctionModelCreator(DomainType domain, FactoryType factory) : _factory(factory), _domain(domain) { }
 
-    decltype(auto) create(Number<P> const& c) const { return this->_factory.create(c); }
-    decltype(auto) create(ScalarFunction<P,D> const& f) { return this->_factory.create(this->_domain,f); }
-    decltype(auto) create(VectorFunction<P,D> const& f) { return this->_factory.create(this->_domain,f); }
-    decltype(auto) create_zero() { return this->_factory.create_zero(this->_domain); }
-    decltype(auto) create_zeros(SizeType n) { return this->_factory.create_zeros(n,this->_domain); }
-    decltype(auto) create_identity() { return this->_factory.create_identity(this->_domain); }
+    NumberModelType create(NumberType const& c) const { return this->_factory.create(c); }
+    // FIXME: Declaring this to return ScalarFunctionModel causes ambiguity in add(ScalarTaylorFunctionModel,ScalarFunction)
+    decltype(auto) create(ScalarFunctionType const& f) { return this->_factory.create(this->_domain,f); }
+    VectorFunctionModelType create(VectorFunctionType const& f) { return this->_factory.create(this->_domain,f); }
+    ScalarFunctionModelType create_zero() { return this->_factory.create_zero(this->_domain); }
+    VectorFunctionModelType create_zeros(SizeType n) { return this->_factory.create_zeros(n,this->_domain); }
+    VectorFunctionModelType create_identity() { return this->_factory.create_identity(this->_domain); }
 
-//    ScalarFunctionModel<P,D,PR,PRE> const& create(ScalarFunctionModel<P,D,PR,PRE> const& f) const { return f; }
-    CanonicalNumericType<P,PR,PRE> const& create(CanonicalNumericType<P,PR,PRE> const& c) const { return c; }
+    NumberModelType const& create(NumberModelType const& c) const { return c; }
+    ScalarFunctionModelType const& create(ScalarFunctionModelType const& f) const { return f; }
+    VectorFunctionModelType const& create(VectorFunctionModelType const& f) const { return f; }
   protected:
     FactoryType _factory;
     DomainType _domain;
@@ -139,14 +160,22 @@ template<class FCTRY> class FunctionModelCreator<FCTRY,IntervalDomainType> {
     typedef D DomainType;
     typedef P Paradigm;
 
+    typedef Number<P> NumberType;
+    typedef ScalarFunction<P,D> ScalarFunctionType;
+    typedef VectorFunction<P,D> VectorFunctionType;
+    
+    typedef CanonicalNumericType<P,PR,PRE> NumberModelType;
+    typedef ScalarFunctionModel<P,D,PR,PRE> ScalarFunctionModelType;
+    typedef VectorFunctionModel<P,D,PR,PRE> VectorFunctionModelType;
+    
     explicit FunctionModelCreator(DomainType domain, FactoryType factory) : _factory(factory), _domain(domain) { }
 
-    CanonicalNumericType<P,PR,PRE> create(Number<P> const& c) const { return this->_factory.create(c); }
-    ScalarFunctionModel<P,D,PR,PRE> create(ScalarFunction<P,D> const& f) { ARIADNE_NOT_IMPLEMENTED; }
-    VectorFunctionModel<P,D,PR,PRE> create(VectorFunction<P,D> const& f) { ARIADNE_NOT_IMPLEMENTED; }
-    ScalarFunctionModel<P,D,PR,PRE> create_zero() { ARIADNE_NOT_IMPLEMENTED; }
-    VectorFunctionModel<P,D,PR,PRE> create_zeros(SizeType n) { ARIADNE_NOT_IMPLEMENTED; }
-    ScalarFunctionModel<P,D,PR,PRE> create_identity() { ARIADNE_NOT_IMPLEMENTED; }
+    NumberModelType create(NumberType const& c) const { return this->_factory.create(c); }
+    ScalarFunctionModelType create(ScalarFunctionType const& f) { ARIADNE_NOT_IMPLEMENTED; }
+    VectorFunctionModelType create(VectorFunctionType const& f) { ARIADNE_NOT_IMPLEMENTED; }
+    ScalarFunctionModelType create_zero() { ARIADNE_NOT_IMPLEMENTED; }
+    VectorFunctionModelType create_zeros(SizeType n) { ARIADNE_NOT_IMPLEMENTED; }
+    ScalarFunctionModelType create_identity() { ARIADNE_NOT_IMPLEMENTED; }
 
     CanonicalNumericType<P,PR,PRE> const& create(CanonicalNumericType<P,PR,PRE> const& c) const { return c; }
   protected:
@@ -173,27 +202,42 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
     typedef CanonicalNumericType<P,PR,PRE> NumericType;
     typedef FloatError<PR> NormType;
     typedef Interval<FloatUpperBound<PR>> RangeType;
+
+    typedef Number<P> NumberType;
+    typedef CanonicalNumericType<P,PR,PRE> NumberModelType;
+    typedef Function<P,D,C> FunctionType;
+    typedef FunctionModelInterface<P,D,C,PR,PRE> FunctionModelInterfaceType;
+    typedef FunctionModel<P,D,C,PR,PRE> FunctionModelType;
+
+    typedef FunctionModel<ValidatedTag,D,C,PR,PRE> ValidatedFunctionModelType;
+    
+    typedef FunctionModelFactory<P,PR,PRE> FunctionModelFactoryType;
+    typedef FunctionModelCreator<FunctionModelFactoryType,D> FunctionModelCreatorType;
+
+    typedef FunctionModel<P,D,IntervalDomainType,PR,PRE> ScalarFunctionModelType;
+    typedef FunctionModel<P,D,BoxDomainType,PR,PRE> VectorFunctionModelType;
+    
   public:
-    clone_on_copy_ptr< ScalarFunctionModelInterface<P,D,PR,PRE> > _ptr;
+    clone_on_copy_ptr< FunctionModelInterfaceType > _ptr;
   public:
     FunctionModel() : _ptr() { }
-    explicit FunctionModel(FunctionModelInterface<P,D,C,PR,PRE>* p) : _ptr(p) { }
-    FunctionModel(const SharedPointer<const FunctionModelInterface<P,D,C,PR,PRE>> p) : _ptr(p->_clone()) { }
-    FunctionModel(const FunctionModel<P,D,C,PR,PRE>& f) : _ptr(f._ptr) { }
-    FunctionModel(const FunctionModelInterface<P,D,C,PR,PRE>& f) : _ptr(f._clone()) { }
-    FunctionModel(const Function<P,D,C>& f) : _ptr(dynamic_cast<FunctionModelInterface<P,D,C,PR,PRE>*>(f.raw_pointer()->_clone())) { }
-    operator Function<P,D,C>() const { return Function<P,D,C>(this->_ptr->_clone()); }
-    operator FunctionModelInterface<P,D,C,PR,PRE>& () { return *_ptr; }
-    operator const FunctionModelInterface<P,D,C,PR,PRE>& () const { return *_ptr; }
-    const FunctionModelInterface<P,D,C,PR,PRE>* raw_pointer() const { return _ptr.operator->(); }
-    FunctionModelInterface<P,D,C,PR,PRE>& reference() { return *_ptr; }
-    const FunctionModelInterface<P,D,C,PR,PRE>& reference() const { return *_ptr; }
+    explicit FunctionModel(FunctionModelInterfaceType* p) : _ptr(p) { }
+    FunctionModel(const SharedPointer<const FunctionModelInterfaceType> p) : _ptr(p->_clone()) { }
+    FunctionModel(const FunctionModelType& f) : _ptr(f._ptr) { }
+    FunctionModel(const FunctionModelInterfaceType& f) : _ptr(f._clone()) { }
+    FunctionModel(const FunctionType& f) : _ptr(dynamic_cast<FunctionModelInterfaceType*>(f.raw_pointer()->_clone())) { }
+    operator FunctionType() const { return FunctionType(this->_ptr->_clone()); }
+    operator FunctionModelInterfaceType& () { return *_ptr; }
+    operator const FunctionModelInterfaceType& () const { return *_ptr; }
+    const FunctionModelInterfaceType* raw_pointer() const { return _ptr.operator->(); }
+    FunctionModelInterfaceType& reference() { return *_ptr; }
+    const FunctionModelInterfaceType& reference() const { return *_ptr; }
 
-    ScalarFunctionModel<P,D,PR,PRE>& operator=(const Number<P>& c);
-    ScalarFunctionModel<P,D,PR,PRE>& operator=(const CanonicalNumericType<P,PR,PRE>& c);
-    ScalarFunctionModel<P,D,PR,PRE>& operator=(const ScalarFunction<P,D>& f);
-    ScalarFunctionModel<P,D,PR,PRE>& operator=(const ScalarFunctionModelInterface<P,D,PR,PRE>& f);
-//    ScalarFunctionModel<P,D,PR,PRE>& operator=(const ValidatedScalarMultivariateTaylorFunctionModelDP& f);
+    FunctionModelType& operator=(const NumberType& c);
+    FunctionModelType& operator=(const NumberModelType& c);
+    FunctionModelType& operator=(const FunctionType& f);
+    FunctionModelType& operator=(const FunctionModelInterfaceType& f);
+//    FunctionModelType& operator=(const ValidatedScalarMultivariateTaylorFunctionModelDP& f);
 
     inline SizeType argument_size() const { return this->_ptr->argument_size(); }
     template<class X> X operator() (const Vector<X>& x) const {
@@ -212,142 +256,134 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
     inline Void set_error(Nat e) { return this->_ptr->set_error(ErrorType(e,this->error().precision())); }
     inline Void clobber() { return this->_ptr->clobber(); }
 
-    inline ScalarFunctionModel<P,D,PR,PRE> apply(Operator op) const { return ScalarFunctionModel<P,D,PR,PRE>(this->_ptr->_apply(op)); }
+    inline FunctionModelType apply(Operator op) const { return FunctionModelType(this->_ptr->_apply(op)); }
     inline Void restrict(const DomainType& d) { *this=restriction(*this,d); }
   public:
-    friend FunctionModelCreator<FunctionModelFactory<P,PR,PRE>,D> factory(ScalarFunctionModel<P,D,PR,PRE> const& f) {
-        FunctionModelFactory<P,PR,PRE> factory(f._ptr->_factory()); return FunctionModelCreator<FunctionModelFactory<P,PR,PRE>,D>(f.domain(),factory); }
+    friend FunctionModelCreatorType factory(FunctionModelType const& f) {
+        FunctionModelFactoryType factory(f._ptr->_factory()); return FunctionModelCreatorType(f.domain(),factory); }
   public:
   public:
-    friend ScalarFunctionModel<P,D,PR,PRE> partial_evaluate(const ScalarFunctionModel<P,D,PR,PRE>& f, SizeType j, const CanonicalNumericType<P,PR,PRE>& c) {
+    friend FunctionModelType partial_evaluate(const FunctionModelType& f, SizeType j, const NumberModelType& c) {
         return f._ptr->_partial_evaluate(j,c); }
 
-    friend NormType norm(const ScalarFunctionModel<P,D,PR,PRE>& f) {
+    friend NormType norm(const FunctionModelType& f) {
         return f._ptr->_norm(); }
-    friend ScalarFunctionModel<P,D,PR,PRE> derivative(const ScalarFunctionModel<P,D,PR,PRE>& f, SizeType j) {
-        return ScalarFunctionModel<P,D,PR,PRE>(f._ptr->_derivative(j)); }
-    friend ScalarFunctionModel<P,D,PR,PRE> antiderivative(const ScalarFunctionModel<P,D,PR,PRE>& f, SizeType j) {
-        return ScalarFunctionModel<P,D,PR,PRE>(f._ptr->_antiderivative(j)); }
-    friend ScalarFunctionModel<P,D,PR,PRE> antiderivative(const ScalarFunctionModel<P,D,PR,PRE>& f, SizeType j, CanonicalNumericType<P,PR,PRE> c) {
-        return ScalarFunctionModel<P,D,PR,PRE>(f._ptr->_antiderivative(j,c)); }
-    friend ScalarFunctionModel<P,D,PR,PRE> antiderivative(const ScalarFunctionModel<P,D,PR,PRE>& f, SizeType j, const Number<P>& c) {
-        return antiderivative(f,j,CanonicalNumericType<P,PR,PRE>(c,f.value().precision())); }
+    friend FunctionModelType derivative(const FunctionModelType& f, SizeType j) {
+        return FunctionModelType(f._ptr->_derivative(j)); }
+    friend FunctionModelType antiderivative(const FunctionModelType& f, SizeType j) {
+        return FunctionModelType(f._ptr->_antiderivative(j)); }
+    friend FunctionModelType antiderivative(const FunctionModelType& f, SizeType j, NumberModelType c) {
+        return FunctionModelType(f._ptr->_antiderivative(j,c)); }
+    friend FunctionModelType antiderivative(const FunctionModelType& f, SizeType j, const NumberType& c) {
+        return antiderivative(f,j,NumberModelType(c,f.value().precision())); }
 
-    friend ScalarFunctionModel<P,D,PR,PRE> embed(const DomainType& d1, const ScalarFunctionModel<P,D,PR,PRE>& f, const DomainType& d2) {
-        return ScalarFunctionModel<P,D,PR,PRE>(f._ptr->_embed(d1,d2)); }
-    friend ScalarFunctionModel<P,D,PR,PRE> embed(const DomainType& d, const ScalarFunctionModel<P,D,PR,PRE>& f) {
+    friend FunctionModelType embed(const DomainType& d1, const FunctionModelType& f, const DomainType& d2) {
+        return FunctionModelType(f._ptr->_embed(d1,d2)); }
+    friend FunctionModelType embed(const DomainType& d, const FunctionModelType& f) {
         return embed(d,f,DomainType()); }
-    friend ScalarFunctionModel<P,D,PR,PRE> embed(const ScalarFunctionModel<P,D,PR,PRE>& f, const BoxDomainType& d) {
+    friend FunctionModelType embed(const FunctionModelType& f, const BoxDomainType& d) {
         return embed(DomainType(),f,d); }
-    friend ScalarFunctionModel<P,D,PR,PRE> embed(const ScalarFunctionModel<P,D,PR,PRE>& f, const IntervalDomainType& d) {
+    friend FunctionModelType embed(const FunctionModelType& f, const IntervalDomainType& d) {
         return embed(f,DomainType(1,d)); }
-    friend ScalarFunctionModel<P,D,PR,PRE> restrict(const ScalarFunctionModel<P,D,PR,PRE>& f, const DomainType& d) {
-        return ScalarFunctionModel<P,D,PR,PRE>(f._ptr->_restriction(d)); }
-    friend ScalarFunctionModel<P,D,PR,PRE> restriction(const ScalarFunctionModel<P,D,PR,PRE>& f, const DomainType& d) {
-        return ScalarFunctionModel<P,D,PR,PRE>(f._ptr->_restriction(d)); }
+    friend FunctionModelType restrict(const FunctionModelType& f, const DomainType& d) {
+        return FunctionModelType(f._ptr->_restriction(d)); }
+    friend FunctionModelType restriction(const FunctionModelType& f, const DomainType& d) {
+        return FunctionModelType(f._ptr->_restriction(d)); }
 
-    friend VectorFunctionModel<P,D,PR,PRE> join(const ScalarFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
-        return join(VectorFunctionModel<P,D,PR,PRE>(1,f1),f2); }
-    friend VectorFunctionModel<P,D,PR,PRE> combine(const ScalarFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2);
+    friend VectorFunctionModelType join(const ScalarFunctionModelType& f1, const ScalarFunctionModelType& f2) {
+        return join(VectorFunctionModelType(1,f1),f2); }
+    friend VectorFunctionModelType combine(const ScalarFunctionModelType& f1, const ScalarFunctionModelType& f2);
   public:
-    typedef ValidatedTag VP;
-    friend ScalarFunctionModel<VP,D,PR,PRE> refinement(const ScalarFunctionModel<VP,D,PR,PRE>& f1, const ScalarFunctionModel<VP,D,PR,PRE>& f2) {
-        return ScalarFunctionModel<VP,D,PR,PRE>(f1._ptr->_refinement(f2)); }
-    friend Boolean inconsistent(const ScalarFunctionModel<VP,D,PR,PRE>& f1, const ScalarFunctionModel<VP,D,PR,PRE>& f2) {
+    friend ValidatedFunctionModelType refinement(const ValidatedFunctionModelType& f1, const ValidatedFunctionModelType& f2) {
+        return ValidatedFunctionModelType(f1._ptr->_refinement(f2)); }
+    friend Boolean inconsistent(const ValidatedFunctionModelType& f1, const ValidatedFunctionModelType& f2) {
         return f1._ptr->_inconsistent(f2); }
-    friend Boolean refines(const ScalarFunctionModel<VP,D,PR,PRE>& f1, const ScalarFunctionModel<VP,D,PR,PRE>& f2) {
+    friend Boolean refines(const ValidatedFunctionModelType& f1, const ValidatedFunctionModelType& f2) {
         return f1._ptr->_refines(f2); }
   public:
-    friend OutputStream& operator<<(OutputStream& os, const ScalarFunctionModel<P,D,PR,PRE>& f) {
+    friend OutputStream& operator<<(OutputStream& os, const FunctionModelType& f) {
         return os <<  f.operator ScalarMultivariateFunction<P>(); }
 };
 
 template<class P, class D, class PR, class PRE> struct AlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>> {
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Nul, ScalarFunctionModel<P,D,PR,PRE> f) {
-        f._ptr->_imul(CanonicalNumericType<P,PR,PRE>(0)); return std::move(f); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Neg, ScalarFunctionModel<P,D,PR,PRE> f) {
-        f._ptr->_imul(CanonicalNumericType<P,PR,PRE>(-1)); return std::move(f); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Add, ScalarFunctionModel<P,D,PR,PRE> f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
-        f1._ptr->_isma(CanonicalNumericType<P,PR,PRE>(+1),f2); return std::move(f1); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Sub, ScalarFunctionModel<P,D,PR,PRE> f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
-        f1._ptr->_isma(CanonicalNumericType<P,PR,PRE>(-1),f2); return std::move(f1); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Mul, const ScalarFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
-        ScalarFunctionModel<P,D,PR,PRE> r=factory(f1).create_zero(); r._ptr->_ifma(f1,f2); return r; }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Add, ScalarFunctionModel<P,D,PR,PRE> f1, const CanonicalNumericType<P,PR,PRE>& c2) {
+    typedef Number<P> NumberType;
+    typedef CanonicalNumericType<P,PR,PRE> NumberModelType;
+    typedef ScalarFunctionModel<P,D,PR,PRE> FunctionModelType;
+    
+    static FunctionModelType apply(Nul, FunctionModelType f) {
+        f._ptr->_imul(NumberModelType(0)); return std::move(f); }
+    static FunctionModelType apply(Neg, FunctionModelType f) {
+        f._ptr->_imul(NumberModelType(-1)); return std::move(f); }
+    static FunctionModelType apply(Add, FunctionModelType f1, const FunctionModelType& f2) {
+        f1._ptr->_isma(NumberModelType(+1),f2); return std::move(f1); }
+    static FunctionModelType apply(Sub, FunctionModelType f1, const FunctionModelType& f2) {
+        f1._ptr->_isma(NumberModelType(-1),f2); return std::move(f1); }
+    static FunctionModelType apply(Mul, const FunctionModelType& f1, const FunctionModelType& f2) {
+        FunctionModelType r=factory(f1).create_zero(); r._ptr->_ifma(f1,f2); return r; }
+    static FunctionModelType apply(Add, FunctionModelType f1, const NumberModelType& c2) {
         f1._ptr->_iadd(c2); return std::move(f1); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Mul, ScalarFunctionModel<P,D,PR,PRE> f1, const CanonicalNumericType<P,PR,PRE>& c2) {
+    static FunctionModelType apply(Mul, FunctionModelType f1, const NumberModelType& c2) {
         f1._ptr->_imul(c2); return std::move(f1); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Add, const CanonicalNumericType<P,PR,PRE>& c1, ScalarFunctionModel<P,D,PR,PRE> f2) {
+    static FunctionModelType apply(Add, const NumberModelType& c1, FunctionModelType f2) {
         f2._ptr->_iadd(c1); return std::move(f2); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Mul, const CanonicalNumericType<P,PR,PRE>& c1, ScalarFunctionModel<P,D,PR,PRE> f2) {
+    static FunctionModelType apply(Mul, const NumberModelType& c1, FunctionModelType f2) {
         f2._ptr->_imul(c1); return std::move(f2); }
 
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Sub, ScalarFunctionModel<P,D,PR,PRE> f1, const CanonicalNumericType<P,PR,PRE>& c2) {
+    static FunctionModelType apply(Sub, FunctionModelType f1, const NumberModelType& c2) {
         return add(std::move(f1),neg(c2)); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Div, ScalarFunctionModel<P,D,PR,PRE> f1, const CanonicalNumericType<P,PR,PRE>& c2) {
+    static FunctionModelType apply(Div, FunctionModelType f1, const NumberModelType& c2) {
         return mul(std::move(f1),rec(c2)); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Sub, const CanonicalNumericType<P,PR,PRE>& c1, ScalarFunctionModel<P,D,PR,PRE> f2) {
+    static FunctionModelType apply(Sub, const NumberModelType& c1, FunctionModelType f2) {
         return add(neg(std::move(f2)),c1); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Div, const CanonicalNumericType<P,PR,PRE>& c1, ScalarFunctionModel<P,D,PR,PRE> f2) {
+    static FunctionModelType apply(Div, const NumberModelType& c1, FunctionModelType f2) {
         return mul(rec(std::move(f2)),c1); }
 
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Add, ScalarFunctionModel<P,D,PR,PRE> f1, const Number<P>& c2) {
-        CanonicalNumericType<P,PR,PRE> s2=factory(f1).create(c2); return add(f1,s2); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Sub, ScalarFunctionModel<P,D,PR,PRE> f1, const Number<P>& c2) {
+    static FunctionModelType apply(Add, FunctionModelType f1, const NumberType& c2) {
+        NumberModelType s2=factory(f1).create(c2); return add(f1,s2); }
+    static FunctionModelType apply(Sub, FunctionModelType f1, const NumberType& c2) {
         return add(f1,neg(c2)); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Mul, ScalarFunctionModel<P,D,PR,PRE> f1, const Number<P>& c2) {
-        CanonicalNumericType<P,PR,PRE> s2=factory(f1).create(c2); return mul(f1,s2); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Div, ScalarFunctionModel<P,D,PR,PRE> f1, const Number<P>& c2) {
+    static FunctionModelType apply(Mul, FunctionModelType f1, const NumberType& c2) {
+        NumberModelType s2=factory(f1).create(c2); return mul(f1,s2); }
+    static FunctionModelType apply(Div, FunctionModelType f1, const NumberType& c2) {
         return mul(f1,rec(c2)); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Add, const Number<P>& c1, ScalarFunctionModel<P,D,PR,PRE> f2) {
+    static FunctionModelType apply(Add, const NumberType& c1, FunctionModelType f2) {
         return add(f2,c1); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Sub, const Number<P>& c1, ScalarFunctionModel<P,D,PR,PRE> f2) {
+    static FunctionModelType apply(Sub, const NumberType& c1, FunctionModelType f2) {
         return add(neg(f2),c1); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Mul, const Number<P>& c1, ScalarFunctionModel<P,D,PR,PRE> f2) {
+    static FunctionModelType apply(Mul, const NumberType& c1, FunctionModelType f2) {
         return mul(f2,c1); }
 
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Rec, const ScalarFunctionModel<P,D,PR,PRE>& f) {
+    static FunctionModelType apply(Rec, const FunctionModelType& f) {
         return f.apply(Rec()); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Div, const ScalarFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
+    static FunctionModelType apply(Div, const FunctionModelType& f1, const FunctionModelType& f2) {
         return mul(f1,rec(f2)); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Div, const Number<P>& c1, ScalarFunctionModel<P,D,PR,PRE> f2) {
+    static FunctionModelType apply(Div, const NumberType& c1, FunctionModelType f2) {
         return mul(rec(f2),c1); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Pow, const ScalarFunctionModel<P,D,PR,PRE>& f1, Int n2) {
+    static FunctionModelType apply(Pow, const FunctionModelType& f1, Int n2) {
         return generic_pow(f1,n2); }
 
-    template<class OP> static ScalarFunctionModel<P,D,PR,PRE> apply(OP op, const ScalarFunctionModel<P,D,PR,PRE>& f) {
+    template<class OP> static FunctionModelType apply(OP op, const FunctionModelType& f) {
         ARIADNE_NOT_IMPLEMENTED; }
 
 };
 
 
-/*
-template<class D, class PR, class PRE> inline
-ScalarFunctionModel<ValidatedTag,D,PR,PRE> refinement(const ScalarFunctionModel<ValidatedTag,D,PR,PRE>& f1, const ScalarFunctionModel<ValidatedTag,D,PR,PRE>& f2) {
-    return ScalarFunctionModel<ValidatedTag,D,PR,PRE>(f1._ptr->_refinement(f2)); }
-template<class D, class PR, class PRE> inline
-Boolean inconsistent(const ScalarFunctionModel<ValidatedTag,D,PR,PRE>& f1, const ScalarFunctionModel<ValidatedTag,D,PR,PRE>& f2) {
-    return f1._ptr->_inconsistent(f2); }
-template<class D, class PR, class PRE> inline
-Boolean refines(const ScalarFunctionModel<ValidatedTag,D,PR,PRE>& f1, const ScalarFunctionModel<ValidatedTag,D,PR,PRE>& f2) {
-    return f1._ptr->_refines(f2); }
-*/
     // FIXME: Should not be needed since ScalarMultivariateFunctionModel has a representation
 template<class P> inline ScalarMultivariateFunctionModel<P,DoublePrecision> embed(const ScalarMultivariateFunction<P>& f, const IntervalDomainType& d) {
     return embed(ScalarMultivariateFunctionModel<P,DoublePrecision>(f),d); }
 
-template<class P, class D, class PR, class PRE> inline
-ScalarFunctionModel<P,D,PR,PRE>& ScalarFunctionModel<P,D,PR,PRE>::operator=(const CanonicalNumericType<P,PR,PRE>& c) {
+template<class P, class D, class PR, class PRE> inline auto
+ScalarFunctionModel<P,D,PR,PRE>::operator=(const NumberModelType& c) -> FunctionModelType& {
     (*this)*=CanonicalNumericType<P,PR,PRE>(0); (*this)+=c; return *this; }
-template<class P, class D, class PR, class PRE> inline
-ScalarFunctionModel<P,D,PR,PRE>& ScalarFunctionModel<P,D,PR,PRE>::operator=(const Number<P>& c) {
+template<class P, class D, class PR, class PRE> inline auto
+ScalarFunctionModel<P,D,PR,PRE>::operator=(const NumberType& c) -> FunctionModelType& {
     return (*this)=factory(*this).create(c); }
-template<class P, class D, class PR, class PRE> inline
-ScalarFunctionModel<P,D,PR,PRE>& ScalarFunctionModel<P,D,PR,PRE>::operator=(const ScalarFunction<P,D>& f) {
+template<class P, class D, class PR, class PRE> inline auto
+ScalarFunctionModel<P,D,PR,PRE>::operator=(const FunctionType& f) -> FunctionModelType& {
     return (*this)=factory(*this).create(f); }
-template<class P, class D, class PR, class PRE> inline
-ScalarFunctionModel<P,D,PR,PRE>& ScalarFunctionModel<P,D,PR,PRE>::operator=(const ScalarFunctionModelInterface<P,D,PR,PRE>& f) {
-    return (*this)=ScalarFunctionModel<P,D,PR,PRE>(f._clone()); }
+template<class P, class D, class PR, class PRE> inline auto
+ScalarFunctionModel<P,D,PR,PRE>::operator=(const FunctionModelInterfaceType& f) -> FunctionModelType& {
+    return (*this)=ScalarFunctionModelType(f._clone()); }
 
 
 
@@ -363,26 +399,34 @@ template<class P, class D, class PR, class PRE> class VectorFunctionModelElement
     : public DispatchTranscendentalAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
     , public ProvideConcreteGenericArithmeticOperators<ScalarFunctionModel<P,D,PR,PRE>>
 {
-    VectorFunctionModel<P,D,PR,PRE>* _p; SizeType _i;
+    typedef ScalarFunctionModel<P,D,PR,PRE> ScalarFunctionModelType;
+    typedef VectorFunctionModel<P,D,PR,PRE> VectorFunctionModelType;
+    typedef VectorFunctionModelElement<P,D,PR,PRE> VectorFunctionModelElementType;
+
+    typedef ScalarFunctionModel<ValidatedTag,D,PR,PRE> ValidatedScalarFunctionModelType;
+    
+    VectorFunctionModelType* _p; SizeType _i;
   public:
-    typedef typename ScalarFunctionModel<P,D,PR,PRE>::GenericType GenericType;
-    operator const ScalarFunctionModel<P,D,PR,PRE> () const;
-    VectorFunctionModelElement(VectorFunctionModel<P,D,PR,PRE>* p, SizeType i) : _p(p), _i(i) { }
-    VectorFunctionModelElement<P,D,PR,PRE>& operator=(const ScalarFunctionModel<P,D,PR,PRE>& sf) {
+    typedef typename ScalarFunctionModelType::GenericType GenericType;
+    typedef typename ScalarFunctionModelType::ErrorType ErrorType;
+    
+    operator const ScalarFunctionModelType () const;
+    VectorFunctionModelElement(VectorFunctionModelType* p, SizeType i) : _p(p), _i(i) { }
+    VectorFunctionModelElementType& operator=(const ScalarFunctionModelType& sf) {
         _p->set(_i,sf); return *this; }
-    VectorFunctionModelElement<P,D,PR,PRE>& operator=(const VectorFunctionModelElement<P,D,PR,PRE>& sf) {
-        return this->operator=(static_cast<ScalarFunctionModel<P,D,PR,PRE>const>(sf)); }
-    Void clobber() { ScalarFunctionModel<P,D,PR,PRE> sf=_p->get(_i); sf.clobber(); _p->set(_i,sf); }
-    const ScalarFunctionModel<P,D,PR,PRE> model() const { ScalarFunctionModel<P,D,PR,PRE> sf=_p->get(_i); return sf.model(); }
-    const CanonicalErrorType<P,PRE> error() const { ScalarFunctionModel<P,D,PR,PRE> sf=_p->get(_i); return sf.error(); }
-    Void set_error(CanonicalErrorType<P,PRE> e) const { ScalarFunctionModel<P,D,PR,PRE> sf=_p->get(_i); sf.set_error(e); _p->set(_i,sf); }
-    Void set_error(Nat e) const { ScalarFunctionModel<P,D,PR,PRE> sf=_p->get(_i); sf.set_error(e); _p->set(_i,sf); }
-    friend Boolean refines(const ScalarFunctionModel<ValidatedTag,D,PR,PRE>& f1, const ScalarFunctionModel<ValidatedTag,D,PR,PRE>& f2);
-    friend Boolean inconsistent(const ScalarFunctionModel<ValidatedTag,D,PR,PRE>& f1, const ScalarFunctionModel<ValidatedTag,D,PR,PRE>& f2);
-    friend ScalarFunctionModel<P,D,PR,PRE> antiderivative(VectorFunctionModelElement<P,D,PR,PRE> const& f, SizeType k) {
-        return antiderivative(ScalarFunctionModel<P,D,PR,PRE>(f),k); }
-    friend inline OutputStream& operator<<(OutputStream& os, const VectorFunctionModelElement<P,D,PR,PRE>& function) {
-        return os << static_cast< const ScalarFunctionModel<P,D,PR,PRE> >(function); }
+    VectorFunctionModelElementType& operator=(const VectorFunctionModelElementType& sf) {
+        return this->operator=(static_cast<ScalarFunctionModelType const>(sf)); }
+    Void clobber() { ScalarFunctionModelType sf=_p->get(_i); sf.clobber(); _p->set(_i,sf); }
+    decltype(auto) model() const { ScalarFunctionModelType sf=_p->get(_i); return sf.model(); }
+    const ErrorType error() const { ScalarFunctionModelType sf=_p->get(_i); return sf.error(); }
+    Void set_error(ErrorType e) const { ScalarFunctionModelType sf=_p->get(_i); sf.set_error(e); _p->set(_i,sf); }
+    Void set_error(Nat e) const { ScalarFunctionModelType sf=_p->get(_i); sf.set_error(e); _p->set(_i,sf); }
+    friend Boolean refines(const ValidatedScalarFunctionModelType& f1, const ValidatedScalarFunctionModelType& f2);
+    friend Boolean inconsistent(const ValidatedScalarFunctionModelType& f1, const ValidatedScalarFunctionModelType& f2);
+    friend ScalarFunctionModelType antiderivative(VectorFunctionModelElementType const& f, SizeType k) {
+        return antiderivative(ScalarFunctionModelType(f),k); }
+    friend inline OutputStream& operator<<(OutputStream& os, const VectorFunctionModelElementType& function) {
+        return os << static_cast< const ScalarFunctionModelType >(function); }
 };
 
 //! \ingroup FunctionModelSubModule
@@ -401,36 +445,60 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
     typedef CanonicalErrorType<P,PRE> ErrorType;
     typedef CanonicalNumericType<P,PR,PRE> NumericType;
     typedef Box<Interval<FloatUpperBound<PR>>> RangeType;
+
+    typedef Number<P> NumberType;
+    typedef CanonicalNumericType<P,PR,PRE> NumberModelType;
+    typedef Function<P,D,C> FunctionType;
+    typedef FunctionModelInterface<P,D,C,PR,PRE> FunctionModelInterfaceType;
+    typedef FunctionModel<P,D,C,PR,PRE> FunctionModelType;
+
+    typedef FunctionModel<ValidatedTag,D,C,PR,PRE> ValidatedFunctionModelType;
+    
+    typedef FunctionModelFactory<P,PR,PRE> FunctionModelFactoryType;
+    typedef FunctionModelCreator<FunctionModelFactoryType,D> FunctionModelCreatorType;
+
+    typedef VectorFunctionModelElement<P,D,PR,PRE> VectorFunctionModelElementType;
+    typedef FunctionModel<P,D,IntervalDomainType,PR,PRE> ScalarFunctionModelType;
+    typedef FunctionModel<P,D,BoxDomainType,PR,PRE> VectorFunctionModelType;
+
+    
+    typedef ScalarMultivariateFunction<P> ScalarMultivariateFunctionType;
+    typedef VectorMultivariateFunction<P> VectorMultivariateFunctionType;
+    typedef FunctionModelInterface<P,BoxDomainType,IntervalDomainType,PR,PRE> ScalarMultivariateFunctionModelInterfaceType;
+    typedef FunctionModelInterface<P,BoxDomainType,BoxDomainType,PR,PRE> VectorMultivariateFunctionModelInterfaceType;
+    typedef FunctionModel<P,BoxDomainType,IntervalDomainType,PR,PRE> ScalarMultivariateFunctionModelType;
+    typedef FunctionModel<P,BoxDomainType,BoxDomainType,PR,PRE> VectorMultivariateFunctionModelType;
+
   public:
     inline FunctionModel() : _ptr() { }
-    inline FunctionModel(SharedPointer<const FunctionModelInterface<P,D,C,PR,PRE>> vfp)
+    inline FunctionModel(SharedPointer<const FunctionModelInterfaceType> vfp)
         : _ptr(vfp->_clone()) { }
-    inline FunctionModel(SizeType n, const ScalarFunctionModelInterface<P,D,PR,PRE>& sf) {
-        FunctionModelFactory<P,PR,PRE> factory(sf._factory()); *this=factory.create_zeros(n,sf.domain());
+    inline FunctionModel(SizeType n, const ScalarFunctionModelType& sf) {
+        FunctionModelCreatorType factry(factory(sf)); *this=factry.create_zeros(n);
         for(SizeType i=0; i!=n; ++i) { (*this)[i]=sf; } }
-    inline FunctionModel(Array<ScalarFunctionModel<P,D,PR,PRE>> const& asf)
+    inline FunctionModel(Array<ScalarFunctionModelType> const& asf)
         : FunctionModel(asf.size(),asf[0]) { for(SizeType i=0; i!=asf.size(); ++i) { (*this)[i]=asf[i]; } }
-    inline FunctionModel(List<ScalarFunctionModel<P,D,PR,PRE>> const& lsf)
+    inline FunctionModel(List<ScalarFunctionModelType> const& lsf)
         : FunctionModel(lsf.size(),lsf[0]) { for(SizeType i=0; i!=lsf.size(); ++i) { (*this)[i]=lsf[i]; } }
-    inline explicit FunctionModel(FunctionModelInterface<P,D,C,PR,PRE>* p) : _ptr(p) { }
-    inline FunctionModel(const FunctionModelInterface<P,D,C,PR,PRE>& f) : _ptr(f._clone()) { }
-    inline FunctionModel(const FunctionModel<P,D,C,PR,PRE>& f) : _ptr(f._ptr) { }
-    inline operator const FunctionModelInterface<P,D,C,PR,PRE>& () const { return *_ptr; }
-    inline operator Function<P,D,C> () const { return Function<P,D,C>(*_ptr); }
-    inline const FunctionModelInterface<P,D,C,PR,PRE>* raw_pointer() const { return _ptr.operator->(); }
-    inline const FunctionModelInterface<P,D,C,PR,PRE>& reference() const { return *_ptr; }
-    inline FunctionModelInterface<P,D,C,PR,PRE>& reference() { return *_ptr; }
+    inline explicit FunctionModel(FunctionModelInterfaceType* p) : _ptr(p) { }
+    inline FunctionModel(const FunctionModelInterfaceType& f) : _ptr(f._clone()) { }
+    inline FunctionModel(const FunctionModelType& f) : _ptr(f._ptr) { }
+    inline operator const FunctionModelInterfaceType& () const { return *_ptr; }
+    inline operator FunctionType () const { return FunctionType(*_ptr); }
+    inline const FunctionModelInterfaceType* raw_pointer() const { return _ptr.operator->(); }
+    inline const FunctionModelInterfaceType& reference() const { return *_ptr; }
+    inline FunctionModelInterfaceType& reference() { return *_ptr; }
 
     inline SizeType result_size() const { return this->_ptr->result_size(); }
     inline SizeType argument_size() const { return this->_ptr->argument_size(); }
     inline SizeType size() const { return this->_ptr->result_size(); }
     template<class XX> inline Vector<XX> operator()(const Vector<XX>& v) const { return this->_ptr->_evaluate(v); }
     template<class XX> inline Vector<XX> evaluate(const Vector<XX>& v) const { return this->_ptr->_evaluate(v); }
-    inline ScalarFunctionModel<P,D,PR,PRE> const get(SizeType i) const { return ScalarFunctionModel<P,D,PR,PRE>(this->_ptr->_get(i)); }
-    inline Void set(SizeType i, ScalarFunctionModel<P,D,PR,PRE> const& sf) { this->_ptr->_set(i,sf); }
-    inline ScalarFunctionModel<P,D,PR,PRE> const operator[](SizeType i) const { return this->get(i); }
-    inline VectorFunctionModelElement<P,D,PR,PRE> operator[](SizeType i) { return VectorFunctionModelElement<P,D,PR,PRE>(this,i); }
-    inline VectorFunctionModel<P,D,PR,PRE> operator[](Range rng) { VectorFunctionModel<P,D,PR,PRE> r=factory(*this).create_zeros(rng.size());
+    inline ScalarFunctionModelType const get(SizeType i) const { return ScalarFunctionModelType(this->_ptr->_get(i)); }
+    inline Void set(SizeType i, ScalarFunctionModelType const& sf) { this->_ptr->_set(i,sf); }
+    inline ScalarFunctionModelType const operator[](SizeType i) const { return this->get(i); }
+    inline VectorFunctionModelElementType operator[](SizeType i) { return VectorFunctionModelElementType(this,i); }
+    inline VectorFunctionModelType operator[](Range rng) { VectorFunctionModelType r=factory(*this).create_zeros(rng.size());
         for(SizeType i=0; i!=rng.size(); ++i) { r[i]=this->operator[](rng[i]); } return r; }
     inline DomainType const domain() const { return this->_ptr->domain(); }
     inline CodomainType const codomain() const { return this->_ptr->codomain(); }
@@ -444,119 +512,119 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
 
     inline Void restrict(const DomainType& d) { this->_ptr->restrict(d); }
   public:
-    friend FunctionModelCreator<FunctionModelFactory<P,PR,PRE>,D> factory(VectorFunctionModel<P,D,PR,PRE> const& f) {
-        FunctionModelFactory<P,PR,PRE> factory(f._ptr->_factory()); return FunctionModelCreator<FunctionModelFactory<P,PR,PRE>,D>(f.domain(),factory); }
+    friend FunctionModelCreatorType factory(VectorFunctionModelType const& f) {
+        FunctionModelFactoryType factory(f._ptr->_factory()); return FunctionModelCreatorType(f.domain(),factory); }
   public:
-    friend inline ScalarFunctionModel<P,D,PR,PRE> compose(const ScalarMultivariateFunction<P>& f, const VectorFunctionModel<P,D,PR,PRE>& g) {
-        return ScalarFunctionModel<P,D,PR,PRE>(g._ptr->_compose(f)); }
-    friend inline ScalarFunctionModel<P,D,PR,PRE> compose(const ScalarFunctionModel<P,D,PR,PRE>& f, const VectorFunctionModel<P,D,PR,PRE>& g) {
-        return ScalarFunctionModel<P,D,PR,PRE>(g._ptr->_compose(f)); }
-    friend inline VectorFunctionModel<P,D,PR,PRE> compose(const VectorMultivariateFunction<P>& f, const VectorFunctionModel<P,D,PR,PRE>& g) {
-        return VectorFunctionModel<P,D,PR,PRE>(g._ptr->_compose(f)); }
-    friend inline VectorFunctionModel<P,D,PR,PRE> compose(const VectorFunctionModel<P,D,PR,PRE>& f, const VectorFunctionModel<P,D,PR,PRE>& g) {
-        return VectorFunctionModel<P,D,PR,PRE>(g._ptr->_compose(f)); }
+    friend inline ScalarFunctionModelType compose(const ScalarMultivariateFunction<P>& f, const VectorFunctionModelType& g) {
+        return ScalarFunctionModelType(g._ptr->_compose(f)); }
+    friend inline ScalarFunctionModelType compose(const ScalarMultivariateFunctionModelType& f, const VectorFunctionModelType& g) {
+        return ScalarFunctionModelType(g._ptr->_compose(f)); }
+    friend inline VectorFunctionModelType compose(const VectorMultivariateFunction<P>& f, const VectorFunctionModelType& g) {
+        return VectorFunctionModelType(g._ptr->_compose(f)); }
+    friend inline VectorFunctionModelType compose(const VectorMultivariateFunctionModelType& f, const VectorFunctionModelType& g) {
+        return VectorFunctionModelType(g._ptr->_compose(f)); }
 
-    friend inline ScalarFunctionModel<P,D,PR,PRE> unchecked_compose(const ScalarFunctionModel<P,D,PR,PRE>& f, const VectorFunctionModel<P,D,PR,PRE>& g) {
-        return ScalarFunctionModel<P,D,PR,PRE>(g._ptr->_unchecked_compose(f)); }
-    friend inline VectorFunctionModel<P,D,PR,PRE> unchecked_compose(const VectorFunctionModel<P,D,PR,PRE>& f, const VectorFunctionModel<P,D,PR,PRE>& g) {
-        return VectorFunctionModel<P,D,PR,PRE>(g._ptr->_unchecked_compose(f)); }
+    friend inline ScalarFunctionModelType unchecked_compose(const ScalarMultivariateFunctionModelType& f, const VectorFunctionModelType& g) {
+        return ScalarFunctionModelType(g._ptr->_unchecked_compose(f)); }
+    friend inline VectorFunctionModelType unchecked_compose(const VectorMultivariateFunctionModelType& f, const VectorFunctionModelType& g) {
+        return VectorFunctionModelType(g._ptr->_unchecked_compose(f)); }
 
-    friend inline VectorFunctionModel<P,D,PR,PRE> operator+(const VectorFunctionModel<P,D,PR,PRE>& f) {
-        return VectorFunctionModel<P,D,PR,PRE>(f._ptr->_clone()); }
-    friend inline VectorFunctionModel<P,D,PR,PRE> operator-(const VectorFunctionModel<P,D,PR,PRE>& f) {
-        VectorFunctionModel<P,D,PR,PRE> r=f; for(SizeType i=0; i!=r.size(); ++i) { r[i]=-f[i]; } return r; }
-    friend inline VectorFunctionModel<P,D,PR,PRE> operator+(const VectorFunctionModel<P,D,PR,PRE>& f1, const VectorFunctionModel<P,D,PR,PRE>& f2) {
-        VectorFunctionModel<P,D,PR,PRE> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]+f2[i]; } return r; }
-    friend inline VectorFunctionModel<P,D,PR,PRE> operator-(const VectorFunctionModel<P,D,PR,PRE>& f1, const VectorFunctionModel<P,D,PR,PRE>& f2) {
-        VectorFunctionModel<P,D,PR,PRE> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]-f2[i]; } return r; }
-    friend inline VectorFunctionModel<P,D,PR,PRE> operator+(const VectorFunctionModel<P,D,PR,PRE>& f1, const Vector<CanonicalNumericType<P,PR,PRE>>& c2) {
-        VectorFunctionModel<P,D,PR,PRE> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]+c2[i]; } return r; }
-    friend inline VectorFunctionModel<P,D,PR,PRE> operator-(const VectorFunctionModel<P,D,PR,PRE>& f1, const Vector<CanonicalNumericType<P,PR,PRE>>& c2) {
-        VectorFunctionModel<P,D,PR,PRE> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]-c2[i]; } return r; }
-    friend inline VectorFunctionModel<P,D,PR,PRE> operator+(const Vector<CanonicalNumericType<P,PR,PRE>>& c1, const VectorFunctionModel<P,D,PR,PRE>& f2);
-    friend inline VectorFunctionModel<P,D,PR,PRE> operator-(const Vector<CanonicalNumericType<P,PR,PRE>>& c1, const VectorFunctionModel<P,D,PR,PRE>& f2);
-    friend inline VectorFunctionModel<P,D,PR,PRE> operator*(const VectorFunctionModel<P,D,PR,PRE>& f1, const CanonicalNumericType<P,PR,PRE>& c2) {
-        VectorFunctionModel<P,D,PR,PRE> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]*c2; } return r; }
-    friend inline VectorFunctionModel<P,D,PR,PRE> operator*(const CanonicalNumericType<P,PR,PRE>& c1, const VectorFunctionModel<P,D,PR,PRE>& f2) {
-        VectorFunctionModel<P,D,PR,PRE> r=f2; for(SizeType i=0; i!=r.size(); ++i) { r[i]=c1*f2[i]; } return r; }
+    friend inline VectorFunctionModelType operator+(const VectorFunctionModelType& f) {
+        return VectorFunctionModelType(f._ptr->_clone()); }
+    friend inline VectorFunctionModelType operator-(const VectorFunctionModelType& f) {
+        VectorFunctionModelType r=f; for(SizeType i=0; i!=r.size(); ++i) { r[i]=-f[i]; } return r; }
+    friend inline VectorFunctionModelType operator+(const VectorFunctionModelType& f1, const VectorFunctionModelType& f2) {
+        VectorFunctionModelType r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]+f2[i]; } return r; }
+    friend inline VectorFunctionModelType operator-(const VectorFunctionModelType& f1, const VectorFunctionModelType& f2) {
+        VectorFunctionModelType r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]-f2[i]; } return r; }
+    friend inline VectorFunctionModelType operator+(const VectorFunctionModelType& f1, const Vector<CanonicalNumericType<P,PR,PRE>>& c2) {
+        VectorFunctionModelType r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]+c2[i]; } return r; }
+    friend inline VectorFunctionModelType operator-(const VectorFunctionModelType& f1, const Vector<CanonicalNumericType<P,PR,PRE>>& c2) {
+        VectorFunctionModelType r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]-c2[i]; } return r; }
+    friend inline VectorFunctionModelType operator+(const Vector<CanonicalNumericType<P,PR,PRE>>& c1, const VectorFunctionModelType& f2);
+    friend inline VectorFunctionModelType operator-(const Vector<CanonicalNumericType<P,PR,PRE>>& c1, const VectorFunctionModelType& f2);
+    friend inline VectorFunctionModelType operator*(const VectorFunctionModelType& f1, const CanonicalNumericType<P,PR,PRE>& c2) {
+        VectorFunctionModelType r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]*c2; } return r; }
+    friend inline VectorFunctionModelType operator*(const CanonicalNumericType<P,PR,PRE>& c1, const VectorFunctionModelType& f2) {
+        VectorFunctionModelType r=f2; for(SizeType i=0; i!=r.size(); ++i) { r[i]=c1*f2[i]; } return r; }
 
-    friend inline VectorFunctionModel<P,D,PR,PRE> operator+(const VectorFunctionModel<P,D,PR,PRE>& f1, const VectorMultivariateFunction<P>& f2) {
+    friend inline VectorFunctionModelType operator+(const VectorFunctionModelType& f1, const VectorMultivariateFunction<P>& f2) {
         return f1+factory(f1).create(f2); }
-    friend inline VectorFunctionModel<P,D,PR,PRE> operator-(const VectorFunctionModel<P,D,PR,PRE>& f1, const VectorMultivariateFunction<P>& f2) {
+    friend inline VectorFunctionModelType operator-(const VectorFunctionModelType& f1, const VectorMultivariateFunction<P>& f2) {
         return f1-factory(f1).create(f2); }
-    friend inline VectorFunctionModel<P,D,PR,PRE> operator+(const VectorMultivariateFunction<P>& f1, const VectorFunctionModel<P,D,PR,PRE>& f2) {
+    friend inline VectorFunctionModelType operator+(const VectorMultivariateFunction<P>& f1, const VectorFunctionModelType& f2) {
         return factory(f2).create(f1)+f2; }
-    friend inline VectorFunctionModel<P,D,PR,PRE> operator-(const VectorMultivariateFunction<P>& f1, const VectorFunctionModel<P,D,PR,PRE>& f2) {
+    friend inline VectorFunctionModelType operator-(const VectorMultivariateFunction<P>& f1, const VectorFunctionModelType& f2) {
         return factory(f2).create(f1)-f2; }
 
 
   public:
-    friend NormType norm(const VectorFunctionModel<P,D,PR,PRE>& f) {
+    friend NormType norm(const FunctionModelType& f) {
         return f._ptr->_norm(); }
-    friend VectorFunctionModel<P,D,PR,PRE> embed(const DomainType& d1, const VectorFunctionModel<P,D,PR,PRE>& f, const DomainType& d2) {
-        return VectorFunctionModel<P,D,PR,PRE>(f._ptr->_embed(d1,d2)); }
-    friend VectorFunctionModel<P,D,PR,PRE> embed(const DomainType& d, const VectorFunctionModel<P,D,PR,PRE>& f) {
+    friend FunctionModelType embed(const DomainType& d1, const FunctionModelType& f, const DomainType& d2) {
+        return FunctionModelType(f._ptr->_embed(d1,d2)); }
+    friend FunctionModelType embed(const DomainType& d, const FunctionModelType& f) {
         return embed(d,f,DomainType()); }
-    friend VectorFunctionModel<P,D,PR,PRE> embed(const VectorFunctionModel<P,D,PR,PRE>& f, const BoxDomainType& d) {
+    friend FunctionModelType embed(const FunctionModelType& f, const BoxDomainType& d) {
         return embed(DomainType(),f,d); }
-    friend VectorFunctionModel<P,D,PR,PRE> embed(const VectorFunctionModel<P,D,PR,PRE>& f, const IntervalDomainType& d) {
+    friend FunctionModelType embed(const FunctionModelType& f, const IntervalDomainType& d) {
         return embed(f,DomainType(1,d)); }
-    friend VectorFunctionModel<P,D,PR,PRE> restrict(const VectorFunctionModel<P,D,PR,PRE>& f, const DomainType& d) {
-        VectorFunctionModelInterface<P,D,PR,PRE>* rptr=f._ptr->_clone(); rptr->restrict(d); return VectorFunctionModel<P,D,PR,PRE>(rptr); }
-    friend VectorFunctionModel<P,D,PR,PRE> restriction(const VectorFunctionModel<P,D,PR,PRE>& f, const DomainType& d) {
-        VectorFunctionModelInterface<P,D,PR,PRE>* rptr=f._ptr->_clone(); rptr->restrict(d); return VectorFunctionModel<P,D,PR,PRE>(rptr); }
+    friend FunctionModelType restrict(const FunctionModelType& f, const DomainType& d) {
+        FunctionModelInterfaceType* rptr=f._ptr->_clone(); rptr->restrict(d); return FunctionModelType(rptr); }
+    friend FunctionModelType restriction(const FunctionModelType& f, const DomainType& d) {
+        FunctionModelInterfaceType* rptr=f._ptr->_clone(); rptr->restrict(d); return FunctionModelType(rptr); }
 
-    friend Vector<CanonicalNumericType<P,PR,PRE>> unchecked_evaluate(const VectorFunctionModel<P,D,PR,PRE>& f, const Vector<CanonicalNumericType<P,PR,PRE>>& x) {
+    friend Vector<NumberModelType> unchecked_evaluate(const VectorFunctionModelType& f, const Vector<NumberModelType>& x) {
         return f._ptr->_unchecked_evaluate(x); }
 
-    friend ScalarFunctionModel<P,D,PR,PRE> unchecked_compose(const ScalarMultivariateFunction<P>& f, const VectorFunctionModel<P,D,PR,PRE>& g) {
-        ScalarFunctionModelInterface<P,D,PR,PRE> const* fptr = dynamic_cast<ScalarFunctionModelInterface<P,D,PR,PRE> const*>(f.raw_pointer());
-        if(fptr) { return unchecked_compose(ScalarFunctionModel<P,D,PR,PRE>(*fptr),g); } else { return compose(f,g); } }
-    friend VectorFunctionModel<P,D,PR,PRE> unchecked_compose(const VectorMultivariateFunction<P>& f, const VectorFunctionModel<P,D,PR,PRE>& g) {
-        VectorFunctionModelInterface<P,D,PR,PRE> const* fptr = dynamic_cast<VectorFunctionModelInterface<P,D,PR,PRE> const*>(f.raw_pointer());
-        if(fptr) { return unchecked_compose(VectorFunctionModel<P,D,PR,PRE>(*fptr),g); } else { return compose(f,g); } }
+    friend ScalarFunctionModelType unchecked_compose(const ScalarMultivariateFunctionType& f, const VectorFunctionModelType& g) {
+        ScalarMultivariateFunctionModelInterfaceType const* fptr = dynamic_cast<ScalarMultivariateFunctionModelInterfaceType const*>(f.raw_pointer());
+        if(fptr) { return unchecked_compose(ScalarMultivariateFunctionModelType(*fptr),g); } else { return compose(f,g); } }
+    friend VectorFunctionModelType unchecked_compose(const VectorMultivariateFunctionType& f, const VectorFunctionModelType& g) {
+        VectorMultivariateFunctionModelInterfaceType const* fptr = dynamic_cast<VectorMultivariateFunctionModelInterfaceType const*>(f.raw_pointer());
+        if(fptr) { return unchecked_compose(VectorMultivariateFunctionModelType(*fptr),g); } else { return compose(f,g); } }
 
-    //friend VectorFunctionModel<P,D,PR,PRE> join(const ScalarFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2);
-    friend VectorFunctionModel<P,D,PR,PRE> join(const ScalarFunctionModel<P,D,PR,PRE>& f1, const VectorFunctionModel<P,D,PR,PRE>& f2) {
-        return join(VectorFunctionModel<P,D,PR,PRE>(1u,f1),f2); }
-    friend VectorFunctionModel<P,D,PR,PRE> join(const VectorFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
-        VectorFunctionModel<P,D,PR,PRE> r=VectorFunctionModel<P,D,PR,PRE>(f1._ptr->_clone()); r._ptr->_adjoin(f2); return r; }
-    friend VectorFunctionModel<P,D,PR,PRE> join(const VectorFunctionModel<P,D,PR,PRE>& f1, const VectorFunctionModel<P,D,PR,PRE>& f2) {
-        return VectorFunctionModel<P,D,PR,PRE>(f1._ptr->_join(f2)); }
+    //friend VectorFunctionModelType join(const ScalarFunctionModelType& f1, const ScalarFunctionModelType& f2);
+    friend VectorFunctionModelType join(const ScalarFunctionModelType& f1, const VectorFunctionModelType& f2) {
+        return join(VectorFunctionModelType(1u,f1),f2); }
+    friend VectorFunctionModelType join(const VectorFunctionModelType& f1, const ScalarFunctionModelType& f2) {
+        VectorFunctionModelType r=VectorFunctionModelType(f1._ptr->_clone()); r._ptr->_adjoin(f2); return r; }
+    friend VectorFunctionModelType join(const VectorFunctionModelType& f1, const VectorFunctionModelType& f2) {
+        return VectorFunctionModelType(f1._ptr->_join(f2)); }
 
-    friend VectorFunctionModel<P,D,PR,PRE> combine(const ScalarFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
-        return VectorFunctionModel<P,D,PR,PRE>(1,f1)._ptr->_combine(VectorFunctionModel<P,D,PR,PRE>(1,f2)); };
-    friend VectorFunctionModel<P,D,PR,PRE> combine(const ScalarFunctionModel<P,D,PR,PRE>& f1, const VectorFunctionModel<P,D,PR,PRE>& f2) {
-        return VectorFunctionModel<P,D,PR,PRE>(1,f1)._ptr->_combine(f2); };
-    friend VectorFunctionModel<P,D,PR,PRE> combine(const VectorFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
-        return VectorFunctionModel<P,D,PR,PRE>(f1._ptr->_combine(VectorFunctionModel<P,D,PR,PRE>(1,f2))); };
-    friend VectorFunctionModel<P,D,PR,PRE> combine(const VectorFunctionModel<P,D,PR,PRE>& f1, const VectorFunctionModel<P,D,PR,PRE>& f2) {
-        return VectorFunctionModel<P,D,PR,PRE>(f1._ptr->_combine(f2)); }
+    friend VectorFunctionModelType combine(const ScalarFunctionModelType& f1, const ScalarFunctionModelType& f2) {
+        return VectorFunctionModelType(1,f1)._ptr->_combine(VectorFunctionModelType(1,f2)); };
+    friend VectorFunctionModelType combine(const ScalarFunctionModelType& f1, const VectorFunctionModelType& f2) {
+        return VectorFunctionModelType(1,f1)._ptr->_combine(f2); };
+    friend VectorFunctionModelType combine(const VectorFunctionModelType& f1, const ScalarFunctionModelType& f2) {
+        return VectorFunctionModelType(f1._ptr->_combine(VectorFunctionModelType(1,f2))); };
+    friend VectorFunctionModelType combine(const VectorFunctionModelType& f1, const VectorFunctionModelType& f2) {
+        return VectorFunctionModelType(f1._ptr->_combine(f2)); }
 
     friend inline VectorFunctionModel<ValidatedTag,D,PR,PRE> refinement(const VectorFunctionModel<ValidatedTag,D,PR,PRE>& f1, const VectorFunctionModel<ValidatedTag,D,PR,PRE>& f2) {
         ARIADNE_ASSERT_MSG(f1.size()==f2.size(),"refinement(f1,f2): f1="<<f1<<", f2="<<f2<<")");
         VectorFunctionModel<ValidatedTag,D,PR,PRE> r=+f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=refinement(f1[i],f2[i]); } return r; }
 
-    friend VectorFunctionModel<P,D,PR,PRE> antiderivative(const VectorFunctionModel<P,D,PR,PRE>& f, SizeType j) {
-        VectorFunctionModel<P,D,PR,PRE> r(f);
+    friend VectorFunctionModelType antiderivative(const VectorFunctionModelType& f, SizeType j) {
+        VectorFunctionModelType r(f);
         for(SizeType i=0; i!=r.size(); ++i) { r[i]=antiderivative(f[i],j); }
         return r;
     }
 
-    friend VectorFunctionModel<P,D,PR,PRE> antiderivative(const VectorFunctionModel<P,D,PR,PRE>& f, SizeType j, const CanonicalNumericType<P,PR,PRE>& c) {
-        VectorFunctionModel<P,D,PR,PRE> r(f);
+    friend VectorFunctionModelType antiderivative(const VectorFunctionModelType& f, SizeType j, const CanonicalNumericType<P,PR,PRE>& c) {
+        VectorFunctionModelType r(f);
         for(SizeType i=0; i!=r.size(); ++i) { r[i]=antiderivative(f[i],j,c); }
         return r;
     }
 
-    friend VectorFunctionModel<P,D,PR,PRE> antiderivative(const VectorFunctionModel<P,D,PR,PRE>& f, SizeType j, const Number<P>& c) {
+    friend VectorFunctionModelType antiderivative(const VectorFunctionModelType& f, SizeType j, const Number<P>& c) {
         return antiderivative(f,j,CanonicalNumericType<P,PR,PRE>(c,f[0].value().precision()));
     }
 
-    friend VectorFunctionModel<P,D,PR,PRE> partial_evaluate(const VectorFunctionModel<P,D,PR,PRE>& f, SizeType j, const CanonicalNumericType<P,PR,PRE>& c) {
-        return VectorFunctionModel<P,D,PR,PRE>(f._ptr->_partial_evaluate(j,c)); }
+    friend VectorFunctionModelType partial_evaluate(const VectorFunctionModelType& f, SizeType j, const CanonicalNumericType<P,PR,PRE>& c) {
+        return VectorFunctionModelType(f._ptr->_partial_evaluate(j,c)); }
 
-    friend OutputStream& operator<<(OutputStream& os, const VectorFunctionModel<P,D,PR,PRE>& f) {
+    friend OutputStream& operator<<(OutputStream& os, const VectorFunctionModelType& f) {
         return os <<  f.operator VectorMultivariateFunction<P>(); }
 
 };
