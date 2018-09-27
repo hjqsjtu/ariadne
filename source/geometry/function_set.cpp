@@ -1278,25 +1278,26 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
 
     ExactBoxType new_domain = hull(domain1,domain2);
 
-    ValidatedVectorMultivariateFunctionModelDP function1
-        = ValidatedVectorMultivariateFunctionModelDP( dynamic_cast<VectorMultivariateFunctionModelDPInterface<ValidatedTag> const&>(set1.function().reference()));
-    Vector<FloatDPError> function_error1=function1.errors();
+    ValidatedVectorMultivariateFunctionModel function1
+        = ValidatedVectorMultivariateFunctionModel( dynamic_cast<VectorMultivariateFunctionModelInterface<ValidatedTag> const&>(set1.function().reference()));
+    Vector<ValidatedErrorNumber> function_error1=function1.errors();
     function1.clobber();
     function1.restrict(new_domain);
 
-    ValidatedVectorMultivariateFunctionModelDP function2
-        = ValidatedVectorMultivariateFunctionModelDP( dynamic_cast<VectorMultivariateFunctionModelDPInterface<ValidatedTag> const&>(set2.function().reference()));
-    Vector<FloatDPError> function_error2=function2.errors();
+    ValidatedVectorMultivariateFunctionModel function2
+        = ValidatedVectorMultivariateFunctionModel( dynamic_cast<VectorMultivariateFunctionModelInterface<ValidatedTag> const&>(set2.function().reference()));
+    Vector<ValidatedErrorNumber> function_error2=function2.errors();
     function2.clobber();
     function2.restrict(new_domain);
 
-    ValidatedVectorMultivariateFunctionModelDP new_function=(function1+function2)*FloatDPValue(0.5);
+    ValidatedVectorMultivariateFunctionModel new_function=(function1+function2)/ValidatedNumber(2);
+    
     new_function.clobber();
     for(Nat i=0; i!=new_function.result_size(); ++i) {
         function_error1[i]=norm(new_function[i]-function1[i])+function_error1[i];
         function_error2[i]=norm(new_function[i]-function2[i])+function_error2[i];
-        FloatDPError new_function_error = max(function_error1[i],function_error2[i]);
-        new_function[i] = new_function[i] + FloatDPBounds(-new_function_error,+new_function_error);
+        ValidatedErrorNumber new_function_error = max(function_error1[i],function_error2[i]);
+        new_function[i] = new_function[i] + FloatDPBounds(-new_function_error,+new_function_error, DoublePrecision());
     }
 
     ARIADNE_ASSERT(set1.number_of_constraints()==0);

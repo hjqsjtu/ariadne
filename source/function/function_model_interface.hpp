@@ -36,36 +36,39 @@
 
 namespace Ariadne {
 
-template<class P, class PR, class PRE> class FunctionModelFactoryInterface;
-template<class P, class D, class PR, class PRE> class FunctionModelCreatorInterface;
+template<class P, class TR> class FunctionModelFactoryInterface;
+template<class P, class D, class TR> class FunctionModelCreatorInterface;
 
-template<class P, class D, class C, class PR, class PRE> class FunctionModelInterface;
+template<class P, class D, class C, class TR> class FunctionModelInterface;
 
-template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D,IntervalDomainType,PR,PRE>
+template<class P, class D, class TR> class FunctionModelInterface<P,D,IntervalDomainType,TR>
     : public virtual FunctionInterface<P,D,IntervalDomainType>
+    , public TR
 {
     static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
     typedef IntervalDomainType C;
   public:
     typedef D DomainType;
     typedef C CodomainType;
-    
-    typedef CanonicalCoefficientType<P,PR> CoefficientType;
-    typedef CanonicalErrorType<P,PRE> ErrorType;
-    typedef Interval<FloatUpperBound<PR>> RangeType;
-    typedef FloatError<PR> NormType;
 
-    typedef CanonicalNumericType<P,PR,PRE> NumberModelType;
-    typedef ScalarFunctionModelInterface<P,D,PR,PRE> FunctionModelInterfaceType;
-    typedef FunctionModelFactoryInterface<P,PR,PRE> FunctionModelFactoryInterfaceType;
+    typedef TR Traits;
+    typedef typename Traits::CoefficientType CoefficientType;
+    typedef typename Traits::ErrorType ErrorType;
+    typedef typename Traits::RangeType RangeType;
+    typedef typename Traits::NormType NormType;
+
+    typedef typename TR::NumericType NumberModelType;
+    typedef ScalarFunctionModelInterface<P,D,TR> FunctionModelInterfaceType;
+    typedef FunctionModelFactoryInterface<P,TR> FunctionModelFactoryInterfaceType;
   public:
-    virtual CoefficientType const& value() const = 0;
-    virtual CoefficientType const gradient_value(SizeType i) const = 0;
-    virtual ErrorType const& error() const = 0;
-    virtual Void set_error(const ErrorType& e) = 0;
-    virtual Void clobber() = 0;
 
-    virtual RangeType range() const = 0;
+    virtual CoefficientType const _value() const = 0;
+    virtual CoefficientType const _gradient_value(SizeType i) const = 0;
+    virtual ErrorType const _error() const = 0;
+    virtual Void _set_error(const ErrorType& e) = 0;
+    virtual Void _clobber() = 0;
+
+    virtual RangeType const _range() const = 0;
     virtual NormType const _norm() const = 0;
 
     virtual FunctionModelInterfaceType* _apply(OperatorCode op) const = 0;
@@ -93,32 +96,38 @@ template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D
 };
 
 
-template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D,BoxDomainType,PR,PRE>
+#warning Put traits in types
+template<class P, class D, class TR> class FunctionModelInterface<P,D,BoxDomainType,TR>
     : public virtual FunctionInterface<P,D,BoxDomainType>
+    , public TR
 {
     static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
     typedef BoxDomainType C;
   public:
     typedef D DomainType;
     typedef C CodomainType;
+
+    typedef TR Traits;
     
-    typedef CanonicalCoefficientType<P,PR> CoefficientType;
-    typedef CanonicalErrorType<P,PRE> ErrorType;
-    typedef Box<Interval<FloatUpperBound<PR>>> RangeType;
-    typedef FloatError<PR> NormType;
+    typedef typename Traits::CoefficientType CoefficientType;
+    typedef typename Traits::ErrorType ErrorType;
+    typedef typename Traits::NumericType NumericType;
+    typedef Box<typename Traits::RangeType> RangeType;
+    typedef typename Traits::NormType NormType;
 
-    typedef CanonicalNumericType<P,PR,PRE> NumberModelType;
-    typedef VectorFunctionModelInterface<P,D,PR,PRE> FunctionModelInterfaceType;
-    typedef FunctionModelFactoryInterface<P,PR,PRE> FunctionModelFactoryInterfaceType;
+    typedef typename Traits::NumericType NumberModelType;
+    typedef VectorFunctionModelInterface<P,D,TR> FunctionModelInterfaceType;
+    typedef FunctionModelFactoryInterface<P,TR> FunctionModelFactoryInterfaceType;
 
-    typedef ScalarFunctionModelInterface<P,D,PR,PRE> ScalarFunctionModelInterfaceType;
-    typedef VectorFunctionModelInterface<P,D,PR,PRE> VectorFunctionModelInterfaceType;
+    typedef ScalarFunctionModelInterface<P,D,TR> ScalarFunctionModelInterfaceType;
+    typedef VectorFunctionModelInterface<P,D,TR> VectorFunctionModelInterfaceType;
+
   public:
-    virtual RangeType const range() const = 0;
-    virtual Vector<ErrorType> const errors() const = 0;
-    virtual ErrorType const error() const = 0;
-    virtual Void clobber() = 0;
+    virtual Vector<ErrorType> const _errors() const = 0;
+    virtual ErrorType const _error() const = 0;
+    virtual Void _clobber() = 0;
 
+    virtual RangeType const _range() const = 0;
     virtual NormType const _norm() const = 0;
 
     virtual FunctionModelFactoryInterfaceType* _factory() const = 0;
@@ -140,28 +149,28 @@ template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D
 };
 
 
-template<class P, class PR, class PRE> class FunctionModelFactoryInterface
+template<class P, class TR> class FunctionModelFactoryInterface
 {
     typedef BoxDomainType VD;
     typedef IntervalDomainType SD;
-    friend class FunctionModelFactory<P,PR,PRE>;
+    friend class FunctionModelFactory<P,TR>;
   public:
     typedef SD ScalarDomainType;
     typedef VD VectorDomainType;
-    
+
     typedef Number<P> NumberType;
     typedef ScalarFunctionInterface<P,VD> ScalarMultivariateFunctionInterfaceType;
     typedef VectorFunctionInterface<P,VD> VectorMultivariateFunctionInterfaceType;
     typedef ScalarFunction<P,VD> ScalarMultivariateFunctionType;
     typedef VectorFunction<P,VD> VectorMultivariateFunctionType;
 
-    typedef CanonicalNumericType<P,PR,PRE> NumberModelType;
-    typedef ScalarFunctionModelInterface<P,VD,PR,PRE> ScalarMultivariateFunctionModelInterfaceType;
-    typedef VectorFunctionModelInterface<P,VD,PR,PRE> VectorMultivariateFunctionModelInterfaceType;
-    typedef ScalarFunctionModel<P,VD,PR,PRE> ScalarMultivariateFunctionModelType;
-    typedef VectorFunctionModel<P,VD,PR,PRE> VectorMultivariateFunctionModelType;
+    typedef typename TR::NumericType NumberModelType;
+    typedef ScalarFunctionModelInterface<P,VD,TR> ScalarMultivariateFunctionModelInterfaceType;
+    typedef VectorFunctionModelInterface<P,VD,TR> VectorMultivariateFunctionModelInterfaceType;
+    typedef ScalarFunctionModel<P,VD,TR> ScalarMultivariateFunctionModelType;
+    typedef VectorFunctionModel<P,VD,TR> VectorMultivariateFunctionModelType;
 
-    typedef FunctionModelFactoryInterface<P,PR,PRE> FunctionModelFactoryInterfaceType;
+    typedef FunctionModelFactoryInterface<P,TR> FunctionModelFactoryInterfaceType;
   public:
     virtual ~FunctionModelFactoryInterface() = default;
     virtual FunctionModelFactoryInterfaceType* clone() const = 0;
@@ -193,8 +202,8 @@ template<class P, class PR, class PRE> class FunctionModelFactoryInterface
         return ScalarMultivariateFunctionModelType(_create_zero(domain)); }
     ScalarMultivariateFunctionModelType create_constant(const VectorDomainType& domain, const NumberType& value) const {
         return ScalarMultivariateFunctionModelType(_create_constant(domain,value)); }
-    ScalarMultivariateFunctionModelType create_constant(const VectorDomainType& domain, const NumberModelType& value) const {
-        return ScalarMultivariateFunctionModelType(_create_constant(domain,NumberType(value))); }
+//    ScalarMultivariateFunctionModelType create_constant(const VectorDomainType& domain, const NumberModelType& value) const {
+//        return ScalarMultivariateFunctionModelType(_create_constant(domain,NumberType(value))); }
     ScalarMultivariateFunctionModelType create_coordinate(const VectorDomainType& domain, SizeType index) const {
         return ScalarMultivariateFunctionModelType(_create_coordinate(domain,index)); }
     VectorMultivariateFunctionModelType create_zeros(SizeType result_size_, const VectorDomainType& domain) const {

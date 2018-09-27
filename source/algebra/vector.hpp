@@ -169,8 +169,7 @@ class Vector
     template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy> Vector(Vector<Y> const& v, PR pr) : _ary(v.array(),pr) { }
     //! \brief Convert from an %VectorExpression of a different type.
     template<class VE, EnableIf<IsConvertible<typename VE::ScalarType,X>> =dummy>
-    Vector(VectorExpression<VE> const& ve) : _ary(ve().size(),ve().zero_element()) {
-            for(SizeType i=0; i!=this->size(); ++i) { this->_ary[i]=ve()[i]; } }
+    Vector(VectorExpression<VE> const& ve) : _ary(ve().size(),[&ve](SizeType i){return ve()[i];}) { }
 
     /*! \brief Generate from a function (object) \a g of type \a G mapping an index to a value. */
     template<class G, EnableIf<IsInvocableReturning<X,G,SizeType>> =dummy>
@@ -178,8 +177,7 @@ class Vector
 
     //! \brief Construct from an %VectorExpression of a different type.
     template<class VE, EnableIf<IsConstructible<X,typename VE::ScalarType>> =dummy, DisableIf<IsConvertible<typename VE::ScalarType,X>> =dummy>
-    explicit Vector(VectorExpression<VE> const& ve) : _ary(ve().size(),X(ve().zero_element())) {
-            for(SizeType i=0; i!=this->size(); ++i) { this->_ary[i]=X(ve()[i]); } }
+    explicit Vector(VectorExpression<VE> const& ve) : _ary(ve().size(),[&ve](SizeType i){return X(ve()[i]);}) { }
 
 
     //! \brief Copy constructor.
@@ -230,7 +228,10 @@ class Vector
     //! \brief Constant range subscripting operator.
     VectorRange<const Vector<X>> operator[](Range rng) const;
     //! \brief The zero of the ring containing the Vector's elements. This may be dependent on class parameters.
-    const X zero_element() const { if(this->size()!=0) { return create_zero((*this)[0]); } else { return X(); } }
+    const X zero_element() const { 
+        if(this->size()!=0) { return create_zero((*this)[0]); } 
+        else if constexpr (IsDefaultConstructible<X>::value) { return X(); } 
+        else { throw std::runtime_error("Vector<X>::zero_element: vector must be nonempty or type default-constructible"); } }
     //! \brief The raw data array.
     Array<X> const& array() const { return _ary; }
     //@}

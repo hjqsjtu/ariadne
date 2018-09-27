@@ -51,8 +51,8 @@ Generator<StepSize> step_size;
 Generator<NumberOfStepsBetweenSimplifications> number_of_steps_between_simplifications;
 Generator<NumberOfVariablesToKeep> number_of_variables_to_keep;
 
-using ValidatedScalarMultivariateFunctionModelType = ValidatedScalarMultivariateFunctionModelDP;
-using ValidatedVectorMultivariateFunctionModelType = ValidatedVectorMultivariateFunctionModelDP;
+using ValidatedScalarMultivariateFunctionModelType = ValidatedScalarMultivariateFunctionModel;
+using ValidatedVectorMultivariateFunctionModelType = ValidatedVectorMultivariateFunctionModel;
 
 using ThresholdSweeperDP = ThresholdSweeper<FloatDP>;
 using GradedSweeperDP = GradedSweeper<FloatDP>;
@@ -77,7 +77,7 @@ inline Bool refines(Vector<UpperIntervalType> const& v1, UpperBoxType const& bx2
 
 Box<Interval<FloatDPValue>> over_approximation(Box<Interval<Real>> const&);
 
-ValidatedVectorMultivariateFunctionModelDP add_errors(ValidatedVectorMultivariateFunctionModelDP phi, Vector<ErrorType> const& e);
+ValidatedVectorMultivariateFunctionModel add_errors(ValidatedVectorMultivariateFunctionModel phi, Vector<ErrorType> const& e);
 
 ValidatedVectorMultivariateFunction build_Fw(ValidatedVectorMultivariateFunction const& F, Vector<ValidatedScalarMultivariateFunction> const& w);
 
@@ -420,9 +420,9 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     virtual ValidatedVectorMultivariateFunctionModelType reach(DifferentialInclusion const& di, BoxDomainType D, ValidatedVectorMultivariateFunctionModelType evolve_function, UpperBoxType B, PositiveFloatDPValue t, PositiveFloatDPValue h) const override;
   private:
     ValidatedVectorMultivariateFunctionModelType compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainType const& domain, UpperBoxType const& B) const;
-    ValidatedVectorMultivariateFunctionModelDP build_reach_function(ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
-    ValidatedVectorMultivariateFunctionModelDP evaluate_evolve_function(ValidatedVectorMultivariateFunctionModelDP reach_function, PositiveFloatDPValue t) const;
-    ValidatedVectorMultivariateFunctionModelDP build_secondhalf_piecewise_reach_function(ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, SizeType m, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
+    ValidatedVectorMultivariateFunctionModel build_reach_function(ValidatedVectorMultivariateFunctionModel evolve_function, ValidatedVectorMultivariateFunctionModel Phi, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
+    ValidatedVectorMultivariateFunctionModel evaluate_evolve_function(ValidatedVectorMultivariateFunctionModel reach_function, PositiveFloatDPValue t) const;
+    ValidatedVectorMultivariateFunctionModel build_secondhalf_piecewise_reach_function(ValidatedVectorMultivariateFunctionModel evolve_function, ValidatedVectorMultivariateFunctionModel Phi, SizeType m, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
     Vector<ValidatedScalarMultivariateFunction> build_secondhalf_piecewise_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const;
 };
 

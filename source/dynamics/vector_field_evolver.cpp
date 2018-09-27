@@ -202,7 +202,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 Bool reach) const
 {
     typedef EffectiveVectorMultivariateFunction FunctionType;
-    typedef ValidatedVectorMultivariateFunctionModelDP FlowModelType;
+    typedef ValidatedVectorMultivariateFunctionModel FlowModelType;
 
     EnclosureType current_set_model;
     TimeStepType current_time;

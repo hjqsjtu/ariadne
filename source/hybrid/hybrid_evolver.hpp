@@ -60,14 +60,14 @@ class GeneralHybridEvolverConfiguration;
 //! \ingroup FunctionModule
 //! \brief A class representing the flow \f$\phi(x,t)\f$ of a differential equation \f$\frac{dx}{dt}=f(x)\f$.
 class FlowFunctionModel
-    : public ValidatedVectorMultivariateFunctionModelDP
+    : public ValidatedVectorMultivariateFunctionModel
 {
   public:
-    FlowFunctionModel(const ValidatedVectorMultivariateFunctionModelDP& f) : ValidatedVectorMultivariateFunctionModelDP(f) { }
+    FlowFunctionModel(const ValidatedVectorMultivariateFunctionModel& f) : ValidatedVectorMultivariateFunctionModel(f) { }
     FloatDPValue step_size() const { return cast_exact(this->time_domain().upper()); }
     ExactIntervalType time_domain() const { return this->domain()[this->domain().size()-1]; }
     ExactBoxType space_domain() const { return ExactBoxType(project(this->domain(),Ariadne::range(0,this->domain().size()-1))); }
-    ExactBoxType const codomain() const { return this->ValidatedVectorMultivariateFunctionModelDP::codomain(); }
+    ExactBoxType const codomain() const { return this->ValidatedVectorMultivariateFunctionModel::codomain(); }
 };
 
 struct TransitionData;
@@ -98,7 +98,7 @@ class HybridEvolverBase
     friend class HybridEvolverBaseConfiguration;
   public:
     typedef HybridEvolverBaseConfiguration ConfigurationType;
-    typedef ValidatedFunctionModelDPFactoryInterface FunctionFactoryType;
+    typedef ValidatedFunctionModelFactoryInterface FunctionFactoryType;
     typedef HybridAutomatonInterface SystemType;
     typedef SystemType::TimeType TimeType;
     typedef TimeType::ContinuousTimeType ContinuousTimeType;
@@ -234,7 +234,7 @@ class HybridEvolverBase
     //! defined on a domain \f$B\times [0,h]\f$, where \f$B\f$ is the bounding
     //! box for the set, and \f$h\f$ is the step size actually used.
     virtual
-    ValidatedVectorMultivariateFunctionModelDP
+    ValidatedVectorMultivariateFunctionModel
     _compute_flow(EffectiveVectorMultivariateFunction vector_field,
                   ExactBoxType const& initial_set,
                   const FloatDPValue& maximum_step_size) const;
@@ -250,7 +250,7 @@ class HybridEvolverBase
     Set<DiscreteEvent>
     _compute_active_events(EffectiveVectorMultivariateFunction const& dynamic,
                            Map<DiscreteEvent,EffectiveScalarMultivariateFunction> const& guards,
-                           ValidatedVectorMultivariateFunctionModelDP const& flow,
+                           ValidatedVectorMultivariateFunctionModel const& flow,
                            HybridEnclosure const& starting_set) const;
 
     //! \brief Compute data on how trajectories of the \a flow
@@ -337,7 +337,7 @@ class HybridEvolverBase
     virtual
     Void
     _apply_reach_step(HybridEnclosure& set,
-                      ValidatedVectorMultivariateFunctionModelDP const& flow,
+                      ValidatedVectorMultivariateFunctionModel const& flow,
                       TimingData const& timing_data) const;
 
     //! \brief Apply the \a flow to the \a set for the time specified by \a timing_data
@@ -345,7 +345,7 @@ class HybridEvolverBase
     virtual
     Void
     _apply_evolve_step(HybridEnclosure& set,
-                       ValidatedVectorMultivariateFunctionModelDP const& flow,
+                       ValidatedVectorMultivariateFunctionModel const& flow,
                        TimingData const& timing_data) const;
 
     //! \brief Apply the \a flow to the \a set for to reach the
@@ -358,7 +358,7 @@ class HybridEvolverBase
     Void
     _apply_guard_step(HybridEnclosure& set,
                       EffectiveVectorMultivariateFunction const& dynamic,
-                      ValidatedVectorMultivariateFunctionModelDP const& flow,
+                      ValidatedVectorMultivariateFunctionModel const& flow,
                       TimingData const& timing_data,
                       TransitionData const& transition_data,
                       CrossingData const& crossing_data,
@@ -381,9 +381,9 @@ class HybridEvolverBase
     virtual
     Void
     _apply_guard(List<HybridEnclosure>& sets,
-                 const ValidatedScalarMultivariateFunctionModelDP& sets_elapsed_time,
+                 const ValidatedScalarMultivariateFunctionModel& sets_elapsed_time,
                  const HybridEnclosure& starting_set,
-                 const ValidatedVectorMultivariateFunctionModelDP& flow,
+                 const ValidatedVectorMultivariateFunctionModel& flow,
                  const TransitionData& transition_data,
                  const CrossingData crossing_data,
                  const Semantics semantics) const;
@@ -431,7 +431,7 @@ class HybridEvolverBase
     Void
     _apply_evolution_step(EvolutionData& evolution_data,
                           HybridEnclosure const& starting_set,
-                          ValidatedVectorMultivariateFunctionModelDP const& flow,
+                          ValidatedVectorMultivariateFunctionModel const& flow,
                           TimingData const& timing_data,
                           Map<DiscreteEvent,CrossingData> const& crossing_data,
                           EffectiveVectorMultivariateFunction const& dynamic,
@@ -540,7 +540,7 @@ struct CrossingData
 {
     CrossingData() : crossing_kind() { }
     CrossingData(CrossingKind crk) : crossing_kind(crk) { }
-    CrossingData(CrossingKind crk, const ValidatedScalarMultivariateFunctionModelDP& crt)
+    CrossingData(CrossingKind crk, const ValidatedScalarMultivariateFunctionModel& crt)
         : crossing_kind(crk), crossing_time(crt) { }
     //! \brief The way in which the guard function changes along trajectories
     DirectionKind direction_kind;
@@ -551,10 +551,10 @@ struct CrossingData
     ExactIntervalType crossing_time_range;
     //! \brief The time \f$\gamma(x)\f$ at which the crossing occurs,
     //! as a function of the initial point in space. Satisfies \f$g(\phi(x,\gamma(x)))=0\f$.
-    ValidatedScalarMultivariateFunctionModelDP crossing_time;
+    ValidatedScalarMultivariateFunctionModel crossing_time;
     //! \brief The time \f$\mu(x)\f$ at which the guard function reaches a maximum or minimum
     //! i.e. \f$L_{f}g(\phi(x,\mu(x))) = 0\f$.
-    ValidatedScalarMultivariateFunctionModelDP critical_time;
+    ValidatedScalarMultivariateFunctionModel critical_time;
 };
 OutputStream& operator<<(OutputStream& os, const CrossingData& crk);
 
@@ -607,18 +607,18 @@ struct TimingData
     FinishingKind finishing_kind; //!< The relationship between the finishing time of the step, and the final time of the evolution trace.
     Real final_time; //!< The time \f$t_{\max}\f$ specified as the final time of the evolution trace.
     FloatDPValue step_size; //!< The maximum step size \f$h\f$ allowed by the computed flow function.
-    ValidatedScalarMultivariateFunctionModelDP spacetime_dependent_evolution_time;
+    ValidatedScalarMultivariateFunctionModel spacetime_dependent_evolution_time;
         //!< The evolution time \f$\varepsilon(x,t)\f$ used in a \a SPACETIME_DEPENDENT_EVOLUTION_TIME step.
-    ValidatedScalarMultivariateFunctionModelDP spacetime_dependent_finishing_time;
+    ValidatedScalarMultivariateFunctionModel spacetime_dependent_finishing_time;
         //!< The final time \f$\omega(x,t)\f$ used in a \a SPACETIME_DEPENDENT_FINISHING_TIME step.
-    ValidatedScalarMultivariateFunctionModelDP parameter_dependent_finishing_time;
+    ValidatedScalarMultivariateFunctionModel parameter_dependent_finishing_time;
         //!< The time \f$\omega(s)\f$ reached after an \a PARAMETER_DEPENDENT_FINISHING_TIME as a function of the parameters.
-    ValidatedScalarMultivariateFunctionModelDP parameter_dependent_evolution_time;
+    ValidatedScalarMultivariateFunctionModel parameter_dependent_evolution_time;
         //!< The time \f$\delta(s)\f$ used in a \a PARAMETER_DEPENDENT_EVOLUTION_TIME step.
         //! Set equal to \f$\varepsilon(\xi(s))\f$ for a \a SPACE_DEPENDENT_EVOLUTION_TIME
         //! and \f$\omega(s)-\varepsilon(s)\f$ for an \a PARAMETER_DEPENDENT_FINISHING_TIME.
     ExactIntervalType evolution_time_domain; //!< The time domain of the flow function, equal to \f$[0,h]\f$.
-    ValidatedScalarMultivariateFunctionModelDP evolution_time_coordinate; //!< The time coordinate of the flow function, equal to the identity on \f$[0,h]\f$.
+    ValidatedScalarMultivariateFunctionModel evolution_time_coordinate; //!< The time coordinate of the flow function, equal to the identity on \f$[0,h]\f$.
 };
 OutputStream& operator<<(OutputStream& os, const TimingData& timing);
 
@@ -735,7 +735,7 @@ class GeneralHybridEvolver
 
     GeneralHybridEvolver(const SystemType& system);
     GeneralHybridEvolver(const SystemType& system,
-                         const ValidatedFunctionModelDPFactoryInterface& factory);
+                         const ValidatedFunctionModelFactoryInterface& factory);
     virtual GeneralHybridEvolver* clone() const { return new GeneralHybridEvolver(*this); }
     virtual OutputStream& write(OutputStream& os) const { return os << "GeneralHybridEvolver( " << this->configuration() << ")"; }
 
@@ -793,13 +793,13 @@ class GeneralHybridEvolverFactory
 {
   private:
 
-    std::shared_ptr<ValidatedFunctionModelDPFactoryInterface> _function_factory;
+    std::shared_ptr<ValidatedFunctionModelFactoryInterface> _function_factory;
 
   public:
 
     GeneralHybridEvolverFactory();
 
-    GeneralHybridEvolverFactory(const ValidatedFunctionModelDPFactoryInterface& factory);
+    GeneralHybridEvolverFactory(const ValidatedFunctionModelFactoryInterface& factory);
 
     virtual GeneralHybridEvolverFactory* clone() const { return new GeneralHybridEvolverFactory(*this); }
 

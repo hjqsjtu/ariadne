@@ -38,6 +38,9 @@ namespace Ariadne {
 using IntervalDomainType = ExactIntervalType;
 using BoxDomainType = ExactBoxType;
 
+using IntervalRangeType = UpperIntervalType;
+using BoxRangeType = UpperBoxType;
+
 // Function declarations
 template<class P, class D, class C> class Function;
 template<class P, class D> using ScalarFunction = Function<P,D,IntervalDomainType>;
@@ -94,20 +97,25 @@ using ValidatedVectorMultivariateFunctionPatch = Function<ValidatedTag,BoxDomain
 
 // Function models declarations
 
+template<class P, class PR=Void, class PRE=PR> struct FunctionModelTraits;
 
-template<class P, class D, class C, class PR, class PRE=PR> class FunctionModelInterface;
-template<class P, class D, class PR, class PRE=PR> using ScalarFunctionModelInterface = FunctionModelInterface<P,D,IntervalDomainType,PR,PRE>;
-template<class P, class D, class PR, class PRE=PR> using VectorFunctionModelInterface = FunctionModelInterface<P,D,BoxDomainType,PR,PRE>;
+template<class P, class D, class C, class TR=FunctionModelTraits<P>> class FunctionModelInterface;
+template<class P, class D, class TR=FunctionModelTraits<P>> using ScalarFunctionModelInterface = FunctionModelInterface<P,D,IntervalDomainType,TR>;
+template<class P, class D, class TR=FunctionModelTraits<P>> using VectorFunctionModelInterface = FunctionModelInterface<P,D,BoxDomainType,TR>;
 
-template<class P, class D, class C, class PR, class PRE=PR> class FunctionModel;
-template<class P, class D, class PR, class PRE=PR> using ScalarFunctionModel = FunctionModel<P,D,IntervalDomainType,PR,PRE>;
-template<class P, class D, class PR, class PRE=PR> using VectorFunctionModel = FunctionModel<P,D,BoxDomainType,PR,PRE>;
-template<class P, class PR, class PRE=PR> using ScalarUnivariateFunctionModel = FunctionModel<P,IntervalDomainType,IntervalDomainType,PR,PRE>;
-template<class P, class PR, class PRE=PR> using VectorUnivariateFunctionModel = FunctionModel<P,IntervalDomainType,BoxDomainType,PR,PRE>;
-template<class P, class PR, class PRE=PR> using ScalarMultivariateFunctionModel = FunctionModel<P,BoxDomainType,IntervalDomainType,PR,PRE>;
-template<class P, class PR, class PRE=PR> using VectorMultivariateFunctionModel = FunctionModel<P,BoxDomainType,BoxDomainType,PR,PRE>;
+template<class P, class D, class C, class TR=FunctionModelTraits<P>> class FunctionModel;
+template<class P, class D, class TR=FunctionModelTraits<P>> using ScalarFunctionModel = FunctionModel<P,D,IntervalDomainType,TR>;
+template<class P, class D, class TR=FunctionModelTraits<P>> using VectorFunctionModel = FunctionModel<P,D,BoxDomainType,TR>;
+template<class P, class TR=FunctionModelTraits<P>> using ScalarUnivariateFunctionModel = FunctionModel<P,IntervalDomainType,IntervalDomainType,TR>;
+template<class P, class TR=FunctionModelTraits<P>> using VectorUnivariateFunctionModel = FunctionModel<P,IntervalDomainType,BoxDomainType,TR>;
+template<class P, class TR=FunctionModelTraits<P>> using ScalarMultivariateFunctionModel = FunctionModel<P,BoxDomainType,IntervalDomainType,TR>;
+template<class P, class TR=FunctionModelTraits<P>> using VectorMultivariateFunctionModel = FunctionModel<P,BoxDomainType,BoxDomainType,TR>;
 
-template<class P, class PR, class PRE=PR> struct FunctionModelTraits;
+using ValidatedScalarMultivariateFunctionModel = ScalarFunctionModel<ValidatedTag,BoxDomainType>;
+using ValidatedVectorMultivariateFunctionModel = VectorFunctionModel<ValidatedTag,BoxDomainType>;
+using ApproximateScalarMultivariateFunctionModel = ScalarFunctionModel<ApproximateTag,BoxDomainType>;
+using ApproximateVectorMultivariateFunctionModel = VectorFunctionModel<ApproximateTag,BoxDomainType>;
+
 
 
 template<class PR> struct FunctionModelTraits<ApproximateTag,PR> {
@@ -117,46 +125,45 @@ template<class PR> struct FunctionModelTraits<ApproximateTag,PR> {
     typedef FloatApproximation<PR> NumericType;
 };
 
+template<> struct FunctionModelTraits<ValidatedTag> {
+    typedef ExactNumber CoefficientType;
+    typedef PositiveValidatedUpperNumber ErrorType;
+    typedef ValidatedNumber NumericType;
+    typedef PositiveValidatedUpperNumber NormType;
+    typedef IntervalRangeType RangeType;
+
+    typedef ValidatedNumber NumberModelType;
+};
+
 template<class PR, class PRE> struct FunctionModelTraits<ValidatedTag,PR,PRE> {
     static_assert(IsSame<PR,DP>::value or IsSame<PR,MP>::value,"");
     typedef FloatValue<PR> CoefficientType;
     typedef FloatError<PRE> ErrorType;
     typedef FloatBounds<PR> NumericType;
+    typedef PositiveFloatUpperBound<PR> NormType;
+    typedef IntervalRangeType RangeType;
+
+    typedef FloatBounds<PR> NumberModelType;
+    //typedef FloatBall<PR,PRE> NumberModelType;
 };
 
-template<class P, class PR, class PRE=PR> using CanonicalNumericType = typename FunctionModelTraits<P,PR,PRE>::NumericType;
-template<class P, class PR> using CanonicalCoefficientType = typename FunctionModelTraits<P,PR>::CoefficientType;
-template<class P, class PRE> using CanonicalErrorType = typename FunctionModelTraits<P,PRE,PRE>::ErrorType;
 
-template<class P> using CanonicalNumeric64Type = typename FunctionModelTraits<P,DoublePrecision>::NumericType;
-template<class P> using CanonicalCoefficient64Type = typename FunctionModelTraits<P,DoublePrecision>::CoefficientType;
-template<class P> using CanonicalError64Type = typename FunctionModelTraits<P,DoublePrecision,DoublePrecision>::ErrorType;
+template<class P, class PR=Void, class PRE=PR> using CanonicalNumericType = typename FunctionModelTraits<P,PR,PRE>::NumericType;
+template<class P, class PR=Void> using CanonicalCoefficientType = typename FunctionModelTraits<P,PR>::CoefficientType;
+template<class P, class PRE=Void> using CanonicalErrorType = typename FunctionModelTraits<P,PRE,PRE>::ErrorType;
 
 template<class X> using PrecisionType = typename X::PrecisionType;
 template<class X> using ErrorPrecisionType = typename X::ErrorPrecisionType;
 
-template<class P> using ScalarMultivariateFunctionModelDP = ScalarFunctionModel<P,BoxDomainType,DoublePrecision>;
-template<class P> using VectorMultivariateFunctionModelDP = VectorFunctionModel<P,BoxDomainType,DoublePrecision>;
+template<class P> using ScalarMultivariateFunctionModelInterface = ScalarFunctionModelInterface<P,BoxDomainType>;
+template<class P> using VectorMultivariateFunctionModelInterface = VectorFunctionModelInterface<P,BoxDomainType>;
+using ValidatedScalarMultivariateFunctionModelInterface = ScalarMultivariateFunctionModelInterface<ValidatedTag>;
+using ValidatedVectorMultivariateFunctionModelInterface = VectorMultivariateFunctionModelInterface<ValidatedTag>;
 
-template<class P> using ScalarMultivariateFunctionModelDPInterface = ScalarFunctionModelInterface<P,BoxDomainType,DoublePrecision>;
-template<class P> using VectorMultivariateFunctionModelDPInterface = VectorFunctionModelInterface<P,BoxDomainType,DoublePrecision>;
-
-using ValidatedScalarMultivariateFunctionModelDPInterface = ScalarFunctionModelInterface<ValidatedTag,BoxDomainType,DoublePrecision>;
-using ValidatedVectorMultivariateFunctionModelDPInterface = VectorFunctionModelInterface<ValidatedTag,BoxDomainType,DoublePrecision>;
-
-using ValidatedScalarMultivariateFunctionModelDP = ScalarFunctionModel<ValidatedTag,BoxDomainType,DoublePrecision>;
-using ValidatedVectorMultivariateFunctionModelDP = VectorFunctionModel<ValidatedTag,BoxDomainType,DoublePrecision>;
-
-using ApproximateScalarMultivariateFunctionModelDPInterface = ScalarFunctionModelInterface<ApproximateTag,BoxDomainType,DoublePrecision>;
-using ApproximateVectorMultivariateFunctionModelDPInterface = VectorFunctionModelInterface<ApproximateTag,BoxDomainType,DoublePrecision>;
-
-using ApproximateScalarMultivariateFunctionModelDP = ScalarFunctionModel<ApproximateTag,BoxDomainType,DoublePrecision>;
-using ApproximateVectorMultivariateFunctionModelDP = VectorFunctionModel<ApproximateTag,BoxDomainType,DoublePrecision>;
-
-template<class P, class PR=DoublePrecision, class PRE=PR> class FunctionModelFactoryInterface;
-typedef FunctionModelFactoryInterface<ValidatedTag,DoublePrecision> ValidatedFunctionModelDPFactoryInterface;
-template<class P, class PR=DoublePrecision, class PRE=PR> class FunctionModelFactory;
-typedef FunctionModelFactory<ValidatedTag,DoublePrecision> ValidatedFunctionModelDPFactory;
+template<class P, class TR=FunctionModelTraits<P>> class FunctionModelFactoryInterface;
+typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
+template<class P, class TR=FunctionModelTraits<P>> class FunctionModelFactory;
+typedef FunctionModelFactory<ValidatedTag> ValidatedFunctionModelFactory;
 template<class FMF, class D> class FunctionModelCreator;
 
 

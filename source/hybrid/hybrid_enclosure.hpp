@@ -127,19 +127,19 @@ class HybridEnclosure
     //! \brief An empty enclosure.
     HybridEnclosure();
     //! \brief An enclosure corresponding to a hybrid box \a hbx with variables canonically ordered by \a spc.
-    HybridEnclosure(const HybridBoxSet& hbx, const RealSpace& spc, const ValidatedFunctionModelDPFactoryInterface& fac);
+    HybridEnclosure(const HybridBoxSet& hbx, const RealSpace& spc, const ValidatedFunctionModelFactoryInterface& fac);
     //! \brief An enclosure corresponding to the hybrid set \a set using \a space to order the continuous variables.
-    HybridEnclosure(const HybridBoundedConstraintSet& set, const RealSpace& space, const ValidatedFunctionModelDPFactoryInterface& factory);
+    HybridEnclosure(const HybridBoundedConstraintSet& set, const RealSpace& space, const ValidatedFunctionModelFactoryInterface& factory);
 
     //! \brief An enclosure corresponding to a Euclidean box \a bx in location \a q with variables ordered by \a spc.
-    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const RealBox& bx, const ValidatedFunctionModelDPFactoryInterface& fac);
+    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const RealBox& bx, const ValidatedFunctionModelFactoryInterface& fac);
     //! \brief An enclosure corresponding to a hybrid box \a hbx.
-    explicit HybridEnclosure(const HybridRealBox& hbx, const ValidatedFunctionModelDPFactoryInterface& fac);
+    explicit HybridEnclosure(const HybridRealBox& hbx, const ValidatedFunctionModelFactoryInterface& fac);
 
     //! \brief An enclosure corresponding to a hybrid box \a hbx.
-    explicit HybridEnclosure(const HybridExactBoxType& hbx, const ValidatedFunctionModelDPFactoryInterface& fac);
+    explicit HybridEnclosure(const HybridExactBoxType& hbx, const ValidatedFunctionModelFactoryInterface& fac);
     //! \brief An enclosure corresponding to a hybrid box \a hbx.
-    explicit HybridEnclosure(const HybridExactBoxType& hbx, List<RealAssignment> aux, const ValidatedFunctionModelDPFactoryInterface& fac);
+    explicit HybridEnclosure(const HybridExactBoxType& hbx, List<RealAssignment> aux, const ValidatedFunctionModelFactoryInterface& fac);
     //! \brief An enclosure constructed from a location \a q, a real space \a spc, and a (timed) enclosure \a es.
     explicit HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Enclosure& es);
 
@@ -161,7 +161,7 @@ class HybridEnclosure
     //! \brief The Euclidean state space of the location.
     const RealSpace auxiliary_space() const;
     //! \brief The factory used to create functions.
-    const ValidatedFunctionModelDPFactoryInterface& function_factory() const;
+    const ValidatedFunctionModelFactoryInterface& function_factory() const;
     //! \brief The list of previous events.
     const List<DiscreteEvent>& previous_events() const;
     //! \brief The number of independent parameters.
@@ -171,20 +171,20 @@ class HybridEnclosure
     //! \brief The continuous state set.
     const ExactBoxType parameter_domain() const;
     //! \brief The function related to the state space.
-    const ValidatedVectorMultivariateFunctionModelDP& state_function() const;
+    const ValidatedVectorMultivariateFunctionModel& state_function() const;
     //! \brief The function related to time.
-    const ValidatedScalarMultivariateFunctionModelDP& time_function() const;
+    const ValidatedScalarMultivariateFunctionModel& time_function() const;
     //! \brief The function giving the time since the last event.
-    const ValidatedScalarMultivariateFunctionModelDP& dwell_time_function() const;
+    const ValidatedScalarMultivariateFunctionModel& dwell_time_function() const;
     //! \brief The function related to the auxiliary space.
-    const ValidatedVectorMultivariateFunctionModelDP auxiliary_function() const;
+    const ValidatedVectorMultivariateFunctionModel auxiliary_function() const;
     //! \brief The function related to the auxiliary space.
-    const ValidatedVectorMultivariateFunctionModelDP state_time_auxiliary_function() const;
+    const ValidatedVectorMultivariateFunctionModel state_time_auxiliary_function() const;
     //! \brief The function related to the variable \a var.
-    const ValidatedScalarMultivariateFunctionModelDP function(RealVariable var) const;
+    const ValidatedScalarMultivariateFunctionModel function(RealVariable var) const;
 
     //! \brief Set the evolution time function to \a omega.
-    Void set_time_function(const ValidatedScalarMultivariateFunctionModelDP& omega);
+    Void set_time_function(const ValidatedScalarMultivariateFunctionModel& omega);
 
     //! \brief A bounding box for the space.
     UpperBoxType state_bounding_box() const;
@@ -213,21 +213,21 @@ class HybridEnclosure
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
     Void apply_reset(DiscreteEvent e, DiscreteLocation q, RealSpace s, const ValidatedVectorMultivariateFunction& r);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps) and tau'(s)=tau(s)+eps
-    Void apply_fixed_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const FloatDPValue& eps);
+    Void apply_fixed_evolve_step(const ValidatedVectorMultivariateFunctionModel& phi, const FloatDPValue& eps);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s))) and tau'(s)=tau(s)+eps(xi(s))
-    Void apply_space_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
+    Void apply_space_evolve_step(const ValidatedVectorMultivariateFunctionModel& phi, const ValidatedScalarMultivariateFunctionModel& eps);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s),tau(s))) and tau'(s)=tau(s)+eps(xi(s),tau(s))
-    Void apply_spacetime_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
+    Void apply_spacetime_evolve_step(const ValidatedVectorMultivariateFunctionModel& phi, const ValidatedScalarMultivariateFunctionModel& eps);
     //! \brief Apply the reach step \xi'(s) = phi(xi(s),t-tau(s)) and tau'(s)=tau(s)+t for 0<=t<=eps(xi(s),tau(s))
-    Void apply_spacetime_reach_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
+    Void apply_spacetime_reach_step(const ValidatedVectorMultivariateFunctionModel& phi, const ValidatedScalarMultivariateFunctionModel& eps);
     // Compute the evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
-    Void apply_parameter_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
+    Void apply_parameter_evolve_step(const ValidatedVectorMultivariateFunctionModel& phi, const ValidatedScalarMultivariateFunctionModel& eps);
     // Compute the evolve step \xi'(s) = phi(xi(s),\omega(s)-tau(s)) and tau'(s)=omega(s)
-    Void apply_finishing_parameter_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& omega);
+    Void apply_finishing_parameter_evolve_step(const ValidatedVectorMultivariateFunctionModel& phi, const ValidatedScalarMultivariateFunctionModel& omega);
     //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(s) , assuming eps(s)<= h throughout.
-    Void apply_parameter_reach_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
+    Void apply_parameter_reach_step(const ValidatedVectorMultivariateFunctionModel& phi, const ValidatedScalarMultivariateFunctionModel& eps);
     //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h].
-    Void apply_full_reach_step(const ValidatedVectorMultivariateFunctionModelDP& phi);
+    Void apply_full_reach_step(const ValidatedVectorMultivariateFunctionModel& phi);
 
 
     //! \brief Set the time of evolution to \a \f$t_{\max}\f$.

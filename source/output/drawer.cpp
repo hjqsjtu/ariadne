@@ -87,7 +87,7 @@ Void EnclosureAffineDrawer::draw(CanvasInterface& canvas, const Projection2d& pr
     fg[1]=set.function()[projection.i];
     for(Nat i=0; i!=set.constraints().size(); ++i) { fg[i+2u]=set.constraints()[i].function(); }
     Projection2d identity(2, 0,1);
-//    ValidatedVectorMultivariateFunctionModelDP fg=join(set.state_function(),set.time_function(),set.constraint_function());
+//    ValidatedVectorMultivariateFunctionModel fg=join(set.state_function(),set.time_function(),set.constraint_function());
 
     List<ExactBoxType> subdomains;
     List<ExactBoxType> unsplitdomains;

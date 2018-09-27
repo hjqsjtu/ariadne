@@ -80,7 +80,7 @@ class TestSolver
         EffectiveScalarMultivariateFunction bb;
         ExactIntervalVectorType p,r;
         EffectiveVectorMultivariateFunction f;
-        ValidatedVectorMultivariateFunctionModelDP h;
+        ValidatedVectorMultivariateFunctionModel h;
         EffectiveVectorMultivariateFunction e;
         FloatDPValue tol;
 
@@ -149,7 +149,7 @@ class TestSolver
         // Uses scalar implicit
         ExactIntervalVectorType p; ExactIntervalType r;
         EffectiveScalarMultivariateFunction e,f,s; // s is unscaling functions
-        ValidatedScalarMultivariateFunctionModelDP h;
+        ValidatedScalarMultivariateFunctionModel h;
 
         ARIADNE_TEST_PRINT(*solver);
 
@@ -173,7 +173,7 @@ class TestSolver
         r=ExactIntervalType(-1,1);
         f=EffectiveScalarMultivariateFunction(x-2*a);
         ARIADNE_TEST_PRINT(f);
-        ValidatedScalarMultivariateFunctionModelDP g=ValidatedScalarMultivariateTaylorFunctionModelDP(join(p,r),f,ThresholdSweeper<FloatDP>(dp,1e-12));
+        ValidatedScalarMultivariateFunctionModel g=ValidatedScalarMultivariateTaylorFunctionModel(join(p,r),f,ThresholdSweeper<FloatDP>(dp,1e-12));
         ARIADNE_TEST_PRINT(g);
         try {
             h=solver->implicit(g,p,r);

@@ -990,8 +990,9 @@ template<class M> OutputStream& VectorScaledFunctionPatch<M>::repr(OutputStream&
 
 
 
-template<class M> auto ScaledFunctionPatchFactory<M>::create(const Number<P>& number) const -> CanonicalNumericType<P,PR,PRE> {
-    return CanonicalNumericType<P,PR>(number,this->_properties.precision());
+template<class M> auto ScaledFunctionPatchFactory<M>::create(const Number<P>& number) const -> NumericType {
+    typedef typename M::NumericType ConcreteNumericType;
+    return ConcreteNumericType(number,this->_properties.precision());
 }
 template<class M> ScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create(const DomainType& domain, const ScalarMultivariateFunctionInterface<P>& function) const {
     return ScaledFunctionPatch<M>(domain,function,this->_properties);
@@ -1003,7 +1004,8 @@ template<class M> ScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create_z
     return ScaledFunctionPatch<M>(domain,this->_properties);
 }
 template<class M> ScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create_constant(const DomainType& domain, Number<P> const& value) const {
-    auto concrete_value=this->create(value);
+    typedef typename M::NumericType ConcreteNumericType;
+    ConcreteNumericType concrete_value(value,this->_properties.precision());
     return ScaledFunctionPatch<M>::constant(domain,concrete_value,this->_properties);
 }
 template<class M> ScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create_coordinate(const DomainType& domain, SizeType k) const {
@@ -1013,7 +1015,8 @@ template<class M> VectorScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::cr
     return VectorScaledFunctionPatch<M>(n,domain,this->_properties);
 }
 template<class M> VectorScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create_constants(const DomainType& domain, Vector<Number<P>> const& values) const {
-    Vector<CanonicalNumericType<P,PR,PRE>> concrete_values(values.size(),this->_properties.precision());
+    typedef typename M::NumericType ConcreteNumericType;
+    Vector<ConcreteNumericType> concrete_values(values.size(),this->_properties.precision());
     for(SizeType i=0; i!=values.size(); ++i) { concrete_values[i]=values[i]; }
     return VectorScaledFunctionPatch<M>::constant(domain,concrete_values,this->_properties);
 }

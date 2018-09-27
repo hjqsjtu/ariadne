@@ -377,7 +377,7 @@ InclusionIntegrator::InclusionIntegrator(List<InputApproximation> approximations
 
 static const SizeType NUMBER_OF_PICARD_ITERATES=6;
 
-List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(DifferentialInclusionIVP const& ivp, Real tmax) {
+List<ValidatedVectorMultivariateFunctionModel> InclusionIntegrator::flow(DifferentialInclusionIVP const& ivp, Real tmax) {
     ARIADNE_LOG(2,"\n"<<ivp<<"\n");
 
     const DifferentialInclusion& di = ivp.di();
@@ -392,7 +392,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(Diffe
 
     PositiveFloatDPValue hsug(this->_step_size);
 
-    ValidatedVectorMultivariateFunctionModelDP evolve_function = ValidatedVectorMultivariateTaylorFunctionModelDP::identity(X0,this->_sweeper);
+    ValidatedVectorMultivariateFunctionModel evolve_function = ValidatedVectorMultivariateTaylorFunctionModelDP::identity(X0,this->_sweeper);
     auto t=PositiveFloatDPValue(0.0);
 
     Map<InputApproximation,SizeType> approximation_global_frequencies, approximation_local_frequencies;
@@ -401,7 +401,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(Diffe
         approximation_local_frequencies[appro] = 0;
     }
 
-    List<ValidatedVectorMultivariateFunctionModelDP> result;
+    List<ValidatedVectorMultivariateFunctionModel> result;
 
     SizeType step = 0;
 
@@ -451,8 +451,8 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(Diffe
 
         PositiveFloatDPValue new_t=cast_positive(cast_exact((t+h).lower()));
 
-        ValidatedVectorMultivariateFunctionModelDP reach_function;
-        ValidatedVectorMultivariateFunctionModelDP best_reach_function, best_evolve_function;
+        ValidatedVectorMultivariateFunctionModel reach_function;
+        ValidatedVectorMultivariateFunctionModel best_reach_function, best_evolve_function;
         SharedPointer<InputApproximator> best;
         FloatDP best_volume(0);
 
@@ -613,8 +613,8 @@ Vector<ValidatedScalarMultivariateFunction> InclusionIntegrator::build_secondhal
     return result;
 }
 
-ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_secondhalf_piecewise_reach_function(
-        ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, SizeType m, PositiveFloatDPValue t,
+ValidatedVectorMultivariateFunctionModel InclusionIntegrator::build_secondhalf_piecewise_reach_function(
+        ValidatedVectorMultivariateFunctionModel evolve_function, ValidatedVectorMultivariateFunctionModel Phi, SizeType m, PositiveFloatDPValue t,
         PositiveFloatDPValue new_t) const {
 
     // Evolve function is e(x,a,2*m) at s; Flow is phi(x,h,b,2*m)
@@ -645,8 +645,8 @@ ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_secondhalf
     return compose(Phi,join(ef,bf,mf,hf));
 }
 
-ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_reach_function(
-        ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, PositiveFloatDPValue t,
+ValidatedVectorMultivariateFunctionModel InclusionIntegrator::build_reach_function(
+        ValidatedVectorMultivariateFunctionModel evolve_function, ValidatedVectorMultivariateFunctionModel Phi, PositiveFloatDPValue t,
         PositiveFloatDPValue new_t) const {
 
     // Evolve function is e(x,a) at s; flow is phi(x,b,h)
@@ -675,11 +675,11 @@ ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_reach_func
     return compose(Phi,join(ef,bf,hf));
 }
 
-ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::evaluate_evolve_function(ValidatedVectorMultivariateFunctionModelDP reach_function, PositiveFloatDPValue t) const {
+ValidatedVectorMultivariateFunctionModel InclusionIntegrator::evaluate_evolve_function(ValidatedVectorMultivariateFunctionModel reach_function, PositiveFloatDPValue t) const {
     return partial_evaluate(reach_function,reach_function.argument_size()-1,t);
 }
 
-ValidatedVectorMultivariateFunctionModelDP add_errors(ValidatedVectorMultivariateFunctionModelDP phi, Vector<ErrorType> const& e) {
+ValidatedVectorMultivariateFunctionModel add_errors(ValidatedVectorMultivariateFunctionModel phi, Vector<ErrorType> const& e) {
     assert(phi.result_size()==e.size());
     ValidatedVectorMultivariateTaylorFunctionModelDP& tphi = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP&>(phi.reference());
     for (auto i : range(e.size())) {
@@ -729,7 +729,7 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(Validat
 }
 
 
-ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::
+ValidatedVectorMultivariateFunctionModel InclusionIntegrator::
 compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainType const& domain, UpperBoxType const& B) const {
     auto n=dyn.result_size();
     auto swp=this->_sweeper;
@@ -846,13 +846,13 @@ LohnerReconditioner::LohnerReconditioner(SweeperDP sweeper, Nat number_of_variab
     this->verbosity = 0;
 }
 
-ValidatedVectorMultivariateFunctionModelDP LohnerReconditioner::expand_errors(ValidatedVectorMultivariateFunctionModelDP f) const {
+ValidatedVectorMultivariateFunctionModel LohnerReconditioner::expand_errors(ValidatedVectorMultivariateFunctionModel f) const {
     BoxDomainType domain=f.domain();
     BoxDomainType errors=cast_exact(cast_exact(f.errors())*FloatDPUpperInterval(-1,+1)); // FIXME: Avoid cast;
 
     ARIADNE_LOG(6,"Uniform errors:"<<errors<<"\n");
     for(SizeType i=0; i!=f.result_size(); ++i) { f[i].set_error(0); }
-    ValidatedVectorMultivariateFunctionModelDP error_function=ValidatedVectorMultivariateTaylorFunctionModelDP::identity(errors,this->_sweeper);
+    ValidatedVectorMultivariateFunctionModel error_function=ValidatedVectorMultivariateTaylorFunctionModelDP::identity(errors,this->_sweeper);
     return embed(f,errors)+embed(domain,error_function);
 }
 
@@ -875,7 +875,7 @@ struct IndexedFloatDPErrorComparator
     }
 };
 
-Void LohnerReconditioner::simplify(ValidatedVectorMultivariateFunctionModelDP& f) const {
+Void LohnerReconditioner::simplify(ValidatedVectorMultivariateFunctionModel& f) const {
     ARIADNE_LOG(6,"simplifying\n");
     ARIADNE_LOG(6,"f="<<f<<"\n");
 

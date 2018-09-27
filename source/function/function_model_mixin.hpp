@@ -49,28 +49,43 @@
 
 namespace Ariadne {
 
-template<class FM, class P, class D, class C, class PR=DoublePrecision, class PRE=PR> class FunctionModelMixin;
-template<class FM, class P, class D, class PR=DoublePrecision, class PRE=PR> using ScalarMultivariateFunctionModelMixin = FunctionModelMixin<FM,P,D,IntervalDomainType,PR,PRE>;
-template<class FM, class P, class D, class PR=DoublePrecision, class PRE=PR> using VectorMultivariateFunctionModelMixin = FunctionModelMixin<FM,P,D,BoxDomainType,PR,PRE>;
+template<class FM, class P, class D, class C, class TR=FunctionModelTraits<P>> class FunctionModelMixin;
+template<class FM, class P, class D, class TR=FunctionModelTraits<P>> using ScalarMultivariateFunctionModelMixin = FunctionModelMixin<FM,P,D,IntervalDomainType,TR>;
+template<class FM, class P, class D, class TR=FunctionModelTraits<P>> using VectorMultivariateFunctionModelMixin = FunctionModelMixin<FM,P,D,BoxDomainType,TR>;
 
-template<class FM, class P, class D, class PR, class PRE> class FunctionModelMixin<FM,P,D,IntervalDomainType,PR,PRE>
-    : public virtual ScalarFunctionModelInterface<P,D,PR,PRE>
+template<class FCTRY, class P, class TR=FunctionModelTraits<P>> class FunctionModelFactoryMixin;
+
+template<class FM, class P, class D, class TR> class FunctionModelMixin<FM,P,D,IntervalDomainType,TR>
+    : public virtual ScalarFunctionModelInterface<P,D,TR>
     , public ScalarFunctionMixin<FM,P,D>
 {
     using C=IntervalDomainType;
-    
-    typedef FunctionModelInterface<P,D,C,PR,PRE> FunctionModelInterfaceType;
-    typedef CanonicalNumericType<P,PR,PRE> NumberModelType;
-    typedef FunctionModel<P,D,C,PR,PRE> FunctionModelType;
-    
-    using typename FunctionModelInterfaceType::NormType;
+  public:
+    using typename TR::CoefficientType;
+    using typename TR::ErrorType;    
+    using typename TR::NumericType;
+    using typename TR::NormType;
+    using typename TR::RangeType;    
+
+    typedef typename TR::NumberModelType NumberModelType;
+    typedef FunctionModel<P,D,C,TR> FunctionModelType;
+    typedef FunctionModelInterface<P,D,C,TR> FunctionModelInterfaceType;
   public:
     FM apply(OperatorCode op) const;
   public:
     FunctionModelInterfaceType* _clone() const override {
         return new FM(static_cast<const FM&>(*this)); }
+    CoefficientType const _value() const override { return static_cast<const FM&>(*this).value(); }
+    CoefficientType const _gradient_value(SizeType i) const override { return static_cast<const FM&>(*this).gradient_value(i); }
+    ErrorType const _error() const override { return static_cast<const FM&>(*this).error(); }
+    Void _set_error(ErrorType const& e) override { static_cast<FM&>(*this).set_error(e); }
+    Void _clobber() override { static_cast<FM&>(*this).clobber(); }
+
     NormType const _norm() const override {
         return norm(static_cast<const FM&>(*this)); }
+    RangeType const _range() const override {
+         return static_cast<RangeType>(static_cast<const FM&>(*this).range()); }
+
     FunctionModelInterfaceType* _antiderivative(SizeType j) const override {
         return new FM(antiderivative(static_cast<const FM&>(*this),j)); }
     FunctionModelInterfaceType* _antiderivative(SizeType j, NumberModelType c) const override {
@@ -101,19 +116,19 @@ template<class FM, class P, class D, class PR, class PRE> class FunctionModelMix
         static_cast<FM&>(*this)+=dynamic_cast<const FM&>(f1)*dynamic_cast<const FM&>(f2); }
 };
 
-template<class FM, class P, class D, class PR, class PRE> FM ScalarMultivariateFunctionModelMixin<FM,P,D,PR,PRE>::apply(OperatorCode op) const {
+template<class FM, class P, class D, class TR> FM ScalarMultivariateFunctionModelMixin<FM,P,D,TR>::apply(OperatorCode op) const {
     const FM& f=static_cast<const FM&>(*this);
     switch(op) {
         case OperatorCode::NEG: return neg(f);
         case OperatorCode::REC: return rec(f);
         case OperatorCode::EXP: return exp(f);
-        default: ARIADNE_FAIL_MSG("ScalarFunctionModel<P,D,PR,PRE>::apply(OperatorCode op): Operator op="<<op<<" not implemented\n");
+        default: ARIADNE_FAIL_MSG("ScalarFunctionModel<P,D,TR>::apply(OperatorCode op): Operator op="<<op<<" not implemented\n");
     }
 }
 
 
-template<class FM, class P, class D, class PR, class PRE> class FunctionModelMixin<FM,P,D,BoxDomainType,PR,PRE>
-    : public virtual VectorFunctionModelInterface<P,D,PR,PRE>
+template<class FM, class P, class D, class TR> class FunctionModelMixin<FM,P,D,BoxDomainType,TR>
+    : public virtual VectorFunctionModelInterface<P,D,TR>
     , public VectorFunctionMixin<FM,P,D>
 {
     using C=BoxDomainType;
@@ -122,16 +137,22 @@ template<class FM, class P, class D, class PR, class PRE> class FunctionModelMix
   public:
     typedef typename Element<FM>::Type ConcreteScalarFunctionModelType;
 
-    typedef FunctionModelInterface<P,D,C,PR,PRE> FunctionModelInterfaceType;
-    typedef CanonicalNumericType<P,PR,PRE> NumberModelType;
-    typedef FunctionModel<P,D,C,PR,PRE> FunctionModelType;
-    
-    using typename FunctionModelInterfaceType::NormType;
+    using typename TR::CoefficientType;
+    using typename TR::ErrorType;
+    using typename TR::NumericType;
+    using typename TR::NormType;
+    typedef Box<typename TR::RangeType> RangeType;
 
-    typedef FunctionModelInterface<P,D,IntervalDomainType,PR,PRE> ScalarFunctionModelInterfaceType;
-    typedef FunctionModelInterface<P,D,BoxDomainType,PR,PRE> VectorFunctionModelInterfaceType;
+    typedef typename TR::NumberModelType NumberModelType;
+    typedef FunctionModelInterface<P,D,C,TR> FunctionModelInterfaceType;
+    typedef FunctionModel<P,D,C,TR> FunctionModelType;
+
+    typedef FunctionModelInterface<P,D,IntervalDomainType,TR> ScalarFunctionModelInterfaceType;
+    typedef FunctionModelInterface<P,D,BoxDomainType,TR> VectorFunctionModelInterfaceType;
 
     typedef ScalarFunction<P,D> ScalarFunctionType;
+    typedef ScalarMultivariateFunctionInterface<P> ScalarMultivariateFunctionInterfaceType;
+    typedef VectorMultivariateFunctionInterface<P> VectorMultivariateFunctionInterfaceType;
     typedef ScalarMultivariateFunction<P> ScalarMultivariateFunctionType;
     typedef VectorMultivariateFunction<P> VectorMultivariateFunctionType;
   public:
@@ -142,8 +163,16 @@ template<class FM, class P, class D, class PR, class PRE> class FunctionModelMix
         static_cast<FM&>(*this).FM::set(i,dynamic_cast<SFM const&>(sf)); }
     virtual FunctionModelInterfaceType* _derivative(SizeType j) const override {
         ARIADNE_NOT_IMPLEMENTED; }
+
+    Vector<ErrorType> const _errors() const override { return static_cast<const FM&>(*this).errors(); }
+    ErrorType const _error() const override { return static_cast<const FM&>(*this).error(); }
+    Void _clobber() override { static_cast<FM&>(*this).clobber(); }
+
+    RangeType const _range() const override {
+         return static_cast<RangeType>(static_cast<const FM&>(*this).range()); }
     NormType const _norm() const override {
          return norm(static_cast<const FM&>(*this)); }
+
     FunctionModelInterfaceType* _embed(const BoxDomainType& d1, const BoxDomainType& d2) const override {
         return heap_copy(embed(d1,static_cast<const FM&>(*this),d2)); }
     FunctionModelInterfaceType* _restriction(const BoxDomainType& d) const override {
@@ -157,41 +186,44 @@ template<class FM, class P, class D, class PR, class PRE> class FunctionModelMix
         return heap_copy(combine(static_cast<const VFM&>(*this),dynamic_cast<const VFM&>(f))); }
     Vector<NumberModelType> _unchecked_evaluate(const Vector<NumberModelType>& x) const override {
         return unchecked_evaluate(static_cast<const FM&>(*this),x); }
-    ScalarFunctionModelInterfaceType* _compose(const ScalarMultivariateFunctionInterface<P>& f) const override {
+    ScalarFunctionModelInterfaceType* _compose(const ScalarMultivariateFunctionInterfaceType& f) const override {
         return heap_copy(compose(f,static_cast<const FM&>(*this))); }
-    VectorFunctionModelInterfaceType* _compose(const VectorMultivariateFunctionInterface<P>& f) const override {
+    VectorFunctionModelInterfaceType* _compose(const VectorMultivariateFunctionInterfaceType& f) const override {
         return heap_copy(compose(f,static_cast<const FM&>(*this))); }
-    ScalarFunctionModelInterfaceType* _unchecked_compose(const ScalarMultivariateFunctionInterface<P>& f) const override {
+    ScalarFunctionModelInterfaceType* _unchecked_compose(const ScalarMultivariateFunctionInterfaceType& f) const override {
         return heap_copy(unchecked_compose(dynamic_cast<SFM const&>(f),static_cast<VFM const&>(*this))); }
-    VectorFunctionModelInterfaceType* _unchecked_compose(const VectorMultivariateFunctionInterface<P>& f) const override {
+    VectorFunctionModelInterfaceType* _unchecked_compose(const VectorMultivariateFunctionInterfaceType& f) const override {
         return heap_copy(unchecked_compose(dynamic_cast<const FM&>(f),static_cast<const FM&>(*this))); }
     FunctionModelInterfaceType* _partial_evaluate(SizeType j, const NumberModelType& c) const override {
         return heap_copy(partial_evaluate(static_cast<const FM&>(*this),j,c)); }
 };
 
 
-template<class FCTRY, class P, class PR, class PRE> class FunctionModelFactoryMixin
-    : public FunctionModelFactoryInterface<P,PR,PRE>
+template<class FCTRY, class P, class TR> class FunctionModelFactoryMixin
+    : public FunctionModelFactoryInterface<P>
 {
     typedef BoxDomainType VD;
     typedef IntervalDomainType SD;
-    friend class FunctionModelFactory<P,PR,PRE>;
+    friend class FunctionModelFactory<P>;
   public:
     typedef VD VectorDomainType;
     typedef SD ScalarDomainType;
 
     typedef Number<P> NumberType;
-    typedef CanonicalNumericType<P,PR,PRE> NumberModelType;
+    typedef typename TR::NumberModelType NumberModelType;
     
     typedef ScalarFunctionInterface<P,VD> ScalarMultivariateFunctionInterfaceType;
     typedef VectorFunctionInterface<P,VD> VectorMultivariateFunctionInterfaceType;
     
-    typedef ScalarFunctionModelInterface<P,VD,PR,PRE> ScalarMultivariateFunctionModelInterfaceType;
-    typedef VectorFunctionModelInterface<P,VD,PR,PRE> VectorMultivariateFunctionModelInterfaceType;
+    typedef ScalarFunctionModelInterface<P,VD,TR> ScalarMultivariateFunctionModelInterfaceType;
+    typedef VectorFunctionModelInterface<P,VD,TR> VectorMultivariateFunctionModelInterfaceType;
+
+    typedef typename TR::NumericType NumericType;
     
   public:
-    virtual FunctionModelFactoryInterface<P,PR,PRE>* clone() const override { return new FCTRY(this->upcast()); }
+    virtual FunctionModelFactoryInterface<P,TR>* clone() const override { return new FCTRY(this->upcast()); }
     virtual OutputStream& _write(OutputStream& os) const override { return os << this->upcast(); }
+
 /*
     NumberModelType create(const NumberType& number) const;
     ScalarMultivariateFunctionModelType create(const BoxDomainType& domain, const ScalarMultivariateFunctionInterfaceType& function) const;

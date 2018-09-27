@@ -32,17 +32,12 @@
 
 namespace Ariadne {
 
-template class FunctionModelFactoryInterface<ValidatedTag,DoublePrecision,DoublePrecision>;
-template class FunctionModelFactoryInterface<ValidatedTag,MultiplePrecision,MultiplePrecision>;
+template class FunctionModelFactoryInterface<ValidatedTag>;
 
-template class FunctionModel<ValidatedTag,IntervalDomainType,IntervalDomainType,DoublePrecision>;
-template class FunctionModel<ValidatedTag,IntervalDomainType,IntervalDomainType,MultiplePrecision>;
-template class FunctionModel<ValidatedTag,IntervalDomainType,BoxDomainType,DoublePrecision>;
-template class FunctionModel<ValidatedTag,IntervalDomainType,BoxDomainType,MultiplePrecision>;
+template class FunctionModel<ValidatedTag,IntervalDomainType,IntervalDomainType>;
+template class FunctionModel<ValidatedTag,IntervalDomainType,BoxDomainType>;
 
-template class FunctionModel<ValidatedTag,BoxDomainType,IntervalDomainType,DoublePrecision>;
-template class FunctionModel<ValidatedTag,BoxDomainType,IntervalDomainType,MultiplePrecision>;
-template class FunctionModel<ValidatedTag,BoxDomainType,BoxDomainType,DoublePrecision>;
-template class FunctionModel<ValidatedTag,BoxDomainType,BoxDomainType,MultiplePrecision>;
+template class FunctionModel<ValidatedTag,BoxDomainType,IntervalDomainType>;
+template class FunctionModel<ValidatedTag,BoxDomainType,BoxDomainType>;
 
 } // namespace Ariadne

@@ -8,7 +8,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   message(WARNING "Microsoft compiler not supported.")
 endif()
 
-set(COMPILER_WARN all extra pedantic sign-conversion shadow cast-qual disabled-optimization 
+set(COMPILER_WARN all extra sign-conversion shadow cast-qual disabled-optimization 
                   init-self missing-include-dirs sign-promo switch-default undef redundant-decls)
 set(COMPILER_DONT_WARN strict-aliasing unused-parameter)
 
