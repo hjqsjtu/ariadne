@@ -268,9 +268,13 @@ TestNumber<ExactNumber>::test_comparisons() {
     ARIADNE_TEST_BINARY_PREDICATE(operator<,y1,pinf);
     ARIADNE_TEST_BINARY_PREDICATE(operator<,ninf,y1);
 
-    ARIADNE_TEST_ASSERT(definitely(ValidatedUpperNumber(3)<ValidatedLowerNumber(4)));
-    ARIADNE_TEST_ASSERT(possibly(ValidatedUpperNumber(4)>ValidatedLowerNumber(3)));
-    ARIADNE_TEST_ASSERT(not definitely(ValidatedUpperNumber(4)>ValidatedLowerNumber(3)));
+    ARIADNE_TEST_CONSTRUCT(ValidatedUpperNumber,yu,(3));
+    ARIADNE_TEST_CONSTRUCT(ValidatedUpperNumber,yux,(FloatDPUpperBound(3,dp)));
+
+    ARIADNE_TEST_ASSERT(false);
+//    ARIADNE_TEST_ASSERT(definitely(ValidatedUpperNumber(3)<ValidatedLowerNumber(4)));
+//    ARIADNE_TEST_ASSERT(possibly(ValidatedUpperNumber(4)>ValidatedLowerNumber(3)));
+//    ARIADNE_TEST_ASSERT(not definitely(ValidatedUpperNumber(4)>ValidatedLowerNumber(3)));
 
 }
 
@@ -287,7 +291,7 @@ template<class Y> class TestDirectedNumber
 
 template<class Y> Void
 TestDirectedNumber<Y>::test() {
-    test_operations();
+    ARIADNE_TEST_CALL(test_operations());
 }
 
 template<class Y> Void
@@ -307,16 +311,30 @@ TestDirectedNumber<Y>::test_concept() {
 template<class Y> Void
 TestDirectedNumber<Y>::test_operations() {
     if constexpr (IsSame<Paradigm<Y>,ValidatedTag>::value) {
-        if constexpr (IsSame<Y,ValidatedLowerNumber>::value) {
+        if constexpr (IsSame<Y,ValidatedUpperNumber>::value) {
             typedef DoublePrecision PR;
             PR pr;
             Rational q(1,3);
             FloatBounds<PR> x(q,pr);
             FloatLowerBound<PR> xl=x;
-            FloatUpperBound<PR> xu=4*x;
-            
+            FloatUpperBound<PR> xu=x;
+            FloatUpperBound<PR> x1u=4*x;
+            FloatUpperBound<PR> x2u=2*x;
+
+            ARIADNE_TEST_CONSTRUCT(ValidatedUpperNumber,yu,(xu));
+            ARIADNE_TEST_CONSTRUCT(ValidatedUpperNumber,y1u,(x1u));
+            ARIADNE_TEST_CONSTRUCT(ValidatedUpperNumber,y2u,(x2u));
+            ARIADNE_TEST_PRINT(y1u+y2u);
+            ARIADNE_TEST_PRINT(add(y1u,y2u));
+            ARIADNE_TEST_PRINT(max(y1u,y2u));
+            ARIADNE_TEST_PRINT(min(y1u,y2u));
+
+            ARIADNE_TEST_PRINT(sqrt(yu));
+            ARIADNE_TEST_PRINT(exp(log(yu)));
+            ARIADNE_TEST_PRINT(log(exp(yu)));
+            ARIADNE_TEST_PRINT(atan(yu));
+/*            
             ValidatedLowerNumber yl(xl);
-            ValidatedUpperNumber yu(xu);
             
             // Tests
             ARIADNE_TEST_ASSERT(not definitely (yl > q));
@@ -326,12 +344,16 @@ TestDirectedNumber<Y>::test_operations() {
             ARIADNE_TEST_ASSERT(not definitely (yl - yu > -1));
             ARIADNE_TEST_ASSERT(not definitely (yl - yu > -2));
             std::cerr << (yl-yu) << "\n";
+*/
+    
         }
     }
 }
 
 
 Int main() {
+    ARIADNE_TEST_CLASS(ValidatedUpperNumber,TestDirectedNumber<ValidatedUpperNumber>());
+
     TestNumbers().test();
     
     std::cout<<std::setprecision(20);
@@ -342,8 +364,8 @@ Int main() {
     TestNumber<EffectiveNumber>().test();
     TestNumber<ExactNumber>().test();
 
-    TestDirectedNumber<ValidatedLowerNumber>().test();
     TestDirectedNumber<ValidatedUpperNumber>().test();
+    TestDirectedNumber<ValidatedLowerNumber>().test();
     TestDirectedNumber<EffectiveLowerNumber>().test();
     TestDirectedNumber<EffectiveUpperNumber>().test();
 

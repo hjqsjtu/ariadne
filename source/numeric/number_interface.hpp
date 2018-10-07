@@ -43,18 +43,48 @@ namespace Ariadne {
 /************ Number *********************************************************/
 
 class NumberInterface;
-class UnaryOperatorInterface;
+class UpperNumberInterface;
+
 template<class... YS> struct Aware;
-template<class X> class NumberWrapper;
+
+template<class X, class I> class Mixin;
+template<class X, class I> class Wrapper;
+
+template<class X> using NumberWrapper = Wrapper<X,NumberInterface>;
+template<class X> using UpperNumberWrapper = Wrapper<X,UpperNumberInterface>;
 
 
+class UpperNumberInterface
+    : public std::enable_shared_from_this<UpperNumberInterface>
+    , public WritableInterface
+    , public ClonableInterface
+{
+    friend class Handle<UpperNumberInterface>;
+  public:
+    virtual ~UpperNumberInterface() = default;
+  public:
+    virtual UpperNumberInterface* _copy() const = 0;
+    virtual UpperNumberInterface* _move() = 0;
+
+    virtual UpperNumberInterface* _apply(MonotoneBinaryOperator op, UpperNumberInterface const* y) const = 0;
+    virtual UpperNumberInterface* _rapply(MonotoneBinaryOperator op, UpperNumberInterface const* y) const = 0;
+    virtual UpperNumberInterface* _apply(MonotoneUnaryOperator op) const = 0;
+
+//    virtual LogicalValue _equals(NumberInterface const& y) const = 0;
+//    virtual LogicalValue _less(NumberInterface const& y) const = 0;
+
+    virtual FloatDPUpperBound _get(DoublePrecision) const = 0;
+    virtual FloatMPUpperBound _get(MultiplePrecision) const = 0;
+
+    virtual ParadigmCode _paradigm() const = 0;
+    virtual String _class_name() const = 0;
+};
 
 class NumberInterface
     : public std::enable_shared_from_this<NumberInterface>
     , public WritableInterface
     , public ClonableInterface
 {
-    template<class X> friend class NumberWrapper;
     friend class Handle<NumberInterface>;
   public:
     virtual ~NumberInterface() = default;
@@ -62,33 +92,13 @@ class NumberInterface
     virtual NumberInterface* _copy() const = 0;
     virtual NumberInterface* _move() = 0;
 
-    virtual NumberInterface* _apply(Add op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _apply(Sub op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _apply(Mul op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _apply(Div op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _rapply(Add op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _rapply(Sub op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _rapply(Mul op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _rapply(Div op, NumberInterface const* y) const = 0;
+    virtual NumberInterface* _apply(BinaryOperator op, NumberInterface const* y) const = 0;
+    virtual NumberInterface* _rapply(BinaryOperator op, NumberInterface const* y) const = 0;
+    virtual NumberInterface* _apply(UnaryOperator op) const = 0;
 
-    virtual NumberInterface* _apply(Pos op) const = 0;
-    virtual NumberInterface* _apply(Neg op) const = 0;
-    virtual NumberInterface* _apply(Sqr op) const = 0;
-    virtual NumberInterface* _apply(Rec op) const = 0;
-    virtual NumberInterface* _apply(Pow op, Int n) const = 0;
-    virtual NumberInterface* _apply(Sqrt op) const = 0;
-    virtual NumberInterface* _apply(Exp op) const = 0;
-    virtual NumberInterface* _apply(Log op) const = 0;
-    virtual NumberInterface* _apply(Sin op) const = 0;
-    virtual NumberInterface* _apply(Cos op) const = 0;
-    virtual NumberInterface* _apply(Tan op) const = 0;
-    virtual NumberInterface* _apply(Atan op) const = 0;
+    virtual LogicalValue _apply(Equal op, NumberInterface const* y) const = 0;
+    virtual LogicalValue _apply(Less op, NumberInterface const* y) const = 0;
 
-    virtual NumberInterface* _apply(Abs op) const = 0;
-    virtual NumberInterface* _apply(Max op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _apply(Min op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _rapply(Max op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _rapply(Min op, NumberInterface const* y) const = 0;
 
     virtual Rational _get_q() const = 0;
 
@@ -113,8 +123,6 @@ class NumberInterface
     virtual ParadigmCode _paradigm() const = 0;
     virtual String _class_name() const = 0;
 
-    virtual LogicalValue _equals(NumberInterface const& y) const = 0;
-    virtual LogicalValue _less(NumberInterface const& y) const = 0;
 };
 
 

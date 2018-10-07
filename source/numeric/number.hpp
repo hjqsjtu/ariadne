@@ -136,7 +136,7 @@ template<class P> class Number
     Handle<NumberInterface> _handle;
   public:
     explicit Number(NumberInterface* p) : _handle(p) { }
-  private:
+  private: public:
     explicit Number(Handle<NumberInterface> h) : _handle(h) { }
     Handle<NumberInterface> handle() const { return this->_handle; }
     NumberInterface const& _ref() const { return this->_handle.reference(); }
@@ -167,6 +167,9 @@ template<class P> class Number
                       EnableIf<IsConvertible<X,Number<ParadigmTag<X>>>> =dummy>
         explicit Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
 
+    //! \brief Convert to an UpperNumber, losing lower-bound information.
+    UpperNumber<P> upper() const;
+
     //! \brief Get the value of the number as a double-precision floating-point type
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy>
     FloatType<WP,DoublePrecision> get(WP par, DoublePrecision const& prec) const { return this->_ref()._get(WP(),prec); }
@@ -180,22 +183,34 @@ template<class P> class Number
     template<class PR, EnableIf<IsSame<PR,MultiplePrecision>> =dummy>
     FloatType<P,PR> get(PR pr) const { return this->_ref()._get(P(),pr); }
 
-    //! \brief Get the value of the number as a multiple-precision floating-point ball.
+    //! \brief Get the value of the number as a multiple-prision floating-point ball.
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy, EnableIf<IsSame<WP,MetricTag>> =dummy>
-    FloatType<WP,DoublePrecision> get(WP par, DoublePrecision const& prec, DoublePrecision const& errprec) const { return this->_ref()._get(WP(),prec,errprec); }
-    //! \brief Get the value of the number as a multiple-precision floating-point ball, with double-precision error.
+    FloatType<WP,DoublePrecision> get(WP par, DoublePrecision const& pr, DoublePrecision const& pre) const { return this->_ref()._get(WP(),pr,pre); }
+    //! \brief Get the value of the number as a multiple-prision floating-point ball, with double-prision error.
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy, EnableIf<IsSame<WP,MetricTag>> =dummy>
-    FloatType<WP,MultiplePrecision,DoublePrecision> get(WP par, MultiplePrecision const& prec, DoublePrecision const& errprec) const { return this->_ref()._get(WP(),prec,errprec); }
-    //! \brief Get the value of the number as a multiple-precision floating-point ball.
+    FloatType<WP,MultiplePrecision,DoublePrecision> get(WP par, MultiplePrecision const& pr, DoublePrecision const& pre) const { return this->_ref()._get(WP(),pr,pre); }
+    //! \brief Get the value of the number as a multiple-prision floating-point ball.
     template<class WP, EnableIf<IsWeaker<WP,P>> =dummy, EnableIf<IsSame<WP,MetricTag>> =dummy>
-    FloatType<WP,MultiplePrecision,MultiplePrecision> get(WP par, MultiplePrecision const& prec, MultiplePrecision const& errprec) const { return this->_ref()._get(WP(),prec,errprec); }
+    FloatType<WP,MultiplePrecision,MultiplePrecision> get(WP par, MultiplePrecision const& pr, MultiplePrecision const& pre) const { return this->_ref()._get(WP(),pr,pre); }
 
+    template<class PR> FloatBounds<PR> get(PR const& pr) const { return this->_ref()._get(P(),pr); }
+    template<class PR, class PRE> FloatBall<PR> get(PR const& pr, PRE const& pre) const { return this->_ref()._get(P(),pr,pre); }
+
+/*
+    //! \brief Get the value of the number as a double-prision floating-point type  DEPRECATED
+    FloatBounds<DoublePrecision> get() const { return this->_ref()._get(P()); }
     //! \brief Get the value of the number as a double-precision floating-point type
-    FloatType<P,DoublePrecision> get() const { return this->_ref()._get(P()); }
-    //! \brief Get the value of the number as a double-precision floating-point type
-    FloatType<P,DoublePrecision> get(DoublePrecision const& prec) const { return this->_ref()._get(P(),prec); }
+    FloatBounds<DoublePrecision> get(DoublePrecision const& prec) const { return this->_ref()._get(P(),prec); }
     //! \brief Get the value of the number as a multiple-precision floating-point type
-    FloatType<P,MultiplePrecision> get(MultiplePrecision const& prec) const { return this->_ref()._get(P(),prec); }
+    FloatBounds<MultiplePrecision> get(MultiplePrecision const& prec) const { return this->_ref()._get(P(),prec); }
+
+    FloatBall<DoublePrecision,DoublePrecision> get(DoublePrecision const& pr, DoublePrecision const& pre) const { 
+        return this->_ref()._get(MetricTag(),pr,pre); }
+    FloatBall<DoublePrecision,DoublePrecision> get(MultiplePrecision const& pr, DoublePrecision const& pre) const { 
+        return this->_ref()._get(MetricTag(),pr,pre); }
+    FloatBall<MultiplePrecision,MultiplePrecision> get(MultiplePrecision const& pr, MultiplePrecision const& pre) const { 
+        return this->_ref()._get(MetricTag(),pr,pre); }
+*/
 
     template<class X> X extract() const;
 
@@ -227,18 +242,18 @@ template<class P> class Number
     friend Number<P> tan(Number<P> const& y) { return Number<P>(y._ref()._apply(Tan())); }
     friend Number<P> atan(Number<P> const& y) { return Number<P>(y._ref()._apply(Atan())); }
 
-    friend Number<P> pow(Number<P> const& y, Nat m) { return Number<P>(y._ref()._apply(Pow(),m)); }
-    friend Number<P> pow(Number<P> const& y, Int n) { return Number<P>(y._ref()._apply(Pow(),n)); }
+    friend Number<P> pow(Number<P> const& y, Nat m) { return Number<P>(y._ref()._apply(PowOf<Int>(m))); }
+    friend Number<P> pow(Number<P> const& y, Int n) { return Number<P>(y._ref()._apply(PowOf<Int>(n))); }
 
     friend Positive<Number<P>> abs(Number<P> const& y) { return cast_positive(Number<P>(y._ref()._apply(Abs()))); }
     friend Number<P> max(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1._ref()._apply(Max(),&y2._ref())); }
     friend Number<P> min(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1._ref()._apply(Min(),&y2._ref())); }
 
     friend EqualityLogicalType<P> operator==(Number<P> const& y1, Number<P> const& y2) {
-        return EqualityLogicalType<P>(y1._ref()._equals(y2._ref())); }
+        return EqualityLogicalType<P>(y1._ref()._apply(Equal(),&y2._ref())); }
     friend InequalityLogicalType<P> operator!=(Number<P> const& y1, Number<P> const& y2) { return !(y1==y2); }
     friend LogicalType<P> operator< (Number<P> const& y1, Number<P> const& y2) {
-        return LogicalType<P>(y1._ref()._less(y2._ref())); }
+        return LogicalType<P>(y1._ref()._apply(Less(),&y2._ref())); }
     friend LogicalType<P> operator> (Number<P> const& y1, Number<P> const& y2) { return (y2<y1); }
     friend LogicalType<P> operator<=(Number<P> const& y1, Number<P> const& y2) { return !(y1>y2); }
     friend LogicalType<P> operator>=(Number<P> const& y1, Number<P> const& y2) { return !(y1<y2); }
@@ -285,9 +300,9 @@ template<class P> class LowerNumber
     friend LowerNumber<P>& operator-=(LowerNumber<P>& y1, UpperNumber<P> const& y2) { return y1=y1-y2; }
     
     friend LowerNumber<P> pos(LowerNumber<P> const& y) { return LowerNumber<P>(y._ref()._apply(Pos())); }
-    friend UpperNumber<P> neg(LowerNumber<P> const& y) { return UpperNumber<P>(y._ref()._apply(Neg())); }
+    friend UpperNumber<P> neg(LowerNumber<P> const& y) { assert(false); } //return UpperNumber<P>(y._ref()._apply(Neg())); }
     friend LowerNumber<P> add(LowerNumber<P> const& y1, LowerNumber<P> const& y2) { return LowerNumber<P>(y1._ref()._apply(Add(),&y2._ref())); }
-    friend LowerNumber<P> sub(LowerNumber<P> const& y1, UpperNumber<P> const& y2) { return LowerNumber<P>(y1._ref()._apply(Sub(),&y2._ref())); }
+    friend LowerNumber<P> sub(LowerNumber<P> const& y1, UpperNumber<P> const& y2) { assert(false); } //return LowerNumber<P>(y1._ref()._apply(Sub(),&y2._ref())); }
     
     friend LowerNumber<P> sqrt(LowerNumber<P> const& y) { return LowerNumber<P>(y._ref()._apply(Sqrt())); }
     friend LowerNumber<P> exp(LowerNumber<P> const& y) { return LowerNumber<P>(y._ref()._apply(Exp())); }
@@ -302,7 +317,7 @@ template<class P> class LowerNumber
     friend LowerLogicalType<P> operator!=(LowerNumber<P> const& y1, UpperNumber<P> const& y2) {
         return not (y1 == y2); }
     friend UpperLogicalType<P> operator< (LowerNumber<P> const& y1, UpperNumber<P> const& y2) {
-        return UpperLogicalType<P>(y1._ref()._less(y2._ref())); }
+        return UpperLogicalType<P>(y1._ref()._apply(Less(),y2._ref())); }
     friend LowerLogicalType<P> operator> (LowerNumber<P> const& y1, UpperNumber<P> const& y2) { 
         return y2 <  y1; }
  
@@ -319,11 +334,11 @@ template<class P> class UpperNumber
     static_assert(IsSame<P,EffectiveTag>::value or IsSame<P,ValidatedTag>::value,"P must be a paradigm");
     friend class LowerNumber<P>;
   private: public:
-    Handle<NumberInterface> _handle;
-  private:
-    explicit UpperNumber(Handle<NumberInterface> h) : _handle(h) { }
-    Handle<NumberInterface> handle() const { return this->_handle; }
-    NumberInterface const& _ref() const { return this->_handle.reference(); }
+    Handle<UpperNumberInterface> _handle;
+  private: public:
+    explicit UpperNumber(Handle<UpperNumberInterface> h) : _handle(h) { }
+    Handle<UpperNumberInterface> handle() const { return this->_handle; }
+    UpperNumberInterface const& _ref() const { return this->_handle.reference(); }
   public:
     typedef P Paradigm;
     typedef UpperNumber<P> NumericType;
@@ -331,14 +346,24 @@ template<class P> class UpperNumber
     UpperNumber() : UpperNumber(Integer(0)) { }
 
     //! \brief Construct from a UpperNumber of a stronger paradigm
-    template<class SP, EnableIf<IsStronger<SP,P>> = dummy> UpperNumber(const UpperNumber<SP>& y) : UpperNumber<P>(y.handle()) { }
+    template<class SP, EnableIf<IsStronger<SP,P>> = dummy> 
+    UpperNumber(const UpperNumber<SP>& y) : UpperNumber<P>(y.handle()) { }
+    //! \brief Construct from a Number of a stronger paradigm
+    template<class SP, EnableIf<IsStronger<SP,P>> = dummy> 
+    UpperNumber(const Number<SP>& y) : UpperNumber(nullptr) { assert(false); }
     //! \brief Construct from a type convertible to a Number.
-    template<class X, EnableIf<IsConvertible<X,Number<P>>> = dummy> UpperNumber(const X& x) : UpperNumber<P>(Number<P>(x).handle()) { }
+    template<class X, EnableIf<IsConvertible<X,Number<P>>> = dummy, DisableIf<IsConvertible<X,UpperNumber<P>>> =dummy> 
+    UpperNumber(const X& x) : UpperNumber<P>(Number<P>(x)) { }
 
-    template<class PR> FloatUpperBound<PR> get(UpperTag, PR pr) const { return this->_ref()._get(UpperTag(),pr); }
-    template<class PR> FloatUpperBound<PR> get(PR pr) const { return this->_ref()._get(UpperTag(),pr); }
+    // Construct from a type which is convertible to another Number type.
+    // TODO: Decide conversion properties from concrete type to Number<P>
+    template<class X, EnableIf<IsConvertible<X,UpperNumber<P>>> =dummy>
+        explicit UpperNumber<P>(X const & x) : UpperNumber<P>(x.operator UpperNumber<P>()) { }
 
-    template<class X> X extract() const;
+    template<class PR> FloatUpperBound<PR> get(UpperTag, PR pr) const { return this->_ref()._get(pr); }
+    template<class PR> FloatUpperBound<PR> get(PR pr) const { return this->_ref()._get(pr); }
+
+    template<class X> X extract() const { return dynamic_cast<Wrapper<X,NumberInterface> const&>(this->_ref); }
 
     friend UpperNumber<P> operator+(UpperNumber<P> const& y) { return pos(y); }
     friend LowerNumber<P> operator-(UpperNumber<P> const& y) { return neg(y); }
@@ -350,7 +375,8 @@ template<class P> class UpperNumber
     friend UpperNumber<P> pos(UpperNumber<P> const& y) { return UpperNumber<P>(y._ref()._apply(Pos())); }
     friend LowerNumber<P> neg(UpperNumber<P> const& y) { return LowerNumber<P>(y._ref()._apply(Neg())); }
     friend UpperNumber<P> add(UpperNumber<P> const& y1, UpperNumber<P> const& y2) { return UpperNumber<P>(y1._ref()._apply(Add(),&y2._ref())); }
-    friend UpperNumber<P> sub(UpperNumber<P> const& y1, LowerNumber<P> const& y2) { return UpperNumber<P>(y1._ref()._apply(Sub(),&y2._ref())); }
+//    friend UpperNumber<P> sub(UpperNumber<P> const& y1, LowerNumber<P> const& y2) { return UpperNumber<P>(y1._ref()._apply(Sub(),&y2._ref())); }
+    friend UpperNumber<P> sub(UpperNumber<P> const& y1, LowerNumber<P> const& y2) { return add(y1,neg(y2)); }
     
     friend UpperNumber<P> sqrt(UpperNumber<P> const& y) { return UpperNumber<P>(y._ref()._apply(Sqrt())); }
     friend UpperNumber<P> exp(UpperNumber<P> const& y) { return UpperNumber<P>(y._ref()._apply(Exp())); }
@@ -361,11 +387,11 @@ template<class P> class UpperNumber
     friend UpperNumber<P> min(UpperNumber<P> const& y1, UpperNumber<P> const& y2) { return UpperNumber<P>(y1._ref()._apply(Min(),&y2._ref())); }
 
     friend UpperLogicalType<P> operator==(UpperNumber<P> const& y1, LowerNumber<P> const& y2) {
-        return UpperLogicalType<P>(y1._ref()._equals(y2._ref())); }
+        return UpperLogicalType<P>(y1._ref()._apply(Equal(),y2._ref())); }
     friend LowerLogicalType<P> operator!=(UpperNumber<P> const& y1, LowerNumber<P> const& y2) {
         return not (y1 == y2); }
     friend LowerLogicalType<P> operator< (UpperNumber<P> const& y1, LowerNumber<P> const& y2) {
-        return LowerLogicalType<P>(y1._ref()._less(y2._ref())); }
+        assert(false); } //return LowerLogicalType<P>(y1._ref()._apply(Less(),y2._ref())); }
     friend UpperLogicalType<P> operator> (UpperNumber<P> const& y1, LowerNumber<P> const& y2) { 
         return y2 <  y1; }
         

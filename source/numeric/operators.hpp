@@ -406,16 +406,15 @@ struct Sgn : ComparisonObject<Sgn> {
     Kleenean operator()(const Real& a) const;
 };
 
-
-class UnaryOperator {
-    OperatorCode _op;
-  public:
-    template<class OP> UnaryOperator(OP op) : _op(op) { }
-    template<class X> X operator() (X const& x) { return compute(_op,x); }
-    template<class X> X derivative(X const& x) { return derivative(_op,x); }
+template<class N> struct PowOf : OperatorObject<PowOf<N>> {
+    static constexpr OperatorCode code() { return OperatorCode::POW; } static constexpr OperatorKind kind() { return OperatorKind::UNARY; }
+    N _n; PowOf(N n) : _n(n) { }
+    template<class A> auto operator()(A&& a) const -> decltype(pow(a,_n)) { return pow(a,_n); }
+    template<class X> X derivative(const X& a) const { return _n*pow(a,_n-1); }
+    template<class X,class D> D derivative(const X& a, const D& d) const { return derivative(a,_n)*d; }
 };
 
-
+      
 inline OutputStream& operator<<(OutputStream& os, const Less& v) { return os << "<"; }
 inline OutputStream& operator<<(OutputStream& os, const Gtr& v) { return os << ">"; }
 inline OutputStream& operator<<(OutputStream& os, const Leq& v) { return os << "<="; }
@@ -433,6 +432,55 @@ inline OutputStream& operator<<(OutputStream& os, const Times& v) { return os <<
 inline OutputStream& operator<<(OutputStream& os, const Divides& v) { return os << "/"; }
 
 
+} // namespace Ariadne
+
+
+#include <variant>
+
+namespace Ariadne {
+
+template<class... TS> using Variant = std::variant<TS...>;
+
+template<class RESOP, class... OPS> class OperatorVariant 
+    : public Variant<OPS...>
+{
+  public:
+    using Variant<OPS...>::Variant;
+    template<class... XS> using ResultType = ResultOf<RESOP(XS...)>;
+    template<class... XS> ResultType<XS...> operator() (XS const& ... xs) const {
+        return std::visit([&xs...](auto op){return static_cast<ResultType<XS...>>(op(xs...));},static_cast<Variant<OPS...>const&>(*this)); }
+    template<class... XS> ResultType<XS...> derivative(XS const& ... xs) const {
+        return std::visit([&xs...](auto op){return static_cast<ResultType<XS...>>(op.derivative(xs...));},static_cast<Variant<OPS...>const&>(*this)); }
+    friend OutputStream& operator<<(OutputStream& os, OperatorVariant<RESOP,OPS...> const& op) {
+        std::visit([&os](auto const& op){os<<op;},static_cast<Variant<OPS...>const&>(op)); return os; }
+};
+
+class MonotoneUnaryOperator 
+    : public OperatorVariant<Atan, Pos,Sqrt,Exp,Log,Atan> { //,PowOf<Nat>
+    using OperatorVariant<Atan, Pos,Sqrt,Exp,Log,Atan>::OperatorVariant;
+};
+    
+class MonotoneBinaryOperator 
+    : public OperatorVariant<Add, Add,Max,Min> {
+    using OperatorVariant<Add,  Add,Max,Min>::OperatorVariant;
+};
+
+class UnaryOperator
+    : public OperatorVariant<Tan,  Pos,Neg,Sqr,Rec,PowOf<Int>,Sqrt,Exp,Log,Sin,Cos,Tan,Atan,Abs> {
+    using OperatorVariant<Tan,  Pos,Neg,Sqr,Rec,PowOf<Int>,Sqrt,Exp,Log,Sin,Cos,Tan,Atan,Abs>::OperatorVariant;
+};
+
+class BinaryOperator 
+    : public OperatorVariant<Div,  Add,Sub,Mul,Div,Max,Min> {
+    using OperatorVariant<Div, Add,Sub,Mul,Div,Max,Min>::OperatorVariant;
+};
+    
+class LogicalOperator 
+    : public OperatorVariant<Less,  Equal,Less> {
+};
+    
+
+    
 } // namespace Ariadne
 
 #endif // ARIADNE_OPERATORS_HPP
