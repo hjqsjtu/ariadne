@@ -94,8 +94,9 @@ template<class X> class Matrix;
 template<class X> class Differential;
 template<class X> class Series;
 
+class MultiIndex;
 template<class P, class F> class AffineModel;
-template<class P, class F> class TaylorModel;
+template<class P, class F, class I=MultiIndex> class TaylorModel;
 template<class X> class Formula;
 template<class X> class Algebra;
 

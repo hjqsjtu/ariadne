@@ -35,6 +35,8 @@ template class SweeperBase<FloatMP>;
 template class RelativeSweeperBase<FloatDP>;
 template class RelativeSweeperBase<FloatMP>;
 
+template class TaylorModel<ValidatedTag,FloatDP,UniIndex>;
+
 template class TaylorModel<ValidatedTag,FloatDP>;
 template struct AlgebraOperations<TaylorModel<ValidatedTag,FloatDP>>;
 template class NormedAlgebraOperations<TaylorModel<ValidatedTag,FloatDP>>;
