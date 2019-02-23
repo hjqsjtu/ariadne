@@ -255,7 +255,7 @@ template<class I, class X> template<class Y, class... PRS, EnableIf<IsConstructi
 Expansion<I,X>::Expansion(Expansion<I,Y> const& other, PRS... prs)
     : Expansion(other.argument_size(),X(prs...))
 {
-    MultiIndex a(other.argument_size());
+    I a(other.argument_size());
     X x;
     for(auto iter=other.begin();
         iter!=other.end(); ++iter)

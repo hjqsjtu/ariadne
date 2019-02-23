@@ -88,6 +88,10 @@ template<class F> class Sweeper {
     //! \brief Discard terms in the expansion, without keeping track of discarded terms.
     inline Void sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const { this->_ptr->_sweep(p); }
     friend OutputStream& operator<<(OutputStream& os, const Sweeper<F>& swp) { return os << *swp._ptr; }
+
+    Void sweep(Expansion<UniIndex,FloatValue<PR>>& p, FloatError<PR>& e) const { ARIADNE_NOT_IMPLEMENTED; }
+    Void sweep(Expansion<UniIndex,FloatApproximation<PR>>& p) const { ARIADNE_NOT_IMPLEMENTED; }
+
   private:
     std::shared_ptr<const SweeperInterface<F>> _ptr;
 };

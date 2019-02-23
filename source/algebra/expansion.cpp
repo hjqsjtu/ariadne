@@ -32,8 +32,19 @@
 
 namespace Ariadne {
 
-    template class Expansion<UniIndex,FloatDP>;
+    template class Expansion<UniIndex,double>;
+    template class Expansion<UniIndex,Dyadic>;
+
     template class Expansion<UniIndex,FloatDPApproximation>;
+    template class Expansion<UniIndex,FloatDPBounds>;
+    template class Expansion<UniIndex,FloatDPValue>;
+    template class Expansion<UniIndex,FloatMPApproximation>;
+    template class Expansion<UniIndex,FloatMPBounds>;
+    template class Expansion<UniIndex,FloatMPValue>;
+
+    template class SortedExpansion<UniIndex,FloatDPValue,ReverseLexicographicIndexLess>;
+    template class SortedExpansion<UniIndex,FloatDPBounds,ReverseLexicographicIndexLess>;
+    template class SortedExpansion<UniIndex,FloatDPApproximation,ReverseLexicographicIndexLess>;
 
     template class Expansion<MultiIndex,double>;
     template class Expansion<MultiIndex,Dyadic>;

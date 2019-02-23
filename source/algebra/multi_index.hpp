@@ -55,6 +55,8 @@ class UniIndex {
     SizeOne size() const { return SizeOne(); }
     DegreeType degree() const { return _a; }
     operator DegreeType() const { return _a; }
+    static UniIndex zero(SizeOne) { return UniIndex(0); }
+    static UniIndex unit(SizeOne, IndexZero) { return UniIndex(1); }
 };
 
 struct MultiIndexData {

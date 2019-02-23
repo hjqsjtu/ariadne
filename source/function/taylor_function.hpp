@@ -43,7 +43,7 @@
 
 namespace Ariadne {
 
-template<class P, class F> class TaylorModel;
+template<class P, class F, class I> class TaylorModel;
 class TaylorFunctionFactory;
 
 template<class P, class F> using ScalarMultivariateTaylorFunctionModel = ScalarScaledFunctionPatch<TaylorModel<P,F>>;

@@ -55,7 +55,7 @@ template<class P, class F> class AffineModel;
 typedef AffineModel<ApproximateTag,FloatDP> ApproximateAffineModel;
 typedef AffineModel<ValidatedTag,FloatDP> ValidatedAffineModel;
 
-template<class P, class F> class TaylorModel;
+template<class P, class F, class I> class TaylorModel;
 typedef TaylorModel<ApproximateTag,FloatDP> ApproximateTaylorModelDP;
 typedef TaylorModel<ValidatedTag,FloatDP> ValidatedTaylorModelDP;
 

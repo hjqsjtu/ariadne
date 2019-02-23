@@ -84,6 +84,7 @@ template<> struct IndexTraits<UniIndex> {
     typedef IndexZero IndexIntoType;
     typedef String NameType;
     template<class Y> using Argument = Scalar<Y>;
+    template<class Y> using Coargument = Scalar<Y>;
 };
 
 template<> struct IndexTraits<MultiIndex> {
@@ -92,6 +93,7 @@ template<> struct IndexTraits<MultiIndex> {
     typedef SizeType IndexIntoType;
     typedef Array<String> NameType;
     template<class Y> using Argument = Vector<Y>;
+    template<class Y> using Coargument = Covector<Y>;
 };
 
 template<class I, class X> using ArgumentOfType = typename IndexTraits<I>::template Argumentq<X>;

@@ -46,7 +46,7 @@ template<class X, class R> class Constraint;
 template<class X> class Procedure;
 typedef Procedure<ValidatedNumber> ValidatedProcedure;
 
-template<class P,class F> class TaylorModel;
+template<class P,class F,class I> class TaylorModel;
 template<class M> class VectorScaledFunctionPatch;
 typedef VectorScaledFunctionPatch<TaylorModel<ValidatedTag,FloatDP>> ValidatedVectorMultivariateTaylorFunctionModelDP;
 

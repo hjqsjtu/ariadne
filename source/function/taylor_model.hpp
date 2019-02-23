@@ -118,9 +118,13 @@ class TaylorModel<ValidatedTag,F,I>
     typedef Sweeper<F> SweeperType;
 
     typedef typename ExpansionType::ArgumentSizeType ArgumentSizeType;
+    typedef typename ExpansionType::VariableIndexType VariableIndexType;
 
     typedef IntervalDomainType CodomainType;
     typedef Interval<FloatUpperBound<PR>> RangeType;
+
+    template<class X> using Argument = typename IndexTraits<I>::template Argument<X>;
+    template<class X> using Coargument = typename IndexTraits<I>::template Coargument<X>;
 
     //! \brief The computational paradigm.
     typedef ValidatedTag Paradigm;
@@ -170,7 +174,7 @@ class TaylorModel<ValidatedTag,F,I>
     TaylorModel<ValidatedTag,F,I> create_constant(NumericType c) const;
     TaylorModel<ValidatedTag,F,I> create_constant(GenericNumericType) const;
     //! \brief The \a j<sup>th</sup> coordinate element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
-    TaylorModel<ValidatedTag,F,I> create_coordinate(ArgumentSizeType j) const;
+    TaylorModel<ValidatedTag,F,I> create_coordinate(VariableIndexType j) const;
     //! \brief Set to zero.
     TaylorModel<ValidatedTag,F,I> create_ball(ErrorType e) const;
     //! \brief Set to zero.
@@ -195,7 +199,7 @@ class TaylorModel<ValidatedTag,F,I>
     static TaylorModel<ValidatedTag,F,I> constant(ArgumentSizeType as, const ValidatedNumber& c, SweeperType swp) {
         TaylorModel<ValidatedTag,F,I> r(as,swp); r.set_value(CoefficientType(1,r.precision())); r*=c; return r; }
     //! \brief Construct the quantity with expansion \f$x_j\f$ in \a as independent variables.
-    static TaylorModel<ValidatedTag,F,I> coordinate(ArgumentSizeType as, ArgumentSizeType j, SweeperType swp) {
+    static TaylorModel<ValidatedTag,F,I> coordinate(ArgumentSizeType as, VariableIndexType j, SweeperType swp) {
         TaylorModel<ValidatedTag,F,I> r(as,swp); r.set_gradient(j,1); return r; }
     //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a e
     static TaylorModel<ValidatedTag,F,I> error(ArgumentSizeType as, ErrorType e, SweeperType swp) {
@@ -208,7 +212,7 @@ class TaylorModel<ValidatedTag,F,I>
         TaylorModel<ValidatedTag,F,I> r(as,swp); r.set_error(1u); return r; }
 
     //! \brief Construct the quantity which scales the interval \a codom onto the unit interval.
-    static TaylorModel<ValidatedTag,F,I> scaling(ArgumentSizeType as, ArgumentSizeType j, const IntervalDomainType& codom, SweeperType swp);
+    static TaylorModel<ValidatedTag,F,I> scaling(ArgumentSizeType as, VariableIndexType j, const IntervalDomainType& codom, SweeperType swp);
 
     //! \brief Return the vector of zero variables of size \a rs in \a as arguments.
     static Vector<TaylorModel<ValidatedTag,F,I>> zeros(ArgumentSizeType rs, ArgumentSizeType as, SweeperType swp);
@@ -253,11 +257,10 @@ class TaylorModel<ValidatedTag,F,I>
     ErrorType& error() { return this->_error; }
 
     //! \brief The constant term in the expansion.
-    const CoefficientType& value() const { return (*this)[MultiIndex::zero(this->argument_size())]; }
+    const CoefficientType& value() const { return (*this)[IndexType::zero(this->argument_size())]; }
     //! \brief The coefficient of the gradient term \f$df/dx_j\f$.
-    const CoefficientType& gradient_value(ArgumentSizeType j) const { return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
-    Covector<CoefficientType> gradient_value() const { Covector<CoefficientType> r(this->argument_size());
-        for(ArgumentSizeType j=0; j!=this->argument_size(); ++j) { r[j]=(*this)[MultiIndex::unit(this->argument_size(),j)]; } return r; }
+    const CoefficientType& gradient_value(VariableIndexType j) const { return (*this)[IndexType::unit(this->argument_size(),j)]; }
+    Coargument<CoefficientType> gradient_value() const;
 
     //! \brief The constant term in the expansion.
     CoefficientType average() const;
@@ -276,20 +279,20 @@ class TaylorModel<ValidatedTag,F,I>
 
     //! \brief Set the constant term in the expansion.
     Void set_value(const CoefficientType& c) {
-        this->_expansion.set(MultiIndex::zero(this->argument_size()),c); }
+        this->_expansion.set(IndexType::zero(this->argument_size()),c); }
     //! \brief Set the coefficient of the term \f$df/dx_j\f$.
-    Void set_gradient(ArgumentSizeType j, const CoefficientType& c) {
-        this->_expansion.set(MultiIndex::unit(this->argument_size(),j),c); }
-    Void set_gradient(ArgumentSizeType j,const Dyadic& c) {
+    Void set_gradient(VariableIndexType j, const CoefficientType& c) {
+        this->_expansion.set(IndexType::unit(this->argument_size(),j),c); }
+    Void set_gradient(VariableIndexType j,const Dyadic& c) {
         this->set_gradient(j,CoefficientType(c,this->precision())); }
      //! \brief Set the error of the expansion.
     Void set_error(const ErrorType& ne) { ARIADNE_ASSERT(ne.raw()>=0.0); this->_error=ne; }
     Void set_error(Nat m) { this->_error=m; }
 
     //! \brief The coefficient of the term in $x^a$.
-    const CoefficientType& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
+    const CoefficientType& operator[](const IndexType& a) const { return this->_expansion[a]; }
     //! \brief A read/write reference to the coefficient of the term in $x^a$.
-    CoefficientType& operator[](const MultiIndex& a) { return this->_expansion.at(a); }
+    CoefficientType& operator[](const IndexType& a) { return this->_expansion.at(a); }
 
     //! \brief An Iterator to the first term in the expansion.
     Iterator begin() { return this->_expansion.begin(); }
@@ -305,8 +308,8 @@ class TaylorModel<ValidatedTag,F,I>
     //! \brief The maximum degree of terms in the expansion.
     DegreeType degree() const;
     //! \brief The number of nonzero terms in the expansion.
-    ArgumentSizeType number_of_terms() const { return this->_expansion.number_of_terms(); }
-    ArgumentSizeType number_of_nonzeros() const { return this->_expansion.number_of_nonzeros(); }
+    SizeType number_of_terms() const { return this->_expansion.number_of_terms(); }
+    SizeType number_of_nonzeros() const { return this->_expansion.number_of_nonzeros(); }
     //@}
 
     //@{
@@ -318,16 +321,16 @@ class TaylorModel<ValidatedTag,F,I>
     //! \brief An over-approximation to the range of the quantity.
     RangeType range() const;
     //! \brief Compute the gradient of the expansion with respect to the \a jth variable over the domain.
-    RangeType gradient_range(ArgumentSizeType j) const;
-    Covector<RangeType> gradient_range() const;
+    RangeType gradient_range(VariableIndexType j) const;
+    Coargument<RangeType> gradient_range() const;
 
     //! \brief Evaluate the quantity over the interval of points \a x.
-    friend ApproximateNumericType evaluate(const TaylorModel<ValidatedTag,F,I>& f, const Vector<ApproximateNumericType>& x) {
+    friend ApproximateNumericType evaluate(const TaylorModel<ValidatedTag,F,I>& f, const Argument<ApproximateNumericType>& x) {
         return TaylorModel<ValidatedTag,F,I>::_evaluate(f,x); }
-    friend ValidatedNumericType evaluate(const TaylorModel<ValidatedTag,F,I>& f, const Vector<ValidatedNumericType>& x) {
+    friend ValidatedNumericType evaluate(const TaylorModel<ValidatedTag,F,I>& f, const Argument<ValidatedNumericType>& x) {
         return TaylorModel<ValidatedTag,F,I>::_evaluate(f,x); }
     //! \brief Evaluate the gradient over the interval of points \a x.
-    friend Covector<FloatBounds<PR>> gradient(const TaylorModel<ValidatedTag,F,I>& f, const Vector<FloatBounds<PR>>& x) {
+    friend Coargument<FloatBounds<PR>> gradient(const TaylorModel<ValidatedTag,F,I>& f, const Argument<FloatBounds<PR>>& x) {
         return TaylorModel<ValidatedTag,F,I>::_gradient(f,x); }
     //! \brief Substite \a c for the \a k th variable.
     friend TaylorModel<ValidatedTag,F,I> partial_evaluate(const TaylorModel<ValidatedTag,F,I>& x, ArgumentSizeType k, ValidatedNumericType c) {
@@ -336,7 +339,7 @@ class TaylorModel<ValidatedTag,F,I>
     friend TaylorModel<ValidatedTag,F,I> compose(const Unscaling& uf, const TaylorModel<ValidatedTag,F,I>& tg) {
         return TaylorModel<ValidatedTag,F,I>::_compose(uf,tg); }
     //! \brief Evaluate the quantity over the interval of points \a x.
-    friend TaylorModel<ValidatedTag,F,I> compose(const TaylorModel<ValidatedTag,F,I>& f, const Vector<TaylorModel<ValidatedTag,F,I>>& g) {
+    friend TaylorModel<ValidatedTag,F,I> compose(const TaylorModel<ValidatedTag,F,MultiIndex>& f, const Vector<TaylorModel<ValidatedTag,F,I>>& g) {
         return TaylorModel<ValidatedTag,F,I>::_compose(f,g); }
     //! \brief Scale the variable by post-composing with an affine map taking the interval ivl to the unit interval
     friend TaylorModel<ValidatedTag,F,I> compose(const TaylorModel<ValidatedTag,F,I>& tf, const VectorUnscaling& u);
@@ -350,9 +353,9 @@ class TaylorModel<ValidatedTag,F,I>
     //! \brief Scales the model by a function mapping \a dom into the unit interval.
     Void unscale(IntervalDomainType const& dom);
     //! \brief Compute the antiderivative (in place).
-    Void antidifferentiate(ArgumentSizeType k);
+    Void antidifferentiate(VariableIndexType k);
     //! \brief Compute the weak derivative (in place).
-    Void differentiate(ArgumentSizeType k);
+    Void differentiate(VariableIndexType k);
 
     friend TaylorModel<ValidatedTag,F,I> unscale(TaylorModel<ValidatedTag,F,I> tm, IntervalDomainType const& dom) {
         tm.unscale(dom); return std::move(tm); }
@@ -365,12 +368,12 @@ class TaylorModel<ValidatedTag,F,I>
     //@{
     /*! \name Operations on the domain. */
     //!\brief Split the Taylor model \a tm, subdividing along the independent variable \a k, taking the lower/middle/upper \a part.
-    friend TaylorModel<ValidatedTag,F,I> split(const TaylorModel<ValidatedTag,F,I>& tm, ArgumentSizeType k, SplitPart part) {
+    friend TaylorModel<ValidatedTag,F,I> split(const TaylorModel<ValidatedTag,F,I>& tm, VariableIndexType k, SplitPart part) {
         return TaylorModel<ValidatedTag,F,I>::_split(tm,k,part); }
     friend Pair<TaylorModel<ValidatedTag,F,I>,TaylorModel<ValidatedTag,F,I>> split(const TaylorModel<ValidatedTag,F,I>& tm, ArgumentSizeType k) {
         return make_pair(split(tm,k,SplitPart::LOWER),split(tm,k,SplitPart::UPPER)); }
     //! \relates TaylorModel<ValidatedTag,F,I> \brief Embed the model in a space of higher dimension
-    friend TaylorModel<ValidatedTag,F,I> embed(ArgumentSizeType as1, const TaylorModel<ValidatedTag,F,I>& tm2, ArgumentSizeType as3) {
+    friend TaylorModel<ValidatedTag,F,MultiIndex> embed(SizeType as1, const TaylorModel<ValidatedTag,F,I>& tm2, SizeType as3) {
         return TaylorModel<ValidatedTag,F,I>::_embed(as1,tm2,as3); }
     //@}
 
@@ -472,7 +475,7 @@ class TaylorModel<ValidatedTag,F,I>
     OutputStream& repr(OutputStream&) const;
   public: // FIXME: Should be private
     Void _set_error(const RawFloat<PR>& ne) { ARIADNE_ASSERT(ne>=0); this->_error=ErrorType(ne); }
-    Void _append(MultiIndex const& a, CoefficientType const& v) { this->_expansion.append(a,v); }
+    Void _append(IndexType const& a, CoefficientType const& v) { this->_expansion.append(a,v); }
     static Bool _consistent(const TaylorModel<ValidatedTag,F,I>& tm1, const TaylorModel<ValidatedTag,F,I>& tm2);
     static Bool _inconsistent(const TaylorModel<ValidatedTag,F,I>& tm1, const TaylorModel<ValidatedTag,F,I>& tm2);
     static Bool _refines(const TaylorModel<ValidatedTag,F,I>& tm1, const TaylorModel<ValidatedTag,F,I>& tm2);
@@ -481,20 +484,20 @@ class TaylorModel<ValidatedTag,F,I>
     static TaylorModel<ValidatedTag,F,I> _weak_derivative(const TaylorModel<ValidatedTag,F,I>& tm, ArgumentSizeType k);
     static TaylorModel<ValidatedTag,F,I> _embed_error(const TaylorModel<ValidatedTag,F,I>& tm);
     static TaylorModel<ValidatedTag,F,I>  _discard_variables(const TaylorModel<ValidatedTag,F,I>&, const Array<ArgumentSizeType>& variables);
-    static TaylorModel<ValidatedTag,F,I> _split(const TaylorModel<ValidatedTag,F,I>& tm, ArgumentSizeType k, SplitPart part);
-    static TaylorModel<ValidatedTag,F,I> _embed(ArgumentSizeType as1, const TaylorModel<ValidatedTag,F,I>& tm2, ArgumentSizeType as3);
-    static TaylorModel<ValidatedTag,F,I> _compose(TaylorModel<ValidatedTag,F,I> const& tf, const Vector<TaylorModel<ValidatedTag,F,I>>& tg);
+    static TaylorModel<ValidatedTag,F,I> _split(const TaylorModel<ValidatedTag,F,I>& tm, VariableIndexType k, SplitPart part);
+    static TaylorModel<ValidatedTag,F,MultiIndex> _embed(SizeType as1, const TaylorModel<ValidatedTag,F,I>& tm2, SizeType as3);
+    static TaylorModel<ValidatedTag,F,I> _compose(TaylorModel<ValidatedTag,F,MultiIndex> const& tf, const Vector<TaylorModel<ValidatedTag,F,I>>& tg);
     static TaylorModel<ValidatedTag,F,I> _compose(Unscaling const& uf, TaylorModel<ValidatedTag,F,I> const& tg);
-    static TaylorModel<ValidatedTag,F,I> _compose(TaylorModel<ValidatedTag,F,I> const& tf, VectorUnscaling const& u, const Vector<TaylorModel<ValidatedTag,F,I>>& tg);
-    static TaylorModel<ValidatedTag,F,I> _partial_evaluate(const TaylorModel<ValidatedTag,F,I>& x, ArgumentSizeType k, NumericType c);
-    static Covector<FloatBounds<PR>> _gradient(const TaylorModel<ValidatedTag,F,I>& x, Vector<FloatBounds<PR>> const& v);
-    static FloatBounds<PR> _evaluate(const TaylorModel<ValidatedTag,F,I>& x, Vector<FloatBounds<PR>> const& v);
-    static FloatApproximation<PR> _evaluate(const TaylorModel<ValidatedTag,F,I>& x, Vector<FloatApproximation<PR>> const& v);
+    static TaylorModel<ValidatedTag,F,I> _compose(TaylorModel<ValidatedTag,F,MultiIndex> const& tf, VectorUnscaling const& u, const Vector<TaylorModel<ValidatedTag,F,I>>& tg);
+    static TaylorModel<ValidatedTag,F,I> _partial_evaluate(const TaylorModel<ValidatedTag,F,I>& x, VariableIndexType k, NumericType c);
+    static Coargument<FloatBounds<PR>> _gradient(const TaylorModel<ValidatedTag,F,I>& x, Argument<FloatBounds<PR>> const& v);
+    static FloatBounds<PR> _evaluate(const TaylorModel<ValidatedTag,F,I>& x, Argument<FloatBounds<PR>> const& v);
+    static FloatApproximation<PR> _evaluate(const TaylorModel<ValidatedTag,F,I>& x, Argument<FloatApproximation<PR>> const& v);
 };
 
 // FIXME: Needed to dispatch gradient of ScaledFunctionPatch
-Covector<FloatDPBounds> gradient(const TaylorModel<ValidatedTag,FloatDP>& x, const Vector<FloatDPBounds>& v);
-Covector<FloatMPBounds> gradient(const TaylorModel<ValidatedTag,FloatMP>& x, const Vector<FloatMPBounds>& v);
+Covector<FloatDPBounds> gradient(const MultivariateTaylorModel<ValidatedTag,FloatDP>& x, const Vector<FloatDPBounds>& v);
+Covector<FloatMPBounds> gradient(const MultivariateTaylorModel<ValidatedTag,FloatMP>& x, const Vector<FloatMPBounds>& v);
 
 // FIXME: Needed to dispatch gradient of ScaledFunctionPatch
 template<class F, class I> template<class A> auto TaylorModel<ValidatedTag,F,I>::operator() (Vector<A> const& x) const -> ArithmeticType<A,FloatValue<PR>> {
@@ -515,12 +518,14 @@ class TaylorModel<ApproximateTag,F,I>
     typedef typename F::PrecisionType PR;
   public:
     typedef PR PrecisionType;
+    typedef I IndexType;
     typedef FloatApproximation<PR> CoefficientType;
     typedef FloatApproximation<PR> ErrorType;
     typedef ReverseLexicographicIndexLess ComparisonType;
-    typedef SortedExpansion<MultiIndex,CoefficientType,ComparisonType> ExpansionType;
+    typedef SortedExpansion<IndexType,CoefficientType,ComparisonType> ExpansionType;
 
     typedef typename ExpansionType::ArgumentSizeType ArgumentSizeType;
+    typedef typename ExpansionType::VariableIndexType VariableIndexType;
 
     typedef IntervalDomainType CodomainType;
     typedef Interval<FloatApproximation<PR>> RangeType;
@@ -530,13 +535,14 @@ class TaylorModel<ApproximateTag,F,I>
     typedef FloatApproximation<PR> NumericType;
     typedef ApproximateNumber GenericNumericType;
     typedef Sweeper<F> PropertiesType;
-    //! \brief The type used to index the coefficients.
-    typedef MultiIndex IndexType;
     //! \brief The type used for the coefficients.
     typedef CoefficientType ValueType;
 
     //! \brief The type used to determine the accuracy.
     typedef Sweeper<F> SweeperType;
+
+    template<class X> using Argument = typename IndexTraits<I>::template Argument<X>;
+    template<class X> using Coargument = typename IndexTraits<I>::template Coargument<X>;
 
     //! \brief An Iterator through the (index,coefficient) pairs of the expansion.
     typedef typename ExpansionType::Iterator Iterator;
@@ -611,8 +617,8 @@ class TaylorModel<ApproximateTag,F,I>
     const CoefficientType& value() const { return (*this)[MultiIndex::zero(this->argument_size())]; }
     //! \brief The coefficient of the gradient term \f$df/dx_j\f$.
     const CoefficientType& gradient_value(ArgumentSizeType j) const { return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
-    Covector<CoefficientType> gradient_value() const { Covector<CoefficientType> r(this->argument_size());
-        for(ArgumentSizeType j=0; j!=this->argument_size(); ++j) { r[j]=(*this)[MultiIndex::unit(this->argument_size(),j)]; } return r; }
+    Coargument<CoefficientType> gradient_value() const { Coargument<CoefficientType> r(this->argument_size());
+        for(VariableIndexType j=0; j!=this->argument_size(); ++j) { r[j]=(*this)[MultiIndex::unit(this->argument_size(),j)]; } return r; }
     //! \brief The error of the expansion over the domain.
     Void error() const { }
     //@}
@@ -747,7 +753,7 @@ template<class F> Vector<FloatBounds<PrecisionType<F>>> evaluate(const Vector<Ta
     return r;
 }
 
-template<class F> Vector<TaylorModel<ValidatedTag,F>> partial_evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, ArgumentSizeType k, const FloatBounds<PrecisionType<F>>& c) {
+template<class F> Vector<TaylorModel<ValidatedTag,F>> partial_evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, SizeType k, const FloatBounds<PrecisionType<F>>& c) {
     Vector<TaylorModel<ValidatedTag,F>> r(tf.size(),ValidatedTaylorModel<F>::zero(tf.zero_element().argument_size()-1u,tf.zero_element().sweeper()));
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=partial_evaluate(tf[i],k,c); }
     return std::move(r);
@@ -765,9 +771,9 @@ template<class P, class F> Vector<TaylorModel<P,F>> unscale(const Vector<TaylorM
     return std::move(r);
 }
 
-template<class P, class F> Vector<TaylorModel<P,F>> compose(const VectorUnscaling& u, const Vector<TaylorModel<P,F>>& g) {
+template<class P, class F, class I> Vector<TaylorModel<P,F,I>> compose(const VectorUnscaling& u, const Vector<TaylorModel<P,F,I>>& g) {
     ARIADNE_ASSERT_MSG(u.size()==g.size(),"u="<<u.domain()<<", g="<<g);
-    Vector<TaylorModel<P,F>> r(u.size());
+    Vector<TaylorModel<P,F,I>> r(u.size());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=compose(u[i],g[i]); }
     return std::move(r);
 }
@@ -778,7 +784,7 @@ template<class P, class F> Vector<TaylorModel<P,F>> compose(const Vector<TaylorM
     return compose(x,compose(u,y));
 }
 
-template<class P, class F> Vector<TaylorModel<P,F>> antiderivative(const Vector<TaylorModel<P,F>>& x, ArgumentSizeType k) {
+template<class P, class F> Vector<TaylorModel<P,F>> antiderivative(const Vector<TaylorModel<P,F>>& x, SizeType k) {
     Vector<TaylorModel<P,F>> r(x.size());
     for(SizeType i=0; i!=x.size(); ++i) { r[i]=antiderivative(x[i],k); }
     return std::move(r);
