@@ -123,7 +123,7 @@ class Polynomial
     template<class Y> using Argument = typename IndexTraits<I>::template Argument<Y>;
 
     typedef typename Expansion<I,X>::ArgumentSizeType ArgumentSizeType;
-    typedef typename Expansion<I,X>::VariableIndexType VariableIndexType;
+    typedef typename Expansion<I,X>::ArgumentIndexType ArgumentIndexType;
     typedef I IndexType;
 
     typedef typename X::Paradigm Paradigm;
@@ -236,9 +236,9 @@ class Polynomial
     //! \brief Truncate to degree \a d.
     Polynomial<I,X>& truncate(DegreeType d);
     //! \brief Differentiate with respect to the \a j<sup>th</sup> variable.
-    Polynomial<I,X>& differentiate(VariableIndexType j);
+    Polynomial<I,X>& differentiate(ArgumentIndexType j);
     //! \brief Antidifferentiate (integrate) with respect to the \a j<sup>th</sup> variable.
-    Polynomial<I,X>& antidifferentiate(VariableIndexType j);
+    Polynomial<I,X>& antidifferentiate(ArgumentIndexType j);
     //@}
 
     //@{
@@ -249,21 +249,21 @@ class Polynomial
     template<class XX, class A> friend A evaluate(const MultivariatePolynomial<XX>& p, const Vector<A>& v);
     template<class II, class XX> friend Polynomial<II,XX> compose(const UnivariatePolynomial<XX>& p, const Scalar<Polynomial<II,XX>>& q);
     template<class II, class XX> friend Polynomial<II,XX> compose(const MultivariatePolynomial<XX>& p, const Vector<Polynomial<II,XX>>& q);
-    template<class XX> friend Polynomial<I,XX> derivative(Polynomial<I,XX> dx, VariableIndexType k);
-    template<class XX> friend Polynomial<I,XX> antiderivative(Polynomial<I,XX> dx, VariableIndexType k);
+    template<class XX> friend Polynomial<I,XX> derivative(Polynomial<I,XX> dx, ArgumentIndexType k);
+    template<class XX> friend Polynomial<I,XX> antiderivative(Polynomial<I,XX> dx, ArgumentIndexType k);
     template<class XX> friend Polynomial<I,XX> truncate(Polynomial<I,XX> dx, DegreeType deg);
     //@}
 
     Void check() const;
     static Polynomial<I,X> _constant(ArgumentSizeType as, const X& c);
-    static Polynomial<I,X> _coordinate(ArgumentSizeType as, VariableIndexType j);
+    static Polynomial<I,X> _coordinate(ArgumentSizeType as, ArgumentIndexType j);
     static Polynomial<UniIndex,X> _compose(const Polynomial<I,X>& p, const ArgumentOf<I,Polynomial<UniIndex,X>>& q);
     static Polynomial<MultiIndex,X> _compose(const Polynomial<I,X>& p, const ArgumentOf<I,Polynomial<MultiIndex,X>>& q);
     static X _evaluate(const Polynomial<I,X>& p, const ArgumentOf<I,X>& vx);
     static Algebra<X> _evaluate(const Polynomial<I,X>& p, const ArgumentOf<I,Algebra<X>>& va);
     static Polynomial<I,X> _partial_evaluate(const Polynomial<I,X>& p, SizeType k, const X& c);
     OutputStream& _write(OutputStream& os) const;
-    OutputStream& _write(OutputStream& os, typename IndexTraits<I>::NameType const& names) const;
+    OutputStream& _write(OutputStream& os, typename IndexTraits<I>::VariableNamesType const& names) const;
   private:
     Void _append(const IndexType& a, const X& c);
     Iterator _unique_key();

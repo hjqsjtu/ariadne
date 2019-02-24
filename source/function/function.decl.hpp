@@ -160,6 +160,12 @@ typedef FunctionModelFactory<ValidatedTag,DoublePrecision> ValidatedFunctionMode
 template<class FMF, class D> class FunctionModelCreator;
 
 
+class UniIndex;
+class MultiIndex;
+template<class P, class F, class I> class TaylorModel;
+template<class P, class F> using UnivariateTaylorModel = TaylorModel<P,F,UniIndex>;
+template<class P, class F> using MultivariateTaylorModel = TaylorModel<P,F,MultiIndex>;
+
 
 } // namespace Ariadne
 

@@ -156,6 +156,8 @@ template<class FCTRY> class FunctionModelCreator<FCTRY,IntervalDomainType> {
     DomainType _domain;
 };
 
+
+
 //! \ingroup FunctionModelSubModule
 //! \brief Generic scalar functions on singleton domains.
 template<class P, class D, class PR, class PRE> class FunctionModel<P,D,IntervalDomainType,PR,PRE>
@@ -178,6 +180,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
     typedef Number<P> GenericNumericType;
     typedef FloatError<PR> NormType;
     typedef Interval<FloatUpperBound<PR>> RangeType;
+    typedef typename ElementTraits<D>::IndexType ArgumentIndexType;
 
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
     template<class Y> using Result = ElementTraits<C>::template Type<Y>;
@@ -214,7 +217,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
     inline RangeType const range() const { return this->_ptr->range(); }
 
     inline CoefficientType value() const { return this->_ptr->value(); }
-    inline CoefficientType gradient_value(SizeType j) const { return this->_ptr->gradient_value(j); }
+    inline CoefficientType gradient_value(ArgumentIndexType j) const { return this->_ptr->gradient_value(j); }
     inline ErrorType error() const { return this->_ptr->error(); }
 
     inline Void set_error(const ErrorType& e) { return this->_ptr->set_error(e); }
@@ -279,7 +282,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
         return f1._ptr->_refines(f2); }
   public:
     friend OutputStream& operator<<(OutputStream& os, const ScalarFunctionModel<P,D,PR,PRE>& f) {
-        return os <<  f.operator ScalarMultivariateFunction<P>(); }
+        return os <<  f.operator ScalarFunction<P,D>(); }
 };
 
 template<class P, class D, class PR, class PRE> struct AlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>> {
@@ -366,7 +369,7 @@ template<class M> class ScaledFunctionPatch;
 template<class M> class VectorScaledFunctionPatch;
 template<class M> struct Element<VectorScaledFunctionPatch<M>> { typedef ScaledFunctionPatch<M> Type; };
 
-typedef ScaledFunctionPatch<ValidatedTaylorModelDP> ValidatedScalarMultivariateTaylorFunctionModelDP;
+typedef ScaledFunctionPatch<MultivariateTaylorModel<ValidatedTag,FloatDP>> ValidatedScalarMultivariateTaylorFunctionModelDP;
 
 template<class P, class D, class PR, class PRE> class VectorFunctionModelElement
     : public DispatchTranscendentalAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>

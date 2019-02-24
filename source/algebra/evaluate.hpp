@@ -41,18 +41,20 @@ class ReverseLexicographicKeyLess;
 template<class X, class A> A horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<A>& y);
 
 //! \brief Evaluate a power series on an algebra using Horner's rule.
-template<class X, class A> A horner_evaluate(const Expansion<DegreeType,X>& e, const A& y);
+template<class X, class A> A horner_evaluate(const Expansion<UniIndex,X>& e, const A& y);
 
 //! \ingroup FunctionModule
 //! \brief Evaluate a power series on an algebra using termwise expansion (slow).
 template<class X, class A> A power_evaluate(const Expansion<MultiIndex,X>& e, const Vector<A>& y);
 
 template<class X, class A> A evaluate(const Expansion<MultiIndex,X>& e, const Vector<A>& y);
+template<class X, class A> A evaluate(const Expansion<UniIndex,X>& e, const Scalar<A>& y);
 
 template<class X, class A> A simple_evaluate(const Expansion<MultiIndex,X>& e, const Vector<A>& y);
 
 
 template<class X, class A> Vector<A> evaluate(const Vector< Expansion<MultiIndex,X> >& e, const Vector<A>& y);
+template<class X, class A> Vector<A> evaluate(const Vector< Expansion<UniIndex,X> >& e, const Scalar<A>& y);
 
 } // namespace Ariadne
 

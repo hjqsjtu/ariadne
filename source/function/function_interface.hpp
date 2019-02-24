@@ -38,10 +38,14 @@ namespace Ariadne {
 
 static const Int SMOOTH=255;
 
+SizeType index_of(SizeType);
+IndexZero index_of(SizeOne);
+
+
 template<class S> struct ElementTraits;
 template<class S, class X> using ElementType = typename ElementTraits<S>::template Type<X>;
 template<class S> using ElementSizeType = decltype(declval<S>().dimension());
-template<class S> using ElementIndexType = decltype(declval<S>().dimension());
+template<class S> using ElementIndexType = decltype(index_of(declval<S>().dimension()));
 
 template<class P, class D, class C> class FunctionInterface;
 
@@ -117,8 +121,10 @@ class FunctionInterface<ApproximateTag,D,C>
     virtual Result<FloatMPApproximation> _evaluate(const Argument<FloatMPApproximation>& x) const = 0;
     virtual Result<Differential<FloatDPApproximation>> _evaluate(const Argument< Differential<FloatDPApproximation> >& x) const = 0;
     virtual Result<Differential<FloatMPApproximation>> _evaluate(const Argument< Differential<FloatMPApproximation> >& x) const = 0;
-    virtual Result<TaylorModel<ApproximateTag,FloatDP>> _evaluate(const Argument< TaylorModel<ApproximateTag,FloatDP> >& x) const = 0;
-    virtual Result<TaylorModel<ApproximateTag,FloatMP>> _evaluate(const Argument< TaylorModel<ApproximateTag,FloatMP> >& x) const = 0;
+    virtual Result<UnivariateTaylorModel<ApproximateTag,FloatDP>> _evaluate(const Argument< UnivariateTaylorModel<ApproximateTag,FloatDP> >& x) const = 0;
+    virtual Result<UnivariateTaylorModel<ApproximateTag,FloatMP>> _evaluate(const Argument< UnivariateTaylorModel<ApproximateTag,FloatMP> >& x) const = 0;
+    virtual Result<MultivariateTaylorModel<ApproximateTag,FloatDP>> _evaluate(const Argument< MultivariateTaylorModel<ApproximateTag,FloatDP> >& x) const = 0;
+    virtual Result<MultivariateTaylorModel<ApproximateTag,FloatMP>> _evaluate(const Argument< MultivariateTaylorModel<ApproximateTag,FloatMP> >& x) const = 0;
     virtual Result<Formula<ApproximateNumber>> _evaluate(const Argument< Formula<ApproximateNumber> >& x) const = 0;
     virtual Result<Algebra<ApproximateNumber>> _evaluate(const Argument< Algebra<ApproximateNumber> >& x) const = 0;
 
@@ -144,8 +150,10 @@ class FunctionInterface<ValidatedTag,D,C>
     virtual Result<FloatMPBounds> _evaluate(const Argument<FloatMPBounds>& x) const = 0;
     virtual Result<Differential<FloatDPBounds>> _evaluate(const Argument< Differential<FloatDPBounds> >& x) const = 0;
     virtual Result<Differential<FloatMPBounds>> _evaluate(const Argument< Differential<FloatMPBounds> >& x) const = 0;
-    virtual Result<TaylorModel<ValidatedTag,FloatDP>> _evaluate(const Argument< TaylorModel<ValidatedTag,FloatDP> >& x) const = 0;
-    virtual Result<TaylorModel<ValidatedTag,FloatMP>> _evaluate(const Argument< TaylorModel<ValidatedTag,FloatMP> >& x) const = 0;
+    virtual Result<UnivariateTaylorModel<ValidatedTag,FloatDP>> _evaluate(const Argument< UnivariateTaylorModel<ValidatedTag,FloatDP> >& x) const = 0;
+    virtual Result<UnivariateTaylorModel<ValidatedTag,FloatMP>> _evaluate(const Argument< UnivariateTaylorModel<ValidatedTag,FloatMP> >& x) const = 0;
+    virtual Result<MultivariateTaylorModel<ValidatedTag,FloatDP>> _evaluate(const Argument< MultivariateTaylorModel<ValidatedTag,FloatDP> >& x) const = 0;
+    virtual Result<MultivariateTaylorModel<ValidatedTag,FloatMP>> _evaluate(const Argument< MultivariateTaylorModel<ValidatedTag,FloatMP> >& x) const = 0;
     virtual Result<Formula<ValidatedNumber>> _evaluate(const Argument< Formula<ValidatedNumber> >& x) const = 0;
     virtual Result<Algebra<ValidatedNumber>> _evaluate(const Argument< Algebra<ValidatedNumber> >& x) const = 0;
 

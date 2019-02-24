@@ -514,7 +514,7 @@ inline OutputStream& _write(OutputStream& os, MultiIndex const& a, Array<String>
 }
 
 template<class I, class X>
-OutputStream& Expansion<I,X>::write(OutputStream& os, const typename IndexTraits<I>::NameType& variable_names) const
+OutputStream& Expansion<I,X>::write(OutputStream& os, const typename IndexTraits<I>::VariableNamesType& variable_names) const
 {
     const Expansion<I,X>& p=*this;
     ARIADNE_ASSERT(p.argument_size()==variable_names.size());

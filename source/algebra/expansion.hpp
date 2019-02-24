@@ -78,22 +78,40 @@ struct CoefficientIsZero;
 
 template<class I> struct IndexTraits;
 
-template<> struct IndexTraits<UniIndex> {
-    typedef DegreeType InitializerType;
+class UnitInterval;
+class UnitBox;
+
+template<class R> struct SpaceTraits;
+
+template<> struct SpaceTraits<Real> {
     typedef SizeOne SizeOfType;
     typedef IndexZero IndexIntoType;
-    typedef String NameType;
+    typedef UnitInterval UnitDomainType;
+    typedef IntervalDomainType BoundedDomainType;
+    typedef IntervalDomainType UnboundedDomainType;
+    typedef String VariableNamesType;
     template<class Y> using Argument = Scalar<Y>;
     template<class Y> using Coargument = Scalar<Y>;
 };
 
-template<> struct IndexTraits<MultiIndex> {
-    typedef InitializerList<DegreeType> InitializerType;
+template<> struct SpaceTraits<RealVector> {
     typedef SizeType SizeOfType;
     typedef SizeType IndexIntoType;
-    typedef Array<String> NameType;
+    typedef UnitBox UnitDomainType;
+    typedef BoxDomainType BoundedDomainType;
+    typedef BoxDomainType UnboundedDomainType;
+    typedef Array<String> VariableNamesType;
     template<class Y> using Argument = Vector<Y>;
     template<class Y> using Coargument = Covector<Y>;
+};
+
+
+template<> struct IndexTraits<UniIndex> : SpaceTraits<Real> {
+    typedef DegreeType InitializerType;
+};
+
+template<> struct IndexTraits<MultiIndex> : SpaceTraits<RealVector> {
+    typedef InitializerList<DegreeType> InitializerType;
 };
 
 template<class I, class X> using ArgumentOfType = typename IndexTraits<I>::template Argumentq<X>;
@@ -114,7 +132,7 @@ template<class I, class X> class Expansion {
     X _zero_coefficient;
   public:
     typedef S ArgumentSizeType;
-    typedef V VariableIndexType;
+    typedef V ArgumentIndexType;
     typedef I IndexType;
     typedef X CoefficientType;
 
@@ -205,7 +223,7 @@ template<class I, class X> class Expansion {
     Bool is_sorted(GradedIndexLess cmp);
 
     OutputStream& write(OutputStream& os) const;
-    OutputStream& write(OutputStream& os, typename IndexTraits<I>::NameType const& vars) const;
+    OutputStream& write(OutputStream& os, typename IndexTraits<I>::VariableNamesType const& vars) const;
   public:
     friend OutputStream& operator<<(OutputStream& os, Expansion<I,X> const& self) { return self.write(os); }
     friend Bool same(Expansion<I,X> const& e1, Expansion<I,X> const& e2) { return e1.same_as(e2); }

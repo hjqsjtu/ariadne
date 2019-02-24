@@ -90,8 +90,8 @@ class UnitBox {
 template<class S> struct ElementTraits;
 template<class S, class X> using ElementType = typename ElementTraits<S>::template Type<X>;
 
-template<class UB> struct ElementTraits<Interval<UB>> { template<class X> using Type=Scalar<X>; };
-template<class IVL> struct ElementTraits<Box<IVL>> { template<class X> using Type=Vector<X>; };
+template<class UB> struct ElementTraits<Interval<UB>> { template<class X> using Type=Scalar<X>; using IndexType = IndexZero; };
+template<class IVL> struct ElementTraits<Box<IVL>> { template<class X> using Type=Vector<X>; using IndexType = SizeType; };
 template<> struct ElementTraits<RealDomain> { template<class X> using Type=Scalar<X>; };
 template<> struct ElementTraits<EuclideanDomain> { template<class X> using Type=Vector<X>; };
 template<> struct ElementTraits<UnitInterval> { template<class X> using Type=Scalar<X>; };

@@ -115,7 +115,9 @@ template<class U> class Interval
   public:
     //! \brief The type returned by the dimension() method.
     typedef SizeOne DimensionType;
-    //! \brief The computational paradigm used by the interval.
+    //! \brief The type used as an index into the coordinates.
+    typedef IndexZero IndexType;
+        //! \brief The computational paradigm used by the interval.
     typedef P Paradigm;
     //! \brief The type of the lower bound of the interval.
     typedef L LowerBoundType;
@@ -196,6 +198,9 @@ template<class U> class Interval
   public:
     //! \brief The dimension of the set; statically returns size one.
     SizeOne dimension() const;
+
+    //FIXME: Included to simplify template code
+        Interval<U> const& operator[](IndexZero) const { return *this; }
 
     //! \brief The lower bound of the interval.
     LowerBoundType const& lower() const;

@@ -76,17 +76,22 @@ Bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
     return reverse_lexicographic_less(a1,a2); }
 
 
-Interval<FloatDPValue> const& convert_interval(IntervalDomainType const& ivl, DoublePrecision) { return ivl; }
-Interval<FloatMPValue> convert_interval(IntervalDomainType const& ivl, MultiplePrecision pr) {
+inline Interval<FloatDPValue> const& convert_domain(IntervalDomainType const& ivl, DoublePrecision) { return ivl; }
+Interval<FloatMPValue> convert_domain(IntervalDomainType const& ivl, MultiplePrecision pr) {
     return Interval<FloatMPValue>(FloatMP(ivl.lower().get_d(),pr),FloatMP(ivl.upper().get_d(),pr)); }
 
-Interval<FloatDPValue> convert_exact_interval(Interval<FloatDPUpperBound> const& ivl, DoublePrecision pr) {
+IntervalDomainType convert_exact_domain(Interval<FloatDPUpperBound> const& ivl) {
     return cast_exact(ivl); }
-Interval<FloatDPValue> convert_exact_interval(Interval<FloatMPUpperBound> const& ivl, DoublePrecision pr) {
-    FloatDP l(Dyadic(ivl.lower().raw()),downward,pr); FloatDP u(Dyadic(ivl.lower().raw()),upward,pr);
+IntervalDomainType convert_exact_domain(Interval<FloatMPUpperBound> const& ivl) {
+    FloatDP l(Dyadic(ivl.lower().raw()),downward,dp); FloatDP u(Dyadic(ivl.lower().raw()),upward,dp);
     return Interval<FloatDPValue>(FloatDPValue(l),FloatDPValue(u)); }
 
-inline Box<Interval<FloatDPValue>> const& convert_box(BoxDomainType const& bx, DoublePrecision) { return bx; }
+inline Box<Interval<FloatDPValue>> const& convert_domain(BoxDomainType const& bx, DoublePrecision) { return bx; }
+Box<Interval<FloatMPValue>> convert_domain(BoxDomainType const& bx, MultiplePrecision pr) {
+    Box<Interval<FloatMPValue>> r(bx.dimension(),Interval<FloatMPValue>(FloatMPValue(pr),FloatMPValue(pr)));
+    for(SizeType i=0; i!=r.dimension(); ++i) { r[i]=convert_domain(bx[i],pr); }
+    return r;
+}
 
 } // namespace
 
@@ -230,9 +235,9 @@ template<class F, class I> TaylorModel<ValidatedTag,F,I>::TaylorModel(const Expa
 {
 }
 
-template<class F, class I> TaylorModel<ValidatedTag,F,I> TaylorModel<ValidatedTag,F,I>::scaling(ArgumentSizeType as, VariableIndexType j, const IntervalDomainType& codom, SweeperType swp) {
+template<class F, class I> TaylorModel<ValidatedTag,F,I> TaylorModel<ValidatedTag,F,I>::scaling(ArgumentSizeType as, ArgumentIndexType j, const IntervalDomainType& codom, SweeperType swp) {
     TaylorModel<ValidatedTag,F,I> r(as,swp);
-    auto ivl=convert_interval(codom,r.precision());
+    auto ivl=convert_domain(codom,r.precision());
     r.set_gradient(j,1);
     r*=ivl.radius();
     r+=ivl.midpoint();
@@ -255,7 +260,7 @@ template<class F, class I> TaylorModel<ValidatedTag,F,I> TaylorModel<ValidatedTa
     return this->create_constant(NumericType(c,this->precision()));
 }
 
-template<class F, class I> TaylorModel<ValidatedTag,F,I> TaylorModel<ValidatedTag,F,I>::create_coordinate(VariableIndexType j) const {
+template<class F, class I> TaylorModel<ValidatedTag,F,I> TaylorModel<ValidatedTag,F,I>::create_coordinate(ArgumentIndexType j) const {
     ARIADNE_PRECONDITION(j<this->argument_size());
     TaylorModel<ValidatedTag,F,I> r(this->argument_size(),this->_sweeper);
     CoefficientType one(1,this->precision());
@@ -922,7 +927,7 @@ template<class F, class I> UnitBox TaylorModel<ValidatedTag,F,I>::domain() const
 template<class F, class I> auto TaylorModel<ValidatedTag,F,I>::codomain() const -> CodomainType
 {
     RangeType rng=this->range();
-    return convert_exact_interval(rng,dp);
+    return convert_exact_domain(rng);
 }
 
 
@@ -942,11 +947,11 @@ if constexpr (IsSame<I,MultiIndex>::value) {
         if(iter->index().degree()==0) {
             constant_term=iter->coefficient();
         } else if(iter->index().degree()==1) {
-            for(VariableIndexType j=0; j!=tm.argument_size(); ++j) {
+            for(ArgumentIndexType j=0; j!=tm.argument_size(); ++j) {
                 if(iter->index()[j]==1) { linear_terms[j]=iter->coefficient(); break; }
             }
         } else if(iter->index().degree()==2) {
-            for(VariableIndexType j=0; j!=tm.argument_size(); ++j) {
+            for(ArgumentIndexType j=0; j!=tm.argument_size(); ++j) {
                 if(iter->index()[j]==2) { quadratic_terms[j]=iter->coefficient(); break; }
                 if(iter->index()[j]==1) { err+=mag(iter->coefficient()); break; }
             }
@@ -959,7 +964,7 @@ if constexpr (IsSame<I,MultiIndex>::value) {
     const FloatBounds<PR> unit_ivl(-1,+1);
     // If the ratio b/a is very large, then roundoff error can cause a significant
     // additional error. We compute both |a|+|b| and a([-1,+1]+b/2a)-b^2/4a and take best bound
-    for(VariableIndexType j=0; j!=as; ++j) {
+    for(ArgumentIndexType j=0; j!=as; ++j) {
         const FloatValue<PR>& a=quadratic_terms[j];
         const FloatValue<PR>& b=linear_terms[j];
         FloatBounds<PR> ql=abs(a)*unit_ivl + abs(b)*unit_ivl;
@@ -979,7 +984,7 @@ if constexpr (IsSame<I,MultiIndex>::value) {
 template<class F, class I> auto TaylorModel<ValidatedTag,F,I>::gradient_value() const -> Coargument<CoefficientType> {
     if constexpr(IsSame<I,MultiIndex>::value) {
         Coargument<CoefficientType> r(this->argument_size());
-        for(VariableIndexType j=0; j!=this->argument_size(); ++j) {
+        for(ArgumentIndexType j=0; j!=this->argument_size(); ++j) {
             r[j]=(*this)[IndexType::unit(this->argument_size(),j)]; }
         return r;
     } else {
@@ -987,7 +992,7 @@ template<class F, class I> auto TaylorModel<ValidatedTag,F,I>::gradient_value() 
     }
 }
 
-template<class F, class I> auto TaylorModel<ValidatedTag,F,I>::gradient_range(VariableIndexType j) const -> RangeType {
+template<class F, class I> auto TaylorModel<ValidatedTag,F,I>::gradient_range(ArgumentIndexType j) const -> RangeType {
     FloatBounds<PR> g(0,0);
     for(typename TaylorModel<ValidatedTag,F,I>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         UniformConstReference<IndexType> a=iter->index();
@@ -1007,7 +1012,7 @@ if constexpr (IsSame<I,MultiIndex>::value) {
     for(typename TaylorModel<ValidatedTag,F,I>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         UniformConstReference<IndexType> a=iter->index();
         UniformConstReference<FloatValue<PR>> x=iter->coefficient();
-        for(VariableIndexType j=0; j!=this->argument_size(); ++j) {
+        for(ArgumentIndexType j=0; j!=this->argument_size(); ++j) {
             const Nat c=a[j];
             if(c>0) {
                 if(a.degree()==1) { g[j]+=x; }
@@ -1214,7 +1219,7 @@ if constexpr (IsSame<I,MultiIndex>::value) {
     for(typename TaylorModel<ValidatedTag,F,I>::ConstIterator iter=tm.expansion().begin(); iter!=tm.expansion().end(); ++iter) {
         UniformConstReference<IndexType> xa=iter->index();
         UniformConstReference<FloatValue<PR>> xv=iter->coefficient();
-        for(VariableIndexType j=0; j!=as; ++j) { ra[j]=xa[j]; }
+        for(ArgumentIndexType j=0; j!=as; ++j) { ra[j]=xa[j]; }
         rtm._append(ra,xv);
     }
     return std::move(rtm);
@@ -1280,7 +1285,7 @@ if constexpr (IsSame<I,MultiIndex>::value) {
 // Differentiation operators
 
 
-template<class F, class I> Void TaylorModel<ValidatedTag,F,I>::antidifferentiate(VariableIndexType k) {
+template<class F, class I> Void TaylorModel<ValidatedTag,F,I>::antidifferentiate(ArgumentIndexType k) {
     TaylorModel<ValidatedTag,F,I>& x=*this;
     ARIADNE_PRECONDITION(k<x.argument_size());
 
@@ -1306,7 +1311,7 @@ template<class F,class I> TaylorModel<ValidatedTag,F,I> antiderivative(const Tay
 
 // Compute derivative inplace by computing term-by-term, switching the rounding mode
 // Note that since some terms may be eliminated, requiring two iterators.
-template<class F, class I> Void TaylorModel<ValidatedTag,F,I>::differentiate(VariableIndexType k) {
+template<class F, class I> Void TaylorModel<ValidatedTag,F,I>::differentiate(ArgumentIndexType k) {
     TaylorModel<ValidatedTag,F,I> const& x=*this;
     ARIADNE_PRECONDITION(k<x.argument_size());
     // ARIADNE_PRECONDITION_MSG(x.error().raw()==0,x);
@@ -1406,7 +1411,7 @@ template<class F, class I> Void TaylorModel<ValidatedTag,F,I>::unscale(IntervalD
     // The motivation for mapping to everything is that any function on the
     // resulting interval should be independent of the unneeded component
     TaylorModel<ValidatedTag,F,I>& tm=*this;
-    Interval<FloatValue<PR>> ivl=convert_interval(codom,this->precision());
+    Interval<FloatValue<PR>> ivl=convert_domain(codom,this->precision());
     ARIADNE_ASSERT_MSG(ivl.lower()<=ivl.upper(),"Cannot unscale TaylorModel<ValidatedTag,F,I> "<<tm<<" from empty interval "<<ivl);
 
     if(ivl.lower()==ivl.upper()) {
@@ -1457,7 +1462,7 @@ template<> class Powers<ValidatedNumericType> {
 
 
 template<class F,class I> TaylorModel<ValidatedTag,F,I>
-TaylorModel<ValidatedTag,F,I>::_partial_evaluate(const TaylorModel<ValidatedTag,F,I>& x, VariableIndexType k, NumericType c)
+TaylorModel<ValidatedTag,F,I>::_partial_evaluate(const TaylorModel<ValidatedTag,F,I>& x, ArgumentIndexType k, NumericType c)
 {
     if constexpr (IsSame<I,MultiIndex>::value) {
         const ArgumentSizeType as=x.argument_size();
@@ -1478,7 +1483,7 @@ template<class F, class I> TaylorModel<ValidatedTag,F,MultiIndex> TaylorModel<Va
 }
 
 
-template<class F, class I> TaylorModel<ValidatedTag,F,I> TaylorModel<ValidatedTag,F,I>::_split(const TaylorModel<ValidatedTag,F,I>& tm, VariableIndexType k, SplitPart h) {
+template<class F, class I> TaylorModel<ValidatedTag,F,I> TaylorModel<ValidatedTag,F,I>::_split(const TaylorModel<ValidatedTag,F,I>& tm, ArgumentIndexType k, SplitPart h) {
     const DegreeType deg=tm.degree();
     const ArgumentSizeType as=tm.argument_size();
     SweeperType swp=tm.sweeper();
@@ -1658,7 +1663,7 @@ template<class F, class I> OutputStream& TaylorModel<ValidatedTag,F,I>::str(Outp
     if constexpr (IsSame<I,MultiIndex>::value) {
         // Set the variable names to be 'parameter' s0,s1,..
         Array<StringType> variable_names(tm.argument_size());
-        for(VariableIndexType j=0; j!=tm.argument_size(); ++j) {
+        for(ArgumentIndexType j=0; j!=tm.argument_size(); ++j) {
             StringStream sstr;
             sstr << 's' << j;
             variable_names[j]=sstr.str();
@@ -2015,7 +2020,7 @@ template<class F,class I> struct AlgebraOperations<TaylorModel<ApproximateTag,F,
 };
 
 template<class F, class I> Void TaylorModel<ApproximateTag,F,I>::unscale(IntervalDomainType const& dom) {
-    auto ivl=convert_interval(dom,this->precision());
+    auto ivl=convert_domain(dom,this->precision());
     TaylorModel<ApproximateTag,F,I>& x=*this;
     x-=ivl.midpoint();
     x/=ivl.radius();

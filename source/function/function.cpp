@@ -195,12 +195,12 @@ template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::constant(
     return ConstantFunction<Y,IntervalDomainType>(dom,c);
 }
 
-template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::coordinate(IntervalDomainType dom, SizeOne as) {
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::coordinate(IntervalDomainType dom, IndexZero as) {
     return CoordinateFunction<P,IntervalDomainType>(dom,as);
 }
 
 template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::coordinate(IntervalDomainType dom) {
-    return coordinate(dom,SizeOne());
+    return coordinate(dom,IndexZero());
 }
 
 template<class P> VectorUnivariateFunction<P> FunctionConstructors<P>::zeros(SizeType rs, IntervalDomainType dom) {
@@ -209,7 +209,7 @@ template<class P> VectorUnivariateFunction<P> FunctionConstructors<P>::zeros(Siz
 
 
 template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::identity(IntervalDomainType dom) {
-    return coordinate(dom,SizeOne());
+    return coordinate(dom,IndexZero());
 }
 
 

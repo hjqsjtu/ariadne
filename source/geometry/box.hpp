@@ -65,6 +65,8 @@ class Box
   public:
     //! \brief The type returned by the dimension() method.
     typedef SizeType DimensionType;
+    //! \brief The type used as an index into the coordinates.
+    typedef SizeType IndexType;
     //! The type used for a component interval.
     typedef I IntervalType;
     //! The type used for the lower bound of a component interval.

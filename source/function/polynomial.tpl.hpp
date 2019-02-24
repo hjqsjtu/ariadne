@@ -62,7 +62,7 @@ template<class I, class X> Polynomial<I,X> Polynomial<I,X>::create_zero() const 
 template<class I, class X> Polynomial<I,X> Polynomial<I,X>::_constant(ArgumentSizeType as, const X& c) {
     Polynomial<I,X> r(as); r[zero_index(as)]=c; return r;}
 
-template<class I, class X> Polynomial<I,X> Polynomial<I,X>::_coordinate(ArgumentSizeType as, VariableIndexType j) {
+template<class I, class X> Polynomial<I,X> Polynomial<I,X>::_coordinate(ArgumentSizeType as, ArgumentIndexType j) {
     ARIADNE_ASSERT(j<as); Polynomial<I,X> r(as); r[unit_index(as,j)]=1; return r;
 }
 
@@ -138,7 +138,7 @@ template<class I, class X> Void Polynomial<I,X>::clear() { this->_expansion.clea
 
 template<class I, class X>
 Polynomial<I,X>&
-Polynomial<I,X>::differentiate(VariableIndexType j) {
+Polynomial<I,X>::differentiate(ArgumentIndexType j) {
     for(typename Polynomial<I,X>::Iterator iter=this->begin(); iter!=this->end(); ++iter) {
         IndexReference a=iter->index();
         CoefficientReference c=iter->coefficient();
@@ -149,7 +149,7 @@ Polynomial<I,X>::differentiate(VariableIndexType j) {
 
 template<class I, class X>
 Polynomial<I,X>&
-Polynomial<I,X>::antidifferentiate(VariableIndexType j) {
+Polynomial<I,X>::antidifferentiate(ArgumentIndexType j) {
     for(typename Polynomial<I,X>::Iterator iter=this->begin(); iter!=this->end(); ++iter) {
         IndexReference a=iter->index();
         CoefficientReference c=iter->coefficient();
@@ -474,7 +474,7 @@ OutputStream& Polynomial<I,X>::_write(OutputStream& os) const {
 }
 
 template<class I, class X>
-OutputStream& Polynomial<I,X>::_write(OutputStream& os, typename IndexTraits<I>::NameType const& argument_names) const {
+OutputStream& Polynomial<I,X>::_write(OutputStream& os, typename IndexTraits<I>::VariableNamesType const& argument_names) const {
     return this->_expansion.write(os,argument_names);
 }
 
