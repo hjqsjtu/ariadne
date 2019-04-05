@@ -39,20 +39,73 @@
 
 namespace Ariadne {
 
+template<class P> class FunctionPatchFactoryInterface;
+
 template<class P, class PR, class PRE> class FunctionModelFactoryInterface;
 template<class P, class D, class PR, class PRE> class FunctionModelCreatorInterface;
 
+template<class P, class D, class C> class FunctionPatchInterface;
 template<class P, class D, class C, class PR, class PRE> class FunctionModelInterface;
 
-template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D,IntervalDomainType,PR,PRE>
-    : public virtual FunctionInterface<P,D,IntervalDomainType>, public virtual ElementaryAlgebraInterface<CanonicalNumericType<P,PR,PRE>>
+template<class P, class D> using ScalarFunctionPatchInterface = FunctionPatchInterface<P,D,IntervalDomainType>;
+
+
+template<class P, class D> class FunctionPatchInterface<P,D,IntervalDomainType>
+    : public virtual FunctionInterface<P,D,IntervalDomainType> //, public virtual ElementaryAlgebraInterface<Number<P>>
 {
     static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
     typedef IntervalDomainType C;
   public:
     typedef D DomainType;
     typedef C CodomainType;
-    typedef Interval<FloatUpperBound<PR>> RangeType;
+    typedef UpperIntervalType RangeType;
+    typedef PositiveValidatedUpperNumber NormType;
+  public:
+#warning Overridden by Model
+//    virtual RangeType range() const = 0;
+
+//    virtual PositiveValidatedUpperNumber _error() const = 0;
+
+//    virtual Void set_error(const PositiveValidatedUpperNumber& e) = 0;
+    virtual Void clobber() = 0;
+
+//    virtual NormType const _norm() const = 0;
+
+    virtual CanonicalNumericType<P,DoublePrecision> _unchecked_evaluate(const Vector<CanonicalNumericType<P,DoublePrecision>>& x) const = 0;
+    //virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _partial_evaluate(SizeType j, const CanonicalNumericType<P,PR,PRE>& c) const = 0;
+
+//    virtual FunctionPatchFactoryInterface<P>* _factory() const = 0;
+    virtual ScalarFunctionPatchInterface<P,D>* _clone() const = 0;
+    virtual ScalarFunctionPatchInterface<P,D>* _create() const = 0;
+    virtual ScalarFunctionPatchInterface<P,D>* _embed(const DomainType& d1, const DomainType& d2) const = 0;
+    virtual ScalarFunctionPatchInterface<P,D>* _restriction(const DomainType& d) const = 0;
+
+    virtual ScalarFunctionPatchInterface<P,D>* _derivative(ElementIndexType<D> j) const = 0;
+    virtual ScalarFunctionPatchInterface<P,D>* _antiderivative(SizeType j) const = 0;
+//    virtual ScalarFunctionPatchInterface<P,D>* _antiderivative(SizeType j, Number<P> c) const = 0;
+
+//    virtual Boolean _refines(const ScalarFunctionPatchInterface<P,D>& f) const = 0;
+//    virtual Boolean _inconsistent(const ScalarFunctionPatchInterface<P,D>& f) const = 0;
+//    virtual ScalarFunctionPatchInterface<P,D>* _refinement(const ScalarFunctionPatchInterface<P,D>& f) const = 0;
+
+    friend OutputStream& operator<<(OutputStream& os, ScalarFunctionPatchInterface<P,D> const& f) {
+        return os << static_cast<WritableInterface const&>(f); }
+};
+
+
+
+
+
+template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D,IntervalDomainType,PR,PRE>
+    : public virtual FunctionInterface<P,D,IntervalDomainType>, public virtual ElementaryAlgebraInterface<CanonicalNumericType<P,PR,PRE>>
+{
+    static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
+    typedef IntervalDomainType C;
+    typedef RawFloat<PR> F;
+  public:
+    typedef D DomainType;
+    typedef C CodomainType;
+    typedef typename FunctionModelTraits<P,PR>::RangeType RangeType;
     typedef FloatError<PR> NormType;
   public:
     virtual RangeType range() const = 0;
@@ -102,7 +155,7 @@ template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D
   public:
     typedef D DomainType;
     typedef C CodomainType;
-    typedef Box<Interval<FloatUpperBound<PR>>> RangeType;
+    typedef Box<typename FunctionModelTraits<P,PR>::RangeType> RangeType;
     typedef FloatError<PR> NormType;
   public:
     virtual RangeType const range() const = 0;

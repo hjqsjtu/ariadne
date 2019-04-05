@@ -1721,6 +1721,8 @@ template<class F> struct Operations<PositiveApproximation<F>> {
         return PositiveApproximation<F>(mul(near,x1._a,x2._a)); }
     static PositiveApproximation<F> _div(PositiveApproximation<F> const& x1, PositiveApproximation<F> const& x2) {
         return PositiveApproximation<F>(div(near,x1._a,x2._a)); }
+    static PositiveApproximation<F> _pow(PositiveApproximation<F> const& x1, Nat m2) {
+        return PositiveApproximation<F>(pow(approx,x1._a,static_cast<Int>(m2))); }
     static PositiveApproximation<F> _pow(PositiveApproximation<F> const& x1, Int n2) {
         return PositiveApproximation<F>(pow(approx,x1._a,n2)); }
     static PositiveApproximation<F> _sqrt(PositiveApproximation<F> const& x) {

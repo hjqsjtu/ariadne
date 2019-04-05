@@ -277,7 +277,7 @@ template<class F> Void TestTaylorModel<F>::test_unscale()
 
     ExactIntervalType is_singleton(1.0,1.0);
     if(unscale(3*o,is_singleton).codomain()!=is_singleton) {
-        ARIADNE_TEST_WARN("Unscaling over is_singleton domain does not yield constant");
+        ARIADNE_TEST_WARN("Unscaling over singleton domain does not yield constant");
     }
 }
 
