@@ -175,22 +175,13 @@ class PositiveUpperReal : public UpperReal, public DirectedSemiRing<PositiveUppe
     PositiveFloatDPUpperBound get(DoublePrecision pr) const;
     PositiveFloatMPUpperBound get(MultiplePrecision pr) const;
   public:
-    PositiveUpperReal rec(PositiveLowerReal const&);
-    PositiveLowerReal rec(PositiveUpperReal const&);
-    PositiveUpperReal add(PositiveUpperReal const&, PositiveUpperReal const&);
-    PositiveUpperReal mul(PositiveUpperReal const&, PositiveUpperReal const&);
-    PositiveUpperReal div(PositiveUpperReal const&, PositiveLowerReal const&);
-    PositiveLowerReal div(PositiveLowerReal const&, PositiveUpperReal const&);
+    friend PositiveUpperReal rec(PositiveLowerReal const&);
+    friend PositiveLowerReal rec(PositiveUpperReal const&);
+    friend PositiveUpperReal add(PositiveUpperReal const&, PositiveUpperReal const&);
+    friend PositiveUpperReal mul(PositiveUpperReal const&, PositiveUpperReal const&);
+    friend PositiveUpperReal div(PositiveUpperReal const&, PositiveLowerReal const&);
+    friend PositiveLowerReal div(PositiveLowerReal const&, PositiveUpperReal const&);
 };
-
-PositiveUpperReal rec(PositiveLowerReal plr);
-PositiveLowerReal rec(PositiveUpperReal pur);
-PositiveLowerReal add(PositiveLowerReal plr1, PositiveLowerReal plr2);
-PositiveUpperReal add(PositiveUpperReal pur1, PositiveUpperReal pur2);
-PositiveLowerReal mul(PositiveLowerReal plr1, PositiveLowerReal plr2);
-PositiveUpperReal mul(PositiveUpperReal pur1, PositiveUpperReal pur2);
-PositiveLowerReal div(PositiveLowerReal plr1, PositiveUpperReal pur2);
-PositiveUpperReal div(PositiveUpperReal pur1, PositiveLowerReal plr2);
 
 } // namespace Ariadne
 
