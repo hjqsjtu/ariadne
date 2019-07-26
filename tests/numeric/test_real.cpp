@@ -29,6 +29,9 @@
 #include "numeric/builtin.hpp"
 #include "numeric/real.hpp"
 
+#include "numeric/upper_real.hpp"
+#include "numeric/lower_real.hpp"
+
 #include "numeric/integer.hpp"
 #include "numeric/dyadic.hpp"
 #include "numeric/decimal.hpp"

@@ -22,16 +22,16 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file real.cpp
- *  \brief
- */
+#include "real.hpp"
+#include "upper_real.hpp"
+#include "lower_real.hpp"
+#include "naive_real.hpp"
 
 #include "../utility/module.hpp"
 #include "../numeric/operators.hpp"
 #include "../symbolic/templates.hpp"
 
 #include "logical.hpp"
-#include "real.hpp"
 #include "integer.hpp"
 #include "rational.hpp"
 
