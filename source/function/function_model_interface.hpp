@@ -33,11 +33,16 @@
 
 #include "../function/function.decl.hpp"
 #include "../function/function_interface.hpp"
+#include "../function/function_patch_interface.hpp"
 
 #include "../algebra/range.hpp"
 #include "../numeric/operators.hpp"
 
 namespace Ariadne {
+
+typedef Interval<FloatDPUpperBound> IntervalRangeType;
+typedef Box<Interval<FloatDPUpperBound>> BoxRangeType;
+
 
 template<class P, class PR, class PRE> class FunctionModelFactoryInterface;
 template<class P, class D, class PR, class PRE> class FunctionModelCreatorInterface;
@@ -45,28 +50,35 @@ template<class P, class D, class PR, class PRE> class FunctionModelCreatorInterf
 template<class P, class D, class C, class PR, class PRE> class FunctionModelInterface;
 
 template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D,IntervalDomainType,PR,PRE>
-    : public virtual FunctionInterface<P,D,IntervalDomainType>, public virtual ElementaryAlgebraInterface<CanonicalNumericType<P,PR,PRE>>
+    : public virtual FunctionPatchInterface<P,D,IntervalDomainType>
+    , public virtual ElementaryAlgebraInterface<CanonicalNumericType<P,PR,PRE>>
 {
     static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
     typedef IntervalDomainType C;
   public:
     typedef D DomainType;
     typedef C CodomainType;
+    template<class Y> using Argument = typename ElementTraits<DomainType>::template Type<Y>;
     typedef Interval<FloatUpperBound<PR>> RangeType;
+    typedef CanonicalErrorType<P,PRE> ErrorType;
     typedef FloatError<PR> NormType;
   public:
-    virtual RangeType range() const = 0;
+    virtual RangeType const _range() const = 0;
 
     virtual CanonicalCoefficientType<P,PR> const& value() const = 0;
     virtual CanonicalCoefficientType<P,PR> const gradient_value(SizeType i) const = 0;
-    virtual CanonicalErrorType<P,PRE> const& error() const = 0;
+    virtual ErrorType const _error() const = 0;
 
-    virtual Void set_error(const CanonicalErrorType<P,PRE>& e) = 0;
+    virtual Void set_error(const ErrorType& e) = 0;
     virtual Void clobber() = 0;
 
     virtual NormType const _norm() const = 0;
 
-    virtual CanonicalNumericType<P,PR,PRE> _unchecked_evaluate(const Vector<CanonicalNumericType<P,PR,PRE>>& x) const = 0;
+    virtual Number<P> _unchecked_evaluate(const Argument<Number<P>>& x) const = 0;
+    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _partial_evaluate(SizeType j, const Number<P>& c) const = 0;
+    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _antiderivative(ElementIndexType<D> j, Number<P> c) const = 0;
+
+    virtual CanonicalNumericType<P,PR,PRE> _unchecked_evaluate(const Argument<CanonicalNumericType<P,PR,PRE>>& x) const = 0;
     virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _partial_evaluate(SizeType j, const CanonicalNumericType<P,PR,PRE>& c) const = 0;
 
     virtual FunctionModelFactoryInterface<P,PR,PRE>* _factory() const = 0;
@@ -76,8 +88,8 @@ template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D
     virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _restriction(const DomainType& d) const = 0;
 
     virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _derivative(ElementIndexType<D> j) const = 0;
-    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _antiderivative(SizeType j) const = 0;
-    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _antiderivative(SizeType j, CanonicalNumericType<P,PR,PRE> c) const = 0;
+    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _antiderivative(ElementIndexType<D> j) const = 0;
+    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _antiderivative(ElementIndexType<D> j, CanonicalNumericType<P,PR,PRE> c) const = 0;
 
     virtual Boolean _refines(const ScalarFunctionModelInterface<P,D,PR,PRE>& f) const = 0;
     virtual Boolean _inconsistent(const ScalarFunctionModelInterface<P,D,PR,PRE>& f) const = 0;
@@ -95,37 +107,52 @@ template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D
 
 
 template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D,BoxDomainType,PR,PRE>
-    : public virtual FunctionInterface<P,D,BoxDomainType>
+    : public virtual FunctionPatchInterface<P,D,BoxDomainType>
 {
     static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
     typedef BoxDomainType C;
   public:
     typedef D DomainType;
     typedef C CodomainType;
+    template<class Y> using Argument = typename ElementTraits<DomainType>::template Type<Y>;
+    typedef CanonicalErrorType<P,PRE> ErrorType;
+    typedef ElementTraits<C>::BoundedRangeType GenericRangeType;
     typedef Box<Interval<FloatUpperBound<PR>>> RangeType;
     typedef FloatError<PR> NormType;
   public:
-    virtual RangeType const range() const = 0;
-    virtual Vector<CanonicalErrorType<P,PRE>> const errors() const = 0;
-    virtual CanonicalErrorType<P,PRE> const error() const = 0;
+//    virtual GenericRangeType const _range() const = 0;
+    virtual Vector<ErrorType> const _errors() const = 0;
+    virtual ErrorType const _error() const = 0;
     virtual Void clobber() = 0;
 
     virtual NormType const _norm() const = 0;
+    virtual RangeType const _range() const = 0;
+
+
+    virtual Void _set(SizeType, ScalarFunctionPatchInterface<P,D> const&) = 0;
+    virtual Void _adjoin(const ScalarFunctionPatchInterface<P,D>& f2) = 0;
+    virtual VectorFunctionModelInterface<P,D,PR,PRE>* _join(const VectorFunctionPatchInterface<P,D>& f2) const = 0;
+    virtual VectorFunctionModelInterface<P,D,PR,PRE>* _combine(const VectorFunctionPatchInterface<P,D>& f2) const = 0;
+
+    virtual Vector<Number<P>> _unchecked_evaluate(const Argument<Number<P>>& x) const = 0;
+    virtual VectorFunctionModelInterface<P,D,PR,PRE>* _partial_evaluate(SizeType j, const Number<P>& c) const = 0;
+
+
+    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _get(SizeType) const = 0;
+    virtual Void _adjoin(const ScalarFunctionModelInterface<P,D,PR,PRE>& f2) = 0;
+    virtual VectorFunctionModelInterface<P,D,PR,PRE>* _join(const VectorFunctionModelInterface<P,D,PR,PRE>& f2) const = 0;
+    virtual VectorFunctionModelInterface<P,D,PR,PRE>* _combine(const VectorFunctionModelInterface<P,D,PR,PRE>& f2) const = 0;
 
     virtual FunctionModelFactoryInterface<P,PR,PRE>* _factory() const = 0;
     virtual VectorFunctionModelInterface<P,D,PR,PRE>* _clone() const = 0;
     virtual Void _set(SizeType, ScalarFunctionModelInterface<P,D,PR,PRE> const&) = 0;
-    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _get(SizeType) const = 0;
     virtual VectorFunctionModelInterface<P,D,PR,PRE>* _embed(const DomainType& d1, const DomainType& d2) const = 0;
     virtual VectorFunctionModelInterface<P,D,PR,PRE>* _restriction(const DomainType& d) const = 0;
-    virtual VectorFunctionModelInterface<P,D,PR,PRE>* _join(const VectorFunctionModelInterface<P,D,PR,PRE>& f2) const = 0;
-    virtual VectorFunctionModelInterface<P,D,PR,PRE>* _combine(const VectorFunctionModelInterface<P,D,PR,PRE>& f2) const = 0;
-    virtual Void _adjoin(const ScalarFunctionModelInterface<P,D,PR,PRE>& f2) = 0;
-    virtual Vector<CanonicalNumericType<P,PR,PRE>> _unchecked_evaluate(const Vector<CanonicalNumericType<P,PR,PRE>>& x) const = 0;
     virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _compose(const ScalarMultivariateFunctionInterface<P>& f) const = 0;
     virtual VectorFunctionModelInterface<P,D,PR,PRE>* _compose(const VectorMultivariateFunctionInterface<P>& f) const = 0;
     virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _unchecked_compose(const ScalarMultivariateFunctionInterface<P>& f) const = 0;
     virtual VectorFunctionModelInterface<P,D,PR,PRE>* _unchecked_compose(const VectorMultivariateFunctionInterface<P>& f) const = 0;
+    virtual Vector<CanonicalNumericType<P,PR,PRE>> _unchecked_evaluate(const Argument<CanonicalNumericType<P,PR,PRE>>& x) const = 0;
     virtual VectorFunctionModelInterface<P,D,PR,PRE>* _partial_evaluate(SizeType j, const CanonicalNumericType<P,PR,PRE>& c) const = 0;
     virtual Void restrict(const DomainType& d) = 0;
 };

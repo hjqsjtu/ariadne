@@ -219,11 +219,11 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
         return this->_ptr->_evaluate(x); }
     inline DomainType const domain() const { return this->_ptr->domain(); }
     inline CodomainType const codomain() const { return this->_ptr->codomain(); }
-    inline RangeType const range() const { return this->_ptr->range(); }
+    inline RangeType const range() const { return this->_ptr->_range(); }
 
     inline CoefficientType value() const { return this->_ptr->value(); }
     inline CoefficientType gradient_value(SizeType j) const { return this->_ptr->gradient_value(j); }
-    inline ErrorType error() const { return this->_ptr->error(); }
+    inline ErrorType error() const { return this->_ptr->_error(); }
 
     inline Void set_error(const ErrorType& e) { return this->_ptr->set_error(e); }
     inline Void set_error(Nat e) { return this->_ptr->set_error(ErrorType(e,this->error().precision())); }
@@ -338,17 +338,49 @@ template<class P, class D, class PR, class PRE> struct AlgebraOperations<ScalarF
 
     typedef ScalarFunctionModel<P,D,PR,PRE> FM; typedef CanonicalNumericType<P,PR,PRE> X;
     typedef ScalarFunctionModelInterface<P,D,PR,PRE> FMI;
+    typedef ElementaryAlgebraInterface<X> EAI;
 
     static FM apply(BinaryElementaryOperator op, const FM& f1, const FM& f2) {
-        return FM(&dynamic_cast<FMI&>(*f1._ptr->_apply(op,*f2._ptr))); }
+        FMI const* f1p=f1._ptr.operator->();
+        FMI const* f2p=f2._ptr.operator->();
+        EAI const* a1p=f1p;
+        EAI* rap=a1p->_apply(op,*f2p);
+        FMI* rfp=&dynamic_cast<FMI&>(*rap);
+        return FM(rfp);
+    }
+//        return FM(&dynamic_cast<FMI&>(*f1._ptr->_apply(op,*f2._ptr))); }
     static FM apply(BinaryElementaryOperator op, const FM& f1, const X& c2) {
-        return FM(&dynamic_cast<FMI&>(*f1._ptr->_apply(op,c2))); }
+        FMI const* f1p=f1._ptr.operator->();
+        EAI const* a1p=f1p;
+        EAI* rap=a1p->_apply(op,c2);
+        FMI* rfp=&dynamic_cast<FMI&>(*rap);
+        return FM(rfp);
+    }
+//        return FM(&dynamic_cast<FMI&>(*f1._ptr->_apply(op,c2))); }
     static FM apply(BinaryElementaryOperator op, const X& c1, const FM& f2) {
-        return FM(&dynamic_cast<FMI&>(*f2._ptr->_rapply(op,c1))); }
+        FMI const* f2p=f2._ptr.operator->();
+        EAI const* a2p=f2p;
+        EAI* rap=a2p->_rapply(op,c1);
+        FMI* rfp=&dynamic_cast<FMI&>(*rap);
+        return FM(rfp);
+    }
+//        return FM(&dynamic_cast<FMI&>(*f2._ptr->_rapply(op,c1))); }
     static FM apply(UnaryElementaryOperator op, const FM& f) {
-        return FM(&dynamic_cast<FMI&>(*f._ptr->_apply(op))); }
+        FMI const* fp=f._ptr.operator->();
+        EAI const* ap=fp;
+        EAI* rap=ap->_apply(op);
+        FMI* rfp=&dynamic_cast<FMI&>(*rap);
+        return FM(rfp);
+    }
+//        return FM(&dynamic_cast<FMI&>(*f._ptr->_apply(op))); }
     static FM apply(GradedElementaryOperator op, const FM& f, Int n) {
-        return FM(&dynamic_cast<FMI&>(*f._ptr->_apply(op,n))); }
+        FMI const* fp=f._ptr.operator->();
+        EAI const* ap=fp;
+        EAI* rap=ap->_apply(op,n);
+        FMI* rfp=&dynamic_cast<FMI&>(*rap);
+        return FM(rfp);
+    }
+//        return FM(&dynamic_cast<FMI&>(*f._ptr->_apply(op,n))); }
 
 /*
     static FM apply(BinaryElementaryOperator op, const X& c1, const FM& f2) {
@@ -475,9 +507,9 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
     inline PrecisionType const precision() const { return this->get(0).precision(); }
     inline DomainType const domain() const { return this->_ptr->domain(); }
     inline CodomainType const codomain() const { return this->_ptr->codomain(); }
-    inline RangeType const range() const { return this->_ptr->range(); }
-    inline Vector<ErrorType> const errors() const { return this->_ptr->errors(); }
-    inline ErrorType const error() const { return this->_ptr->error(); }
+    inline RangeType const range() const { return this->_ptr->_range(); }
+    inline Vector<ErrorType> const errors() const { return this->_ptr->_errors(); }
+    inline ErrorType const error() const { return this->_ptr->_error(); }
     inline Void clobber() { this->_ptr->clobber(); }
     inline Matrix<NumericType> const jacobian(const Vector<NumericType>& x) const;
 //        Vector<Differential<NumericType>> dfx=this->_ptr->_evaluate(Differential<NumericType>::variables(1u,x));

@@ -294,7 +294,7 @@ class Function
     friend template<class X> auto evaluate (const Function<P,D,C>& f,const Argument<X>& x) const -> decltype(f.reference()._evaluate(x)) {
         return f(x); }
 #endif
-//! \brief Call the function on an argument of concrete scalar type \a X. \deprecated
+    //! \brief Call the function on an argument of concrete scalar type \a X. \deprecated
     template<class X> auto evaluate(const Argument<X>& x) const -> decltype(this->reference()._evaluate(x)) {
         return this->reference()._evaluate(x); }
     //@}

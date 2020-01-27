@@ -303,6 +303,15 @@ template<class A, class X> struct DispatchLatticeAlgebraOperations {
 
 };
 
+template<class A, class X, class Y> struct DispatchConcreteGenericLatticeAlgebraOperations
+    : public DispatchLatticeAlgebraOperations<A,X>
+{
+    friend A max(A a1, Y const& y2) { X x2=X(y2,a1.precision()); return max(a1,x2); }
+    friend A min(A a1, Y const& y2) { X x2=X(y2,a1.precision()); return min(a1,x2); }
+    friend A max(Y const& y1, A a2) { X x1=X(y1,a2.precision()); return max(x1,a2); }
+    friend A min(Y const& y1, A a2) { X x1=X(y1,a2.precision()); return min(x1,a2); }
+};
+
 template<class A, class X> struct DispatchElementaryAlgebraOperations
     : DispatchTranscendentalAlgebraOperations<A,X>, DispatchLatticeAlgebraOperations<A,X> {
 };

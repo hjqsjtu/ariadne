@@ -322,6 +322,11 @@ template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::create_constant
     return ScaledFunctionPatch<M>::constant(this->domain(),c,this->properties());
 }
 
+template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::create_constant(GenericNumericType const& c) const
+{
+    return ScaledFunctionPatch<M>::constant(this->domain(),NumericType(c,this->precision()),this->properties());
+}
+
 //FIXME: Should allow this in code file
 /*
 template<class M> ScaledFunctionPatch<M>* ScaledFunctionPatch<M>::_clone() const
@@ -809,6 +814,16 @@ template<class M> const typename VectorScaledFunctionPatch<M>::RangeType VectorS
     RangeType result(this->result_size(),this->_models.zero_element().range());
     for(SizeType i=0; i!=result.size(); ++i) {
         result[i]=this->_models[i].range();
+    }
+    return result;
+}
+
+
+template<class M> const typename VectorScaledFunctionPatch<M>::NormType VectorScaledFunctionPatch<M>::norm() const
+{
+    NormType result(this->_models.zero_element().norm());
+    for(SizeType i=0; i!=this->models().size(); ++i) {
+        result=max(this->_models[i].norm(),result);
     }
     return result;
 }

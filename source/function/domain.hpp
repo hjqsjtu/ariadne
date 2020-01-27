@@ -40,10 +40,13 @@ using BoxDomainType = ExactBoxType;
 class RealDomain {
   public:
     constexpr RealDomain() { }
+    constexpr RealDomain(SizeOne) { }
     constexpr SizeOne dimension() const { return SizeOne(); }
     operator IntervalDomainType() const { return IntervalDomainType(-inf,+inf); }
     friend RealDomain intersection(RealDomain const& dom1, RealDomain const& dom2) { return RealDomain(); }
     friend Bool operator==(RealDomain const& dom1, RealDomain const& dom2) { return true; }
+    friend Bool operator==(RealDomain const& dom1, IntervalDomainType const& dom2) { return IntervalDomainType(dom1)==dom2; }
+    friend Bool operator==(IntervalDomainType const& dom1, RealDomain const& dom2) { return dom1==IntervalDomainType(dom2); }
     friend OutputStream& operator<<(OutputStream& os, RealDomain const& dom) { return os << "R"; }
 };
 
@@ -59,6 +62,9 @@ class EuclideanDomain {
     friend EuclideanDomain product(EuclideanDomain const& dom1, EuclideanDomain const& dom2) { return EuclideanDomain(dom1.dimension()+dom2.dimension()); }
     friend EuclideanDomain product(EuclideanDomain const& dom1, RealDomain const& dom2) { return EuclideanDomain(dom1.dimension()+dom2.dimension()); }
     friend Bool operator==(EuclideanDomain const& dom1, EuclideanDomain const& dom2) { return dom1.dimension() == dom2.dimension(); }
+    friend Bool operator==(EuclideanDomain const& dom1, BoxDomainType const& dom2) { return BoxDomainType(dom1)==dom2; }
+    friend Bool operator==(BoxDomainType const& dom1, EuclideanDomain const& dom2) { return dom1==BoxDomainType(dom2); }
+
     friend OutputStream& operator<<(OutputStream& os, EuclideanDomain const& dom) { return os << "R" << dom.dimension(); }
 };
 
@@ -87,15 +93,28 @@ class UnitBox {
     friend OutputStream& operator<<(OutputStream& os, UnitBox const& dom) { return os << "[-1:+1]^" << dom.dimension(); }
 };
 
+struct ScalarElementTraits {
+    template<class X> using Type=Scalar<X>;
+    using SizeType=SizeOne;
+    using IndexType=IndexZero;
+    typedef Interval<FloatDPUpperBound> BoundedRangeType;
+};
+struct VectorElementTraits {
+    template<class X> using Type=Vector<X>;
+    using SizeType=Ariadne::SizeType;
+    using IndexType=SizeType;
+    typedef Box<Interval<FloatDPUpperBound>> BoundedRangeType;
+};
+
 template<class S> struct ElementTraits;
 template<class S, class X> using ElementType = typename ElementTraits<S>::template Type<X>;
 
-template<class UB> struct ElementTraits<Interval<UB>> { template<class X> using Type=Scalar<X>; };
-template<class IVL> struct ElementTraits<Box<IVL>> { template<class X> using Type=Vector<X>; };
-template<> struct ElementTraits<RealDomain> { template<class X> using Type=Scalar<X>; };
-template<> struct ElementTraits<EuclideanDomain> { template<class X> using Type=Vector<X>; };
-template<> struct ElementTraits<UnitInterval> { template<class X> using Type=Scalar<X>; };
-template<> struct ElementTraits<UnitBox> { template<class X> using Type=Vector<X>; };
+template<class UB> struct ElementTraits<Interval<UB>> : ScalarElementTraits { };
+template<class IVL> struct ElementTraits<Box<IVL>> : VectorElementTraits { };
+template<> struct ElementTraits<RealDomain> : ScalarElementTraits { };
+template<> struct ElementTraits<EuclideanDomain> : VectorElementTraits { };
+template<> struct ElementTraits<UnitInterval> : ScalarElementTraits { };
+template<> struct ElementTraits<UnitBox> : VectorElementTraits { };
 
 template<class... TS> using CartesianProductType = decltype(product(declval<TS>()...));
 

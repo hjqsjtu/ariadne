@@ -137,10 +137,20 @@ typedef VectorMultivariateFunctionInterface<ApproximateTag> ApproximateVectorMul
 typedef VectorMultivariateFunctionInterface<ValidatedTag> ValidatedVectorMultivariateFunctionInterface;
 typedef VectorMultivariateFunctionInterface<EffectiveTag> EffectiveVectorMultivariateFunctionInterface;
 
-using ValidatedScalarUnivariateFunctionPatch = Function<ValidatedTag,IntervalDomainType,IntervalDomainType>;
-using ValidatedVectorUnivariateFunctionPatch = Function<ValidatedTag,IntervalDomainType,BoxDomainType>;
-using ValidatedScalarMultivariateFunctionPatch = Function<ValidatedTag,BoxDomainType,IntervalDomainType>;
-using ValidatedVectorMultivariateFunctionPatch = Function<ValidatedTag,BoxDomainType,BoxDomainType>;
+//template<class P, class SIG> using FunctionPatch=Function<P,SIG>;
+//using ValidatedScalarUnivariateFunctionPatch = FunctionPatch<ValidatedTag,RealScalar(RealScalar)>;
+//using ValidatedVectorUnivariateFunctionPatch = FunctionPatch<ValidatedTag,RealVector(RealScalar)>;
+//using ValidatedScalarMultivariateFunctionPatch = FunctionPatch<ValidatedTag,RealScalar(RealVector)>;
+//using ValidatedVectorMultivariateFunctionPatch = FunctionPatch<ValidatedTag,RealVector(RealVector)>;
+template<class P, class D, class C> class FunctionPatch;
+template<class P, class D> using ScalarFunctionPatch=FunctionPatch<P,D,IntervalDomainType>;
+template<class P, class D> using VectorFunctionPatch=FunctionPatch<P,D,BoxDomainType>;
+template<class P, class C> using UnivariateFunctionPatch=FunctionPatch<P,IntervalDomainType,C>;
+template<class P, class C> using MultivariateFunctionPatch=FunctionPatch<P,BoxDomainType,C>;
+template<class P> using ScalarUnivariateFunctionPatch = FunctionPatch<P,IntervalDomainType,IntervalDomainType>;
+template<class P> using VectorUnivariateFunctionPatch = FunctionPatch<P,IntervalDomainType,BoxDomainType>;
+template<class P> using ScalarMultivariateFunctionPatch = FunctionPatch<P,BoxDomainType,IntervalDomainType>;
+template<class P> using VectorMultivariateFunctionPatch = FunctionPatch<P,BoxDomainType,BoxDomainType>;
 
 
 // Function models declarations
