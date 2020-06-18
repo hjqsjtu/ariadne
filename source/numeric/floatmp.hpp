@@ -258,6 +258,26 @@ class FloatMP {
     friend FloatMP sub(RoundDownward rnd, FloatMP const& x1, FloatDP const& x2);
 
     // Correctly rounded arithmetic
+    friend FloatMP sqr(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP rec(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP add(CurrentRoundingMode, FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP sub(CurrentRoundingMode, FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP mul(CurrentRoundingMode, FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP div(CurrentRoundingMode, FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP fma(CurrentRoundingMode, FloatMP const& x1, FloatMP const& x2, FloatMP const& x3);
+    friend FloatMP pow(CurrentRoundingMode, FloatMP const& x, Int n);
+    friend FloatMP sqrt(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP exp(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP log(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP sin(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP cos(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP tan(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP asin(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP acos(CurrentRoundingMode, FloatMP const& x);
+    friend FloatMP atan(CurrentRoundingMode, FloatMP const& x);
+    static FloatMP pi(CurrentRoundingMode, MultiplePrecision pr);
+
+    // Correctly rounded arithmetic
     friend FloatMP sqr(FloatMP const& x);
     friend FloatMP rec(FloatMP const& x);
     friend FloatMP add(FloatMP const& x1, FloatMP const& x2);

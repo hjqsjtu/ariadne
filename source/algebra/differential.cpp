@@ -37,7 +37,7 @@
 
 namespace Ariadne {
 
-template class UnivariateDifferential<FloatDP>;
+template class UnivariateDifferential<RoundedFloatDP>;
 template class UnivariateDifferential<FloatDPApproximation>;
 template class UnivariateDifferential<FloatDPBounds>;
 template class UnivariateDifferential<FloatDPUpperInterval>;
@@ -46,21 +46,35 @@ template class UnivariateDifferential<FloatMPApproximation>;
 template class UnivariateDifferential<FloatMPBounds>;
 
 
+#warning
+// FIXME: Unsafe arithmetic operators on raw float
+inline FloatDP operator+(FloatDP x1, FloatDP x2) { return x1.dbl + x2.dbl; }
+inline FloatDP operator-(FloatDP x1, FloatDP x2) { return x1.dbl - x2.dbl; }
+inline FloatDP operator*(FloatDP x1, FloatDP x2) { return x1.dbl * x2.dbl; }
+inline FloatDP operator/(FloatDP x1, FloatDP x2) { return x1.dbl / x2.dbl; }
+inline FloatDP& operator+=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl + x2.dbl; return x1; }
+inline FloatDP& operator-=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl - x2.dbl; return x1; }
+inline FloatDP& operator*=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl * x2.dbl; return x1; }
+inline FloatDP& operator/=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl / x2.dbl; return x1; }
+inline FloatDP rec(FloatDP x) { return 1.0/x.dbl; }
 template class Differential<FloatDP>;
+template class Vector<Differential<FloatDP>>;
+
+template class Differential<RoundedFloatDP>;
 template class Differential<FloatDPBounds>;
 template class Differential<FloatDPApproximation>;
 template class Differential<FloatDPUpperInterval>;
 
-template struct AlgebraOperations<Differential<FloatDP>>;
+template struct AlgebraOperations<Differential<RoundedFloatDP>>;
 template struct AlgebraOperations<Differential<FloatDPApproximation>>;
 template struct AlgebraOperations<Differential<FloatDPBounds>>;
 template struct AlgebraOperations<Differential<FloatDPUpperInterval>>;
-template class GradedAlgebraOperations<Differential<FloatDP>>;
+template class GradedAlgebraOperations<Differential<RoundedFloatDP>>;
 template class GradedAlgebraOperations<Differential<FloatDPApproximation>>;
 template class GradedAlgebraOperations<Differential<FloatDPBounds>>;
 template class GradedAlgebraOperations<Differential<FloatDPUpperInterval>>;
 
-template class Vector<Differential<FloatDP>>;
+template class Vector<Differential<RoundedFloatDP>>;
 template class Vector<Differential<FloatDPBounds>>;
 template class Vector<Differential<FloatDPApproximation>>;
 template class Vector<Differential<FloatDPUpperInterval>>;

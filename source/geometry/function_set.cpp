@@ -46,6 +46,11 @@
 
 namespace Ariadne {
 
+#warning
+// FIXME: Unsafe arithmetic operators on raw float
+inline FloatDP& operator+=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl + x2.dbl; return x1; }
+inline FloatDP& operator*=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl * x2.dbl; return x1; }
+
 //! \related TaylorConstrainedImageSet \brief The possible types of method used to discretise a nonlinear set.
 enum class DiscretisationMethod : std::uint8_t { SUBDIVISION, AFFINE, CONSTRAINT };
 //! \related TaylorConstrainedImageSet \brief The type of method currently used to discretise a nonlinear set.
@@ -71,6 +76,8 @@ ExactIntervalType over_approximation(Interval<ValidatedUpperNumber> const& ivl);
 ExactBoxType under_approximation(const RealBox& rbx);
 ExactBoxType over_approximation(const RealBox& rbx);
 ExactBoxType approximation(const RealBox& rbx);
+
+
 
 
 

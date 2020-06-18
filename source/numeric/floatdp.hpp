@@ -69,6 +69,10 @@ static const DoublePrecision double_precision = DoublePrecision();
 static const DoublePrecision dp = DP();
 
 // Correctly rounded functions
+double nul_rnd(double x);
+double pos_rnd(double x);
+double neg_rnd(double x);
+double hlf_rnd(double x);
 double sqr_rnd(double x);
 double rec_rnd(double x);
 double add_rnd(double x1, double x2);
@@ -99,6 +103,10 @@ double sub_opp(double x, double y);
 double mul_opp(double x, double y);
 double div_opp(double x, double y);
 double neg_rec_opp(double x);
+
+template<class FLT> class Rounded;
+
+using RoundedFloatDP = Rounded<FloatDP>;
 
 //! \ingroup NumericModule
 //! \brief Floating point numbers (double precision) using rounded arithmetic.
@@ -208,6 +216,7 @@ class FloatDP {
     friend FloatDP min(FloatDP x1, FloatDP x2) { return std::min(x1.dbl,x2.dbl); }
     friend FloatDP abs(FloatDP x) { return std::fabs(x.dbl); }
     friend FloatDP mag(FloatDP x) { return std::fabs(x.dbl); }
+    friend FloatDP mig(FloatDP x) { return std::fabs(x.dbl); }
 
     // Exact arithmetic
     friend FloatDP nul(FloatDP x) { return +0.0; }
@@ -235,6 +244,27 @@ class FloatDP {
     static FloatDP pi(RoundingModeType rnd, PrecisionType pr);
 
     // Correctly rounded arithmetic
+    friend FloatDP sqr(CurrentRoundingMode, FloatDP x) { return sqr_rnd(x.dbl); }
+    friend FloatDP rec(CurrentRoundingMode, FloatDP x) { return rec_rnd(x.dbl); }
+    friend FloatDP add(CurrentRoundingMode, FloatDP x1, FloatDP x2) { return add_rnd(x1.dbl,x2.dbl); }
+    friend FloatDP sub(CurrentRoundingMode, FloatDP x1, FloatDP x2) { return sub_rnd(x1.dbl,x2.dbl); }
+    friend FloatDP mul(CurrentRoundingMode, FloatDP x1, FloatDP x2) { return mul_rnd(x1.dbl,x2.dbl); }
+    friend FloatDP div(CurrentRoundingMode, FloatDP x1, FloatDP x2) { return div_rnd(x1.dbl,x2.dbl); }
+    friend FloatDP fma(CurrentRoundingMode, FloatDP x1, FloatDP x2, FloatDP x3) { return fma_rnd(x1.dbl,x2.dbl,x3.dbl); }
+    friend FloatDP pow(CurrentRoundingMode, FloatDP x, Int n) { return pow_rnd(x.dbl,n); }
+    friend FloatDP sqrt(CurrentRoundingMode, FloatDP x) { return sqrt_rnd(x.dbl); }
+    friend FloatDP exp(CurrentRoundingMode, FloatDP x) { return exp_rnd(x.dbl); }
+    friend FloatDP log(CurrentRoundingMode, FloatDP x) { return log_rnd(x.dbl); }
+    friend FloatDP sin(CurrentRoundingMode, FloatDP x) { return sin_rnd(x.dbl); }
+    friend FloatDP cos(CurrentRoundingMode, FloatDP x) { return cos_rnd(x.dbl); }
+    friend FloatDP tan(CurrentRoundingMode, FloatDP x) { return tan_rnd(x.dbl); }
+    friend FloatDP asin(CurrentRoundingMode, FloatDP x) { return asin_rnd(x.dbl); }
+    friend FloatDP acos(CurrentRoundingMode, FloatDP x) { return acos_rnd(x.dbl); }
+    friend FloatDP atan(CurrentRoundingMode, FloatDP x) { return atan_rnd(x.dbl); }
+    static FloatDP pi(CurrentRoundingMode, PrecisionType pr) { return pi_rnd(); }
+
+/*
+    // Correctly rounded arithmetic
     friend FloatDP sqr(FloatDP x) { return sqr_rnd(x.dbl); }
     friend FloatDP rec(FloatDP x) { return rec_rnd(x.dbl); }
     friend FloatDP add(FloatDP x1, FloatDP x2) { return add_rnd(x1.dbl,x2.dbl); }
@@ -253,7 +283,9 @@ class FloatDP {
     friend FloatDP acos(FloatDP x) { return acos_rnd(x.dbl); }
     friend FloatDP atan(FloatDP x) { return atan_rnd(x.dbl); }
     static FloatDP pi(PrecisionType pr) { return pi_rnd(); }
+*/
 
+/*
     // Correctly rounded operators
     friend FloatDP operator+(FloatDP x1, FloatDP x2) { return x1.dbl+x2.dbl; }
     friend FloatDP operator-(FloatDP x1, FloatDP x2) { return x1.dbl-x2.dbl; }
@@ -263,47 +295,46 @@ class FloatDP {
     friend FloatDP& operator-=(FloatDP& x1, FloatDP x2) { x1.dbl-=x2.dbl; return x1; }
     friend FloatDP& operator*=(FloatDP& x1, FloatDP x2) { x1.dbl*=x2.dbl; return x1; }
     friend FloatDP& operator/=(FloatDP& x1, FloatDP x2) { x1.dbl/=x2.dbl; return x1; }
-
-    template<class OP> friend FloatDP apply(OP op, RoundingModeType rnd, FloatDP x1, FloatDP x2, FloatDP x3) {
+*/
+  private:
+    template<class OP> static FloatDP _apply_rnd(OP op, RoundingModeType rnd, FloatDP x1, FloatDP x2, FloatDP x3) {
         auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);
-        FloatDP r=op(x1,x2,x3); FloatDP::set_rounding_mode(old_rnd); return r;
+        FloatDP r=op(x1.dbl,x2.dbl,x3.dbl); FloatDP::set_rounding_mode(old_rnd); return r;
+    }
+    template<class OP> static FloatDP _apply_rnd(OP op, RoundingModeType rnd, FloatDP x1, FloatDP x2) {
+        auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);
+        FloatDP r=op(x1.dbl,x2.dbl); FloatDP::set_rounding_mode(old_rnd); return r;
+    }
+    template<class OP> static FloatDP _apply_rnd(OP op, RoundingModeType rnd, FloatDP x) {
+        auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);
+        FloatDP r=op(x.dbl); FloatDP::set_rounding_mode(old_rnd); return r;
+    }
+    template<class OP> static FloatDP _apply_rnd(OP op, RoundingModeType rnd, FloatDP x, Int n) {
+        auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);
+        FloatDP r=op(x.dbl,n); FloatDP::set_rounding_mode(old_rnd); return r;
     }
 
-    template<class OP> friend FloatDP apply(OP op, RoundingModeType rnd, FloatDP x1, FloatDP x2) {
-        auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);
-        FloatDP r=op(x1,x2); FloatDP::set_rounding_mode(old_rnd); return r;
-    }
-
-    template<class OP> friend FloatDP apply(OP op, RoundingModeType rnd, FloatDP x) {
-        auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);
-        FloatDP r=op(x); FloatDP::set_rounding_mode(old_rnd); return r;
-    }
-
-    template<class OP> friend FloatDP apply(OP op, RoundingModeType rnd, FloatDP x, Int n) {
-        auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);
-        FloatDP r=op(x,n); FloatDP::set_rounding_mode(old_rnd); return r;
-    }
-
+  public:
     // Explicitly rounded operations
-    friend FloatDP nul(RoundingModeType rnd, FloatDP x) { return apply(Nul(),rnd,x); }
-    friend FloatDP pos(RoundingModeType rnd, FloatDP x) { return apply(Pos(),rnd,x); }
-    friend FloatDP neg(RoundingModeType rnd, FloatDP x) { return apply(Neg(),rnd,x); }
-    friend FloatDP hlf(RoundingModeType rnd, FloatDP x) { return apply(Hlf(),rnd,x); }
-    friend FloatDP add(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return apply(Add(),rnd,x1,x2); }
-    friend FloatDP sub(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return apply(Sub(),rnd,x1,x2); }
-    friend FloatDP mul(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return apply(Mul(),rnd,x1,x2); }
-    friend FloatDP div(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return apply(Div(),rnd,x1,x2); }
-    friend FloatDP fma(RoundingModeType rnd, FloatDP x1, FloatDP x2, FloatDP x3) { return apply(Fma(),rnd,x1,x2,x3); }
-    friend FloatDP pow(RoundingModeType rnd, FloatDP x, Int n) { return apply(Pow(),rnd,x,n); }
-    friend FloatDP sqr(RoundingModeType rnd, FloatDP x) { return apply(Sqr(),rnd,x); }
-    friend FloatDP rec(RoundingModeType rnd, FloatDP x) { return apply(Rec(),rnd,x); }
-    friend FloatDP sqrt(RoundingModeType rnd, FloatDP x) { return apply(Sqrt(),rnd,x); }
-    friend FloatDP exp(RoundingModeType rnd, FloatDP x) { return apply(Exp(),rnd,x); }
-    friend FloatDP log(RoundingModeType rnd, FloatDP x) { return apply(Log(),rnd,x); }
-    friend FloatDP sin(RoundingModeType rnd, FloatDP x) { return apply(Sin(),rnd,x); }
-    friend FloatDP cos(RoundingModeType rnd, FloatDP x) { return apply(Cos(),rnd,x); }
-    friend FloatDP tan(RoundingModeType rnd, FloatDP x) { return apply(Tan(),rnd,x); }
-    friend FloatDP atan(RoundingModeType rnd, FloatDP x) { return apply(Atan(),rnd,x); }
+    friend FloatDP nul(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&nul_rnd,rnd,x); }
+    friend FloatDP pos(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&pos_rnd,rnd,x); }
+    friend FloatDP neg(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&neg_rnd,rnd,x); }
+    friend FloatDP hlf(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&hlf_rnd,rnd,x); }
+    friend FloatDP add(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return _apply_rnd(&add_rnd,rnd,x1,x2); }
+    friend FloatDP sub(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return _apply_rnd(&sub_rnd,rnd,x1,x2); }
+    friend FloatDP mul(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return _apply_rnd(&mul_rnd,rnd,x1,x2); }
+    friend FloatDP div(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return _apply_rnd(&div_rnd,rnd,x1,x2); }
+    friend FloatDP fma(RoundingModeType rnd, FloatDP x1, FloatDP x2, FloatDP x3) { return _apply_rnd(&fma_rnd,rnd,x1,x2,x3); }
+    friend FloatDP pow(RoundingModeType rnd, FloatDP x, Int n) { return _apply_rnd((double(*)(double,int))&pow_rnd,rnd,x,n); }
+    friend FloatDP sqr(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&sqr_rnd,rnd,x); }
+    friend FloatDP rec(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&rec_rnd,rnd,x); }
+    friend FloatDP sqrt(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&sqrt_rnd,rnd,x); }
+    friend FloatDP exp(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&exp_rnd,rnd,x); }
+    friend FloatDP log(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&log_rnd,rnd,x); }
+    friend FloatDP sin(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&sin_rnd,rnd,x); }
+    friend FloatDP cos(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&cos_rnd,rnd,x); }
+    friend FloatDP tan(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&tan_rnd,rnd,x); }
+    friend FloatDP atan(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&atan_rnd,rnd,x); }
 
     friend FloatDP med(RoundingModeType rnd, FloatDP x1, FloatDP x2) {
         rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(rnd);
@@ -386,6 +417,88 @@ class FloatDP {
     friend FloatDP div_opp(FloatDP x, FloatDP y) { double t=-x.dbl; t=t/y.dbl; return -t; }
     friend FloatDP pow_opp(FloatDP x, int n);
 };
+
+
+template<> class Rounded<FloatDP>
+{
+    volatile double dbl;
+  public:
+    typedef RawTag Paradigm;
+    typedef Rounded<FloatDP> NumericType;
+    typedef DoublePrecision PrecisionType;
+    typedef BuiltinRoundingModeType RoundingModeType;
+  public:
+    static RoundingModeType get_rounding_mode() { return FloatDP::get_rounding_mode(); }
+    static Void set_rounding_mode(RoundingModeType rnd) { FloatDP::set_rounding_mode(rnd); }
+  public:
+    Rounded<FloatDP>() : dbl(0.0) { }
+    Rounded<FloatDP>(double d) : dbl(d) { }
+    double data() const { return dbl; }
+    PrecisionType precision() const { return DoublePrecision(); }
+
+    Rounded<FloatDP>& operator=(double d) { this->dbl=d; return *this; }
+
+    inline explicit Rounded(FloatDP x) : dbl(x.dbl) { }
+    inline explicit operator FloatDP() const { return FloatDP(this->dbl); }
+    inline FloatDP raw() const { return FloatDP(this->dbl); }
+
+    explicit Rounded(double d, PrecisionType pr) : dbl(d) { }
+    Rounded(Value<FloatDP> const& x);
+    Rounded(Approximation<FloatDP> const& x);
+    operator Approximation<FloatDP> () const;
+
+    // Correctly rounded arithmetic
+    friend Rounded<FloatDP> nul(Rounded<FloatDP> x) { return Rounded<FloatDP>(nul_rnd(x.dbl)); }
+    friend Rounded<FloatDP> pos(Rounded<FloatDP> x) { return Rounded<FloatDP>(pos_rnd(x.dbl)); }
+    friend Rounded<FloatDP> neg(Rounded<FloatDP> x) { return Rounded<FloatDP>(neg_rnd(x.dbl)); }
+    friend Rounded<FloatDP> sqr(Rounded<FloatDP> x) { return Rounded<FloatDP>(sqr_rnd(x.dbl)); }
+    friend Rounded<FloatDP> hlf(Rounded<FloatDP> x) { return Rounded<FloatDP>(hlf_rnd(x.dbl)); }
+    friend Rounded<FloatDP> rec(Rounded<FloatDP> x) { return Rounded<FloatDP>(rec_rnd(x.dbl)); }
+    friend Rounded<FloatDP> add(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return Rounded<FloatDP>(add_rnd(x1.dbl,x2.dbl)); }
+    friend Rounded<FloatDP> sub(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return Rounded<FloatDP>(sub_rnd(x1.dbl,x2.dbl)); }
+    friend Rounded<FloatDP> mul(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return Rounded<FloatDP>(mul_rnd(x1.dbl,x2.dbl)); }
+    friend Rounded<FloatDP> div(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return Rounded<FloatDP>(div_rnd(x1.dbl,x2.dbl)); }
+    friend Rounded<FloatDP> fma(Rounded<FloatDP> x1, Rounded<FloatDP> x2, Rounded<FloatDP> x3) { return Rounded<FloatDP>(fma_rnd(x1.dbl,x2.dbl,x3.dbl)); }
+    friend Rounded<FloatDP> pow(Rounded<FloatDP> x, Int n) { return Rounded<FloatDP>(pow_rnd(x.dbl,n)); }
+    friend Rounded<FloatDP> sqrt(Rounded<FloatDP> x) { return Rounded<FloatDP>(sqrt_rnd(x.dbl)); }
+    friend Rounded<FloatDP> exp(Rounded<FloatDP> x) { return Rounded<FloatDP>(exp_rnd(x.dbl)); }
+    friend Rounded<FloatDP> log(Rounded<FloatDP> x) { return Rounded<FloatDP>(log_rnd(x.dbl)); }
+    friend Rounded<FloatDP> sin(Rounded<FloatDP> x) { return Rounded<FloatDP>(sin_rnd(x.dbl)); }
+    friend Rounded<FloatDP> cos(Rounded<FloatDP> x) { return Rounded<FloatDP>(cos_rnd(x.dbl)); }
+    friend Rounded<FloatDP> tan(Rounded<FloatDP> x) { return Rounded<FloatDP>(tan_rnd(x.dbl)); }
+    friend Rounded<FloatDP> asin(Rounded<FloatDP> x) { return Rounded<FloatDP>(asin_rnd(x.dbl)); }
+    friend Rounded<FloatDP> acos(Rounded<FloatDP> x) { return Rounded<FloatDP>(acos_rnd(x.dbl)); }
+    friend Rounded<FloatDP> atan(Rounded<FloatDP> x) { return Rounded<FloatDP>(atan_rnd(x.dbl)); }
+    static Rounded<FloatDP> pi(PrecisionType pr) { return Rounded<FloatDP>(pi_rnd()); }
+
+    friend Rounded<FloatDP> abs(Rounded<FloatDP> x) { return Rounded<FloatDP>(std::abs(x.dbl)); }
+    friend Rounded<FloatDP> max(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return Rounded<FloatDP>(std::max(x1.dbl,x2.dbl)); }
+    friend Rounded<FloatDP> min(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return Rounded<FloatDP>(std::min(x1.dbl,x2.dbl)); }
+    friend Rounded<FloatDP> mag(Rounded<FloatDP> x) { return Rounded<FloatDP>(std::abs(x.dbl)); }
+    friend Rounded<FloatDP> mig(Rounded<FloatDP> x) { return Rounded<FloatDP>(std::abs(x.dbl)); }
+
+    friend Rounded<FloatDP> operator+(Rounded<FloatDP> x) { return Rounded<FloatDP>(pos_rnd(x.dbl)); }
+    friend Rounded<FloatDP> operator-(Rounded<FloatDP> x) { return Rounded<FloatDP>(neg_rnd(x.dbl)); }
+    friend Rounded<FloatDP> operator+(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return Rounded<FloatDP>(x1.dbl+x2.dbl); }
+    friend Rounded<FloatDP> operator-(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return Rounded<FloatDP>(x1.dbl-x2.dbl); }
+    friend Rounded<FloatDP> operator*(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return Rounded<FloatDP>(x1.dbl*x2.dbl); }
+    friend Rounded<FloatDP> operator/(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return Rounded<FloatDP>(x1.dbl/x2.dbl); }
+    friend Rounded<FloatDP>& operator+=(Rounded<FloatDP>& x1, Rounded<FloatDP> x2) { x1.dbl=x1.dbl+x2.dbl; return x1; }
+    friend Rounded<FloatDP>& operator-=(Rounded<FloatDP>& x1, Rounded<FloatDP> x2) { x1.dbl=x1.dbl-x2.dbl; return x1; }
+    friend Rounded<FloatDP>& operator*=(Rounded<FloatDP>& x1, Rounded<FloatDP> x2) { x1.dbl=x1.dbl*x2.dbl; return x1; }
+    friend Rounded<FloatDP>& operator/=(Rounded<FloatDP>& x1, Rounded<FloatDP> x2) { x1.dbl=x1.dbl/x2.dbl; return x1; }
+
+    friend Comparison cmp(Rounded<FloatDP> x1, Rounded<FloatDP> x2);
+    friend Bool operator==(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return x1.dbl == x2.dbl; }
+    friend Bool operator!=(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return x1.dbl != x2.dbl; }
+    friend Bool operator<=(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return x1.dbl <= x2.dbl; }
+    friend Bool operator>=(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return x1.dbl >= x2.dbl; }
+    friend Bool operator< (Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return x1.dbl <  x2.dbl; }
+    friend Bool operator> (Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return x1.dbl >  x2.dbl; }
+
+    friend OutputStream& operator<<(OutputStream& os, Rounded<FloatDP> const& x) { return os << x.data(); }
+};
+
 
 template<class R, class A> R integer_cast(const A& a);
 template<> Nat integer_cast<Nat,FloatDP>(FloatDP const&);

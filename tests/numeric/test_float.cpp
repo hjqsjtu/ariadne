@@ -49,23 +49,23 @@ FloatDP& operator+=(FloatDP& x1, FloatDP x2);
 FloatDP& operator-=(FloatDP& x1, FloatDP x2);
 FloatDP& operator*=(FloatDP& x1, FloatDP x2);
 FloatDP& operator/=(FloatDP& x1, FloatDP x2);
-FloatDP sqr(FloatDP x);
-FloatDP rec(FloatDP x);
-FloatDP add(FloatDP x1, FloatDP x2);
-FloatDP sub(FloatDP x1, FloatDP x2);
-FloatDP mul(FloatDP x1, FloatDP x2);
-FloatDP div(FloatDP x1, FloatDP x2);
+FloatDP sqr(FloatDP x) { return sqr_rnd(x.dbl); }
+FloatDP rec(FloatDP x) { return rec_rnd(x.dbl); }
+FloatDP add(FloatDP x1, FloatDP x2) { return add_rnd(x1.dbl,x2.dbl); }
+FloatDP sub(FloatDP x1, FloatDP x2) { return sub_rnd(x1.dbl,x2.dbl); }
+FloatDP mul(FloatDP x1, FloatDP x2) { return mul_rnd(x1.dbl,x2.dbl); }
+FloatDP div(FloatDP x1, FloatDP x2) { return div_rnd(x1.dbl,x2.dbl); }
 FloatDP fma(FloatDP x1, FloatDP x2, FloatDP x3);
-FloatDP pow(FloatDP x, Int n);
-FloatDP sqrt(FloatDP x);
-FloatDP exp(FloatDP x);
-FloatDP log(FloatDP x);
-FloatDP sin(FloatDP x);
-FloatDP cos(FloatDP x);
-FloatDP tan(FloatDP x);
-FloatDP asin(FloatDP x);
-FloatDP acos(FloatDP x);
-FloatDP atan(FloatDP x);
+FloatDP pow(FloatDP x, Int n) { return pow_rnd(x.dbl,n); }
+FloatDP sqrt(FloatDP x) { return sqrt_rnd(x.dbl); }
+FloatDP exp(FloatDP x) { return exp_rnd(x.dbl); }
+FloatDP log(FloatDP x) { return log_rnd(x.dbl); }
+FloatDP sin(FloatDP x) { return sin_rnd(x.dbl); }
+FloatDP cos(FloatDP x) { return cos_rnd(x.dbl); }
+FloatDP tan(FloatDP x) { return tan_rnd(x.dbl); }
+//FloatDP asin(FloatDP x) { return asin_rnd(x.dbl); }
+//FloatDP acos(FloatDP x) { return acos_rnd(x.dbl); }
+FloatDP atan(FloatDP x) { return atan_rnd(x.dbl); }
 FloatMP operator+(FloatMP const& x1, FloatMP const& x2);
 FloatMP operator-(FloatMP const& x1, FloatMP const& x2);
 FloatMP operator*(FloatMP const& x1, FloatMP const& x2);
@@ -771,6 +771,10 @@ TestFloat<PR>::test_arithmetic()
     ARIADNE_TEST_COMPARE(mul(down,five_ninths_down,nine), < , five);
     ARIADNE_TEST_COMPARE(mul(up,five_ninths_up,nine), > , five);
 
+    Float pi_down=Float::pi(down,precision);
+    ARIADNE_TEST_EQUAL(pi_down/2,div(down,pi_down,2));
+    ARIADNE_TEST_EQUAL(pi_down/2,hlf(pi_down));
+
 
     // Power (not exact; should catch errors here)
     f3=pow(down,f1,3);
@@ -866,7 +870,12 @@ TestFloat<PR>::test_cosine()
     static const Float third_pi_down=div(down,pi_down,three);
     static const Float third_pi_up  =div(up  ,pi_up  ,three);
 
+    ARIADNE_TEST_COMPARE(cos(up,div(down,pi_down,2)),>,0.0);
+
+    CurrentRoundingMode rndm;
+
     Float::set_rounding_mode(upward);
+    ARIADNE_TEST_COMPARE(cos(rndm,hlf(pi_down)),>,0.0);
     ARIADNE_TEST_EQUAL(cos(Float(0.0)),1.0);
     ARIADNE_TEST_COMPARE(cos(third_pi_down),>,0.5);
     ARIADNE_TEST_COMPARE(sqr(cos(pi_down/4)),>,0.5);

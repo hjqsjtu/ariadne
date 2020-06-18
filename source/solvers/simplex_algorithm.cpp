@@ -39,6 +39,16 @@
 
 namespace Ariadne {
 
+#warning
+// FIXME: Unsafe arithmetic operators on raw float
+inline FloatDP operator+(FloatDP const& x1, FloatDP const& x2) { return x1.dbl + x2.dbl; }
+inline FloatDP operator-(FloatDP const& x1, FloatDP const& x2) { return x1.dbl - x2.dbl; }
+inline FloatDP operator*(FloatDP const& x1, FloatDP const& x2) { return x1.dbl * x2.dbl; }
+inline FloatDP operator/(FloatDP const& x1, FloatDP const& x2) { return x1.dbl / x2.dbl; }
+inline FloatDP& operator+=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl + x2.dbl; return x1; }
+inline FloatDP& operator-=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl - x2.dbl; return x1; }
+inline FloatDP& operator*=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl * x2.dbl; return x1; }
+
 template<class X1, class X2, EnableIf<IsSame<X1,RawFloatDP>> =dummy, EnableIf<IsSame<X2,FloatDPValue>> =dummy>
     bool operator<(X1 x1, X2 x2) { return x1<x2.raw(); }
 
@@ -1510,6 +1520,7 @@ SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, c
 
 
 template class SimplexSolver<RawFloatDP>;
+template class SimplexSolver<RoundedFloatDP>;
 template class SimplexSolver<FloatDPApproximation>;
 template class SimplexSolver<FloatDPValue>;
 template class SimplexSolver<Rational>;

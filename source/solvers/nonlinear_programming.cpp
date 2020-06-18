@@ -57,6 +57,17 @@
 
 namespace Ariadne {
 
+#warning
+// FIXME: Unsafe arithmetic operators on raw float
+inline FloatDP operator+(FloatDP const& x1, FloatDP const& x2) { return x1.dbl + x2.dbl; }
+inline FloatDP operator-(FloatDP const& x1, FloatDP const& x2) { return x1.dbl - x2.dbl; }
+inline FloatDP operator*(FloatDP const& x1, FloatDP const& x2) { return x1.dbl * x2.dbl; }
+inline FloatDP operator/(FloatDP const& x1, FloatDP const& x2) { return x1.dbl / x2.dbl; }
+inline FloatDP& operator+=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl + x2.dbl; return x1; }
+inline FloatDP& operator-=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl - x2.dbl; return x1; }
+inline FloatDP& operator*=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl * x2.dbl; return x1; }
+inline FloatDP& operator/=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl / x2.dbl; return x1; }
+
 inline Sweeper<FloatDP> default_sweeper() { return Sweeper<FloatDP>(); }
 
 typedef Vector<FloatDP> FloatDPVectorType;

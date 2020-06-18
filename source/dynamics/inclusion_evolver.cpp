@@ -30,6 +30,15 @@
 #include "inclusion_evolver.hpp"
 
 namespace Ariadne {
+
+#warning
+// FIXME: Unsafe arithmetic operators on raw float
+inline FloatDP operator+(FloatDP x1, FloatDP x2) { return x1.dbl + x2.dbl; }
+inline FloatDP operator-(FloatDP x1, FloatDP x2) { return x1.dbl - x2.dbl; }
+inline FloatDP operator*(FloatDP x1, FloatDP x2) { return x1.dbl * x2.dbl; }
+inline FloatDP operator/(FloatDP x1, FloatDP x2) { return x1.dbl / x2.dbl; }
+inline FloatDP& operator+=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl + x2.dbl; return x1; }
+
 /*
 FloatDP volume(Vector<IntervalValidatedRangeType> const& box) {
     FloatDP result = 1.0;

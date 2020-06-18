@@ -168,7 +168,7 @@ class TestGraded
 
 
 Int main() {
-    TestGraded<FloatDP>().test();
+    TestGraded<RoundedFloatDP>().test();
 
     return ARIADNE_TEST_FAILURES;
 }

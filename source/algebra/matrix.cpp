@@ -379,7 +379,7 @@ normalise_rows(Matrix<X>& A)
     const SizeType n=A.column_size();
 
     auto prev_rounding_mode=X::get_rounding_mode();
-    X::set_rounding_upward();
+    X::set_rounding_mode(up);
     Array<X> row_asums(m);
     for(SizeType i=0; i!=m; ++i) {
         row_asums[i]=0.0;
@@ -387,7 +387,7 @@ normalise_rows(Matrix<X>& A)
             row_asums[i]+=abs(A[i][j]);
         }
     }
-    X::set_rounding_toward_zero();
+    X::set_rounding_mode(toward_zero);
     for(SizeType i=0; i!=m; ++i) {
         for(SizeType j=0; j!=n; ++j) {
             A[i][j]/=row_asums[i];
@@ -847,10 +847,26 @@ template<class AX> Matrix<decltype(cast_exact(declval<AX>()))> cast_exact(Matrix
 }
 
 
+#warning
+// FIXME: Unsafe arithmetic operators on raw float
+inline FloatDP operator+(FloatDP x1, FloatDP x2) { return x1.dbl + x2.dbl; }
+inline FloatDP operator-(FloatDP x1, FloatDP x2) { return x1.dbl - x2.dbl; }
+inline FloatDP operator*(FloatDP x1, FloatDP x2) { return x1.dbl * x2.dbl; }
+inline FloatDP operator/(FloatDP x1, FloatDP x2) { return x1.dbl / x2.dbl; }
+inline FloatDP& operator+=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl + x2.dbl; return x1; }
+inline FloatDP& operator-=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl - x2.dbl; return x1; }
+inline FloatDP& operator*=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl * x2.dbl; return x1; }
+inline FloatDP& operator/=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl / x2.dbl; return x1; }
+inline FloatDP rec(FloatDP x) { return 1.0/x.dbl; }
 template class Matrix<FloatDP>;
 template Matrix<FloatDP> inverse(const Matrix<FloatDP>&);
 template Vector<FloatDP> solve(const Matrix<FloatDP>&, const Vector<FloatDP>&);
 template Void normalise_rows(Matrix<FloatDP>&);
+
+template class Matrix<RoundedFloatDP>;
+template Matrix<RoundedFloatDP> inverse(const Matrix<RoundedFloatDP>&);
+template Vector<RoundedFloatDP> solve(const Matrix<RoundedFloatDP>&, const Vector<RoundedFloatDP>&);
+template Void normalise_rows(Matrix<RoundedFloatDP>&);
 
 template class Matrix<FloatDPApproximation>;
 template Matrix<FloatDPApproximation> inverse(const Matrix<FloatDPApproximation>&);
