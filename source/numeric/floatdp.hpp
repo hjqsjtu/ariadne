@@ -424,23 +424,35 @@ template<> class Rounded<FloatDP>
     volatile double dbl;
   public:
     typedef RawTag Paradigm;
+    typedef FloatDP FloatType;
     typedef Rounded<FloatDP> NumericType;
     typedef DoublePrecision PrecisionType;
     typedef BuiltinRoundingModeType RoundingModeType;
   public:
     static RoundingModeType get_rounding_mode() { return FloatDP::get_rounding_mode(); }
     static Void set_rounding_mode(RoundingModeType rnd) { FloatDP::set_rounding_mode(rnd); }
+    static Void set_rounding_downward() { FloatDP::set_rounding_downward(); }
+    static Void set_rounding_upward() { FloatDP::set_rounding_upward(); }
+    static Void set_rounding_to_nearest() { FloatDP::set_rounding_to_nearest(); }
+    static Void set_rounding_toward_zero() { FloatDP::set_rounding_toward_zero(); }
   public:
-    Rounded<FloatDP>() : dbl(0.0) { }
-    Rounded<FloatDP>(double d) : dbl(d) { }
+    Rounded() : dbl(0.0) { }
+    Rounded(double d) : dbl(d) { }
     double data() const { return dbl; }
     PrecisionType precision() const { return DoublePrecision(); }
 
+    Rounded(Dyadic const& w, PrecisionType pr) : Rounded(FloatDP(w,pr)) { }
+    template<class Y, EnableIf<IsConstructible<FloatType,Y,RoundingModeType,PrecisionType>> =dummy>
+        Rounded(Y const& y, PrecisionType pr) : Rounded(FloatDP(y,FloatDP::get_rounding_mode(),pr)) { }
+
     Rounded<FloatDP>& operator=(double d) { this->dbl=d; return *this; }
 
-    inline explicit Rounded(FloatDP x) : dbl(x.dbl) { }
-    inline explicit operator FloatDP() const { return FloatDP(this->dbl); }
-    inline FloatDP raw() const { return FloatDP(this->dbl); }
+    inline explicit Rounded(FloatType x, PrecisionType) : dbl(x.dbl) { }
+    inline explicit Rounded(Rounded<FloatType> x, PrecisionType) : dbl(x.dbl) { }
+    inline explicit Rounded(PrecisionType pr) : Rounded(FloatType(pr)) { }
+    inline explicit Rounded(FloatType x) : dbl(x.dbl) { }
+    inline explicit operator FloatType() const { return FloatType(this->dbl); }
+    inline FloatType raw() const { return FloatDP(this->dbl); }
 
     explicit Rounded(double d, PrecisionType pr) : dbl(d) { }
     Rounded(Value<FloatDP> const& x);
@@ -476,6 +488,8 @@ template<> class Rounded<FloatDP>
     friend Rounded<FloatDP> min(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return Rounded<FloatDP>(std::min(x1.dbl,x2.dbl)); }
     friend Rounded<FloatDP> mag(Rounded<FloatDP> x) { return Rounded<FloatDP>(std::abs(x.dbl)); }
     friend Rounded<FloatDP> mig(Rounded<FloatDP> x) { return Rounded<FloatDP>(std::abs(x.dbl)); }
+
+    friend Rounded<FloatDP> med(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return Rounded<FloatDP>(hlf_rnd(add_rnd(x1.dbl,x2.dbl))); }
 
     friend Rounded<FloatDP> operator+(Rounded<FloatDP> x) { return Rounded<FloatDP>(pos_rnd(x.dbl)); }
     friend Rounded<FloatDP> operator-(Rounded<FloatDP> x) { return Rounded<FloatDP>(neg_rnd(x.dbl)); }
