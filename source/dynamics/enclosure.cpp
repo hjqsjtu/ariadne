@@ -79,11 +79,6 @@
 
 namespace Ariadne {
 
-#warning
-// FIXME: Unsafe arithmetic operators on raw float
-inline FloatDP& operator+=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl + x2.dbl; return x1; }
-inline FloatDP& operator*=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl * x2.dbl; return x1; }
-
 template<class T> inline StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
 using ValidatedConstraintModelDP = Constraint<ValidatedScalarMultivariateFunctionModelDP,FloatDPBounds>;
@@ -881,9 +876,9 @@ Void Enclosure::reduce() const
 
 
 
-Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom);
-Pair<SizeType,FloatDP> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
-Pair<SizeType,FloatDP> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
+Matrix<FloatDPError> nonlinearities_zeroth_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom);
+Pair<SizeType,FloatDPError> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
+Pair<SizeType,FloatDPError> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
 
 Pair<Enclosure,Enclosure>
 Enclosure::split_zeroth_order() const
@@ -916,14 +911,14 @@ Enclosure::splitting_index_zeroth_order() const
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     SizeType jmax=this->number_of_parameters();
-    FloatDP max_column_norm=0.0;
+    FloatDPError max_column_norm(0.0);
     for(SizeType j=0; j!=this->number_of_parameters(); ++j) {
-        FloatDP column_norm=0.0;
+        FloatDPError column_norm(0.0);
         for(SizeType i=0; i!=this->state_dimension(); ++i) {
-            column_norm+=mag(jacobian[i][j]).raw();
+            column_norm+=mag(jacobian[i][j]);
         }
-        column_norm *= this->reduced_domain()[j].radius().value_raw();
-        if(column_norm>max_column_norm) {
+        column_norm *= this->reduced_domain()[j].radius();
+        if(column_norm.raw()>max_column_norm.raw()) {
             max_column_norm=column_norm;
             jmax=j;
         }
@@ -936,24 +931,24 @@ Enclosure::splitting_index_zeroth_order() const
 Pair<Enclosure,Enclosure>
 Enclosure::split_first_order() const
 {
-    Matrix<FloatDP> nonlinearities=Ariadne::nonlinearities_zeroth_order(this->_state_function,this->_reduced_domain);
+    Matrix<FloatDPError> nonlinearities=Ariadne::nonlinearities_zeroth_order(this->_state_function,this->_reduced_domain);
 
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     SizeType jmax_in_row_imax=nonlinearities.column_size();
-    FloatDP max_row_sum=0.0;
+    FloatDPError max_row_sum(0.0);
     for(SizeType i=0; i!=nonlinearities.row_size(); ++i) {
         SizeType jmax=nonlinearities.column_size();
-        FloatDP row_sum=0.0;
-        FloatDP max_mag_j_in_i=0.0;
+        FloatDPError row_sum(0.0);
+        FloatDPError max_mag_j_in_i(0.0);
         for(SizeType j=0; j!=nonlinearities.column_size(); ++j) {
             row_sum+=mag(nonlinearities[i][j]);
-            if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
+            if(mag(nonlinearities[i][j]).raw()>max_mag_j_in_i.raw()) {
                 jmax=j;
                 max_mag_j_in_i=mag(nonlinearities[i][j]);
             }
         }
-        if(row_sum>max_row_sum) {
+        if(row_sum.raw()>max_row_sum.raw()) {
             max_row_sum=row_sum;
             jmax_in_row_imax=jmax;
         }
@@ -1211,7 +1206,7 @@ Enclosure::kuhn_recondition()
         for(ValidatedTaylorModelDP::ConstIterator iter=models[i].begin(); iter!=models[i].end(); ++iter) {
             for(SizeType j=0; j!=dependencies.column_size(); ++j) {
                 if(iter->index()[j]!=0) {
-                    dependencies[i][j]+=abs(iter->coefficient()).raw();
+                    dependencies[i][j]=add(rounded,dependencies[i][j],abs(iter->coefficient()).raw());
                 }
             }
         }
