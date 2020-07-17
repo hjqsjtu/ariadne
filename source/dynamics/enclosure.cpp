@@ -103,12 +103,12 @@ ValidatedVectorMultivariateFunctionModelDP make_identity(const RealBox& bx, cons
     ExactBoxType dom(bx.dimension());
     Vector<FloatDPError> errs(bx.dimension(),dp);
 
-    for(Nat i=0; i!=bx.dimension(); ++i) {
+    for(SizeType i=0; i!=bx.dimension(); ++i) {
         make_lpair(dom[i],errs[i])=make_domain(bx[i]);
     }
 
     ValidatedVectorMultivariateFunctionModelDP res=configuration._function_factory.create_identity(dom);
-    for(Nat i=0; i!=bx.dimension(); ++i) {
+    for(SizeType i=0; i!=bx.dimension(); ++i) {
         res[i]=res[i]+FloatDPBounds(-errs[i],+errs[i]);
     }
 
@@ -139,12 +139,12 @@ List<Identifier> canonical_variable_names(const List<EnclosureVariableKind>& vks
     return result;
 }
 
-inline Pair<ValidatedScalarMultivariateFunctionModelDP,ValidatedScalarMultivariateFunctionModelDP> split(const ValidatedScalarMultivariateFunctionModelDP& f, Nat k) {
+inline Pair<ValidatedScalarMultivariateFunctionModelDP,ValidatedScalarMultivariateFunctionModelDP> split(const ValidatedScalarMultivariateFunctionModelDP& f, SizeType k) {
     Pair<ExactBoxType,ExactBoxType> domains=split(f.domain(),k);
     return make_pair(restriction(f,domains.first),restriction(f,domains.second));
 }
 
-inline Pair<ValidatedVectorMultivariateFunctionModelDP,ValidatedVectorMultivariateFunctionModelDP> split(const ValidatedVectorMultivariateFunctionModelDP& f, Nat k) {
+inline Pair<ValidatedVectorMultivariateFunctionModelDP,ValidatedVectorMultivariateFunctionModelDP> split(const ValidatedVectorMultivariateFunctionModelDP& f, SizeType k) {
     Pair<ExactBoxType,ExactBoxType> domains=split(f.domain(),k);
     return make_pair(restriction(f,domains.first),restriction(f,domains.second));
 }
@@ -206,7 +206,7 @@ Enclosure::set_drawer(Drawer const& drawer) {
 
 // TODO: Make more efficient
 inline Void assign_all_but_last(MultiIndex& r, const MultiIndex& a) {
-    for(Nat i=0; i!=r.size(); ++i) { r[i]=a[i]; }
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=a[i]; }
 }
 
 // FIXME: What if solving for constraint leaves domain?
@@ -215,7 +215,7 @@ Void Enclosure::_solve_zero_constraints() {
     for(List<ValidatedScalarMultivariateFunctionModelDP>::Iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ) {
         const ExactBoxType& domain=this->domain();
         const ValidatedTaylorModelDP& model=iter->model();
-        const Nat k=model.argument_size()-1u;
+        const SizeType k=model.argument_size()-1u;
         ValidatedTaylorModelDP zeroth_order(k,this->sweeper());
         ValidatedTaylorModelDP first_order(k,this->sweeper());
         Bool is_zeroth_order=true;
@@ -737,7 +737,7 @@ List<ValidatedConstraintModel> const& Enclosure::constraint_models() const {
 
 List<ValidatedConstraint> const Enclosure::constraints() const {
     List<ValidatedConstraint> result;
-    for(Nat i=0; i!=this->_constraints.size(); ++i) {
+    for(SizeType i=0; i!=this->_constraints.size(); ++i) {
         result.append(ValidatedConstraint(this->_constraints[i].lower_bound(),this->_constraints[i].function(),this->_constraints[i].upper_bound()));
     }
     return result;
@@ -749,7 +749,7 @@ ValidatedConstraintModel const& Enclosure::constraint(SizeType i) const {
 
 ValidatedVectorMultivariateFunctionModelDP const Enclosure::constraint_function() const {
     ValidatedVectorMultivariateFunctionModelDP g=this->function_factory().create_zeros(this->number_of_constraints(),this->domain());
-    for(Nat i=0; i!=this->number_of_constraints(); ++i) {
+    for(SizeType i=0; i!=this->number_of_constraints(); ++i) {
         g.set(i,this->constraint(i).function());
     }
     return g;
@@ -757,7 +757,7 @@ ValidatedVectorMultivariateFunctionModelDP const Enclosure::constraint_function(
 
 ExactBoxType const Enclosure::constraint_bounds() const {
     ExactBoxType c(this->number_of_constraints());
-    for(Nat i=0; i!=this->number_of_constraints(); ++i) {
+    for(SizeType i=0; i!=this->number_of_constraints(); ++i) {
         c[i]=this->constraint(i).bounds();
     }
     return c;
@@ -808,7 +808,7 @@ ValidatedLowerKleenean Enclosure::is_empty() const
     if(this->_constraints.empty()) { return this->domain().is_empty(); }
     if(!this->_is_fully_reduced) { this->reduce(); this->reduce(); this->reduce(); }
 
-    for(Nat i=0; i!=this->_constraints.size(); ++i) {
+    for(SizeType i=0; i!=this->_constraints.size(); ++i) {
         UpperIntervalType constraint_range = Ariadne::apply(this->_constraints[i].function(),this->_reduced_domain);
         if( definitely(disjoint(constraint_range,this->_constraints[i].bounds())) ) {
             if(this->_reduced_domain.size()>0) { this->_reduced_domain[0] = ExactIntervalType(1,-1); }
@@ -841,7 +841,7 @@ ValidatedLowerKleenean Enclosure::separated(const ExactBoxType& bx) const
     if(_reduced_domain.is_empty()) { return true; }
 
     const ExactBoxType test_domain=this->_reduced_domain;
-    for(Nat i=0; i!=bx.dimension(); ++i) {
+    for(SizeType i=0; i!=bx.dimension(); ++i) {
         // FIXME: Conversion should be automatic
         ValidatedScalarMultivariateFunction fi(static_cast<ValidatedScalarMultivariateFunction::Interface const&>(this->_state_function[i]));
         constraints.append(fi >= bx[i].lower());
@@ -856,7 +856,7 @@ Void Enclosure::reduce() const
     ConstraintSolver contractor=ConstraintSolver();
     contractor.reduce(reinterpret_cast<UpperBoxType&>(this->_reduced_domain),constraints);
 
-    for(Nat i=0; i!=this->number_of_parameters(); ++i) {
+    for(SizeType i=0; i!=this->number_of_parameters(); ++i) {
         FloatDP l=this->_reduced_domain[i].lower().raw();
         FloatDP u=this->_reduced_domain[i].upper().raw();
         if(is_nan(l) || is_nan(u)) {
@@ -867,9 +867,9 @@ Void Enclosure::reduce() const
 
 /*
     // Remove redundant constraints
-    Nat j=0;
+    SizeType j=0;
     List<ValidatedScalarMultivariateFunctionModelDP>& mutable_constraints=const_cast<List<ValidatedScalarMultivariateFunctionModelDP>&>(this->_negative_constraints);
-    for(Nat i=0; i!=mutable_constraints.size(); ++i) {
+    for(SizeType i=0; i!=mutable_constraints.size(); ++i) {
         if(mutable_constraints[i](this->_reduced_domain).upper()<0.0) { redundant_constraints.append(i); }
         else { if(i>j) { mutable_constraints[j]=mutable_constraints[j]; } ++j; }
     }
@@ -882,8 +882,8 @@ Void Enclosure::reduce() const
 
 
 Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom);
-Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
-Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
+Pair<SizeType,FloatDP> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
+Pair<SizeType,FloatDP> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
 
 Pair<Enclosure,Enclosure>
 Enclosure::split_zeroth_order() const
@@ -896,7 +896,7 @@ List<ExactBoxType>
 Enclosure::splitting_subdomains_zeroth_order() const
 {
     List<ExactBoxType> result;
-    Nat k=this->splitting_index_zeroth_order();
+    SizeType k=this->splitting_index_zeroth_order();
     if(k==this->number_of_parameters()) {
         result.append(this->_reduced_domain);
     } else {
@@ -908,18 +908,18 @@ Enclosure::splitting_subdomains_zeroth_order() const
 }
 
 
-Nat
+SizeType
 Enclosure::splitting_index_zeroth_order() const
 {
     Matrix<UpperIntervalType> jacobian=Ariadne::jacobian_range(this->state_function(),cast_vector(this->reduced_domain()));
 
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
-    Nat jmax=this->number_of_parameters();
+    SizeType jmax=this->number_of_parameters();
     FloatDP max_column_norm=0.0;
-    for(Nat j=0; j!=this->number_of_parameters(); ++j) {
+    for(SizeType j=0; j!=this->number_of_parameters(); ++j) {
         FloatDP column_norm=0.0;
-        for(Nat i=0; i!=this->state_dimension(); ++i) {
+        for(SizeType i=0; i!=this->state_dimension(); ++i) {
             column_norm+=mag(jacobian[i][j]).raw();
         }
         column_norm *= this->reduced_domain()[j].radius().value_raw();
@@ -940,13 +940,13 @@ Enclosure::split_first_order() const
 
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
-    Nat jmax_in_row_imax=nonlinearities.column_size();
+    SizeType jmax_in_row_imax=nonlinearities.column_size();
     FloatDP max_row_sum=0.0;
-    for(Nat i=0; i!=nonlinearities.row_size(); ++i) {
-        Nat jmax=nonlinearities.column_size();
+    for(SizeType i=0; i!=nonlinearities.row_size(); ++i) {
+        SizeType jmax=nonlinearities.column_size();
         FloatDP row_sum=0.0;
         FloatDP max_mag_j_in_i=0.0;
-        for(Nat j=0; j!=nonlinearities.column_size(); ++j) {
+        for(SizeType j=0; j!=nonlinearities.column_size(); ++j) {
             row_sum+=mag(nonlinearities[i][j]);
             if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
                 jmax=j;
@@ -972,7 +972,7 @@ Enclosure::split() const
 }
 
 Pair<Enclosure,Enclosure>
-Enclosure::split(Nat d) const
+Enclosure::split(SizeType d) const
 {
     ARIADNE_PRECONDITION(d<this->number_of_parameters());
     ExactBoxType subdomain1,subdomain2;
@@ -1079,11 +1079,11 @@ Void Enclosure::
 uniform_error_recondition()
 {
     const double MAXIMUM_ERROR = std::numeric_limits<double>::epsilon() * 1024;
-    Nat old_number_of_parameters = this->number_of_parameters();
+    SizeType old_number_of_parameters = this->number_of_parameters();
 
-    List<Nat> large_error_indices;
+    List<SizeType> large_error_indices;
 
-    for(Nat i=0; i!=this->_state_function.result_size(); ++i) {
+    for(SizeType i=0; i!=this->_state_function.result_size(); ++i) {
         FloatDPError error=this->_state_function.get(i).error();
         if(error.raw() > MAXIMUM_ERROR) {
             large_error_indices.append(i);
@@ -1093,21 +1093,21 @@ uniform_error_recondition()
     if (large_error_indices.size() > 0) {
 
         ExactBoxType error_domains(large_error_indices.size());
-        for(Nat i=0; i!=large_error_indices.size(); ++i) {
+        for(SizeType i=0; i!=large_error_indices.size(); ++i) {
             FloatDP error=this->_state_function.get(large_error_indices[i]).error().raw();
             error_domains[i]=ExactIntervalType(-error,+error);
         }
         error_domains=ExactBoxType(large_error_indices.size(),ExactIntervalType(-1,+1));
-        Nat k=this->number_of_parameters();
+        SizeType k=this->number_of_parameters();
 
         this->_domain=product(this->_domain,error_domains);
         this->_reduced_domain=product(this->_reduced_domain,error_domains);
         this->_state_function=embed(this->_state_function,error_domains);
-        for(Nat i=0; i!=this->_constraints.size(); ++i) {
+        for(SizeType i=0; i!=this->_constraints.size(); ++i) {
             this->_constraints[i].function()=embed(this->_constraints[i].function(),error_domains);
         }
 
-        for(Nat i=0; i!=large_error_indices.size(); ++i) {
+        for(SizeType i=0; i!=large_error_indices.size(); ++i) {
             FloatDP error=this->_state_function.get(large_error_indices[i]).error().raw();
             if(error > MAXIMUM_ERROR) {
                 this->_state_function[large_error_indices[i]].clobber();
@@ -1382,8 +1382,8 @@ Enclosure::affine_approximation() const
     this->_check();
     typedef List<ValidatedScalarMultivariateFunctionModelDP>::ConstIterator ConstIterator;
 
-    const Nat nx=this->state_dimension();
-    const Nat np=this->number_of_parameters();
+    const SizeType nx=this->state_dimension();
+    const SizeType np=this->number_of_parameters();
 
     Enclosure set(*this);
 
@@ -1392,10 +1392,10 @@ Enclosure::affine_approximation() const
 
     Vector<FloatDP> h(nx);
     Matrix<FloatDP> G(nx,np);
-    for(Nat i=0; i!=nx; ++i) {
+    for(SizeType i=0; i!=nx; ++i) {
         ValidatedScalarMultivariateFunctionModelDP component=set._state_function[i];
         h[i]=component.model().value();
-        for(Nat j=0; j!=np; ++j) {
+        for(SizeType j=0; j!=np; ++j) {
             G[i][j]=component.model().gradient(j);
         }
     }
@@ -1408,7 +1408,7 @@ Enclosure::affine_approximation() const
             iter!=set._negative_constraints.end(); ++iter) {
         const ValidatedScalarMultivariateFunctionModelDP& constraint=*iter;
         b=-constraint.model().value();
-        for(Nat j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
+        for(SizeType j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
         result.new_inequality_constraint(a,b);
     }
 
@@ -1416,7 +1416,7 @@ Enclosure::affine_approximation() const
             iter!=set._zero_constraints.end(); ++iter) {
         const ValidatedScalarMultivariateFunctionModelDP& constraint=*iter;
         b=-constraint.model().value();
-        for(Nat j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
+        for(SizeType j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
         result.new_equality_constraint(a,b);
     }
     return result;
@@ -1435,7 +1435,7 @@ ValidatedAffineModel _affine_model(const ValidatedTaylorModelDP& tm) {
         if(iter->index().degree()>=2) { result._e+=abs(iter->coefficient()); }
         else if(iter->index().degree()==0) {result. _c=iter->coefficient(); }
         else {
-            for(Nat j=0; j!=tm.argument_size(); ++j) {
+            for(SizeType j=0; j!=tm.argument_size(); ++j) {
                 if(iter->index()[j]!=0) { result._g[j]=iter->coefficient(); break; }
             }
         }
