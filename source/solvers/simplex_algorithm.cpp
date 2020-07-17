@@ -39,16 +39,6 @@
 
 namespace Ariadne {
 
-#warning
-// FIXME: Unsafe arithmetic operators on raw float
-inline FloatDP operator+(FloatDP const& x1, FloatDP const& x2) { return x1.dbl + x2.dbl; }
-inline FloatDP operator-(FloatDP const& x1, FloatDP const& x2) { return x1.dbl - x2.dbl; }
-inline FloatDP operator*(FloatDP const& x1, FloatDP const& x2) { return x1.dbl * x2.dbl; }
-inline FloatDP operator/(FloatDP const& x1, FloatDP const& x2) { return x1.dbl / x2.dbl; }
-inline FloatDP& operator+=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl + x2.dbl; return x1; }
-inline FloatDP& operator-=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl - x2.dbl; return x1; }
-inline FloatDP& operator*=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl * x2.dbl; return x1; }
-
 template<class X1, class X2, EnableIf<IsSame<X1,RawFloatDP>> =dummy, EnableIf<IsSame<X2,FloatDPValue>> =dummy>
     bool operator<(X1 x1, X2 x2) { return x1<x2.raw(); }
 
@@ -745,23 +735,23 @@ compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt,
     return make_pair(r,t);
 }
 
-Pair<SizeType,RigorousNumericType<FloatDP>>
-compute_rt(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Array<Slackness>& vt, const Array<SizeType>& p, const Vector<RigorousNumericType<FloatDP>>& x, const Vector<RigorousNumericType<FloatDP>>& d, const SizeType s)
+Pair<SizeType,RigorousNumericType<Rounded<FloatDP>>>
+compute_rt(const Vector<Rounded<FloatDP>>& xl, const Vector<Rounded<FloatDP>>& xu, const Array<Slackness>& vt, const Array<SizeType>& p, const Vector<RigorousNumericType<Rounded<FloatDP>>>& x, const Vector<RigorousNumericType<Rounded<FloatDP>>>& d, const SizeType s)
 {
     ARIADNE_LOG_SCOPE_CREATE;
-    typedef FloatDP X;
+    typedef Rounded<FloatDP> X;
     typedef RigorousNumericType<X> XX;
-    const X inf_=Ariadne::inf;
+    const X inf_=X(Ariadne::inf);
 
     // Choose variable to take out of basis
     // If the problem is degenerate, choose the variable with smallest index
     const SizeType m=d.size();
     const SizeType n=x.size();
     SizeType r=n;
-    X ds=(vt[p[s]]==Slackness::LOWER ? +1 : -1);
+    X ds=X(vt[p[s]]==Slackness::LOWER ? +1 : -1);
     XX t=XX(xu[p[s]])-XX(xl[p[s]]);
     if(definitely(t<inf_)) { r=s; }
-    XX tk=0;
+    XX tk=X(0);
     ARIADNE_LOG_PRINTLN("xl="<<xl<<" x="<<x<<" xu="<<xu);
     ARIADNE_LOG_PRINTLN("vt="<<vt<<" p="<<p<<" d="<<d);
     ARIADNE_LOG_PRINTLN("s="<<s<<" p[s]="<<p[s]<<" vt[p[s]]="<<vt[p[s]]<<" ds="<<ds<<" xl[p[s]]="<<xl[p[s]]<<" xu[p[s]]="<<xu[p[s]]<<" r="<<r<<" t[r]="<<t);
@@ -1519,7 +1509,6 @@ SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, c
 
 
 
-template class SimplexSolver<RawFloatDP>;
 template class SimplexSolver<RoundedFloatDP>;
 template class SimplexSolver<FloatDPApproximation>;
 template class SimplexSolver<FloatDPValue>;

@@ -104,7 +104,7 @@ Void export_interior_point_solver(pybind11::module& module)
     pybind11::class_<InteriorPointSolver> interior_point_solver_class(module,"InteriorPointSolver");
     interior_point_solver_class.def(pybind11::init<>());
     interior_point_solver_class.def("minimise", &InteriorPointSolver::minimise);
-    interior_point_solver_class.def("feasible", (ValidatedKleenean(InteriorPointSolver::*)(const Vector<FloatDP>&,const Vector<FloatDP>&, const Matrix<FloatDP>&,const Vector<FloatDP>&)const) &InteriorPointSolver::feasible);
+    interior_point_solver_class.def("feasible", (ValidatedKleenean(InteriorPointSolver::*)(const Vector<FloatDPValue>&,const Vector<FloatDPValue>&, const Matrix<FloatDPValue>&,const Vector<FloatDPValue>&)const) &InteriorPointSolver::feasible);
     interior_point_solver_class.def("validate_feasibility", &InteriorPointSolver::validate_feasibility);
 }
 
