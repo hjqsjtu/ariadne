@@ -869,6 +869,9 @@ template<> String class_name<FloatDP>() { return "FloatDP"; }
 
 namespace Ariadne {
 
+template<> String class_name<ApproximateDouble>() { return "ApproximateDouble"; }
+template<> String class_name<ExactDouble>() { return "ExactDouble"; }
+
 template<> String class_name<Rounded<FloatDP>>() { return "Rounded<FloatDP>"; }
 
 template<class X> class Value { X _v; public: X const& raw() const { return this->_v; } };
