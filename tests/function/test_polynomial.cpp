@@ -32,6 +32,7 @@
 #include "algebra/expansion.inl.hpp"
 #include "algebra/algebra.hpp"
 #include "function/polynomial.hpp"
+#include "function/polynomial.tpl.hpp"
 
 #include "../test.hpp"
 
@@ -42,7 +43,7 @@ using namespace Ariadne;
 class TestPolynomial
 {
     typedef MultiIndex MI;
-    typedef MultivariatePolynomial<RoundedFloatDP> P;
+    typedef MultivariatePolynomial<ApproximateDouble> P;
   public:
     Void test();
   private:
@@ -68,21 +69,21 @@ Void TestPolynomial::test()
 
 Void TestPolynomial::test_concept()
 {
-    RoundedFloatDP x=0;
-    Vector<RoundedFloatDP> v(3);
+    ApproximateDouble x=0.0;
+    Vector<ApproximateDouble> v(3);
     MultiIndex a(3);
-    MultivariatePolynomial<RoundedFloatDP> p(3);
-    const MultivariatePolynomial<RoundedFloatDP> cp(3);
-    Vector< MultivariatePolynomial<RoundedFloatDP> > pv(2);
+    MultivariatePolynomial<ApproximateDouble> p(3);
+    const MultivariatePolynomial<ApproximateDouble> cp(3);
+    Vector< MultivariatePolynomial<ApproximateDouble> > pv(2);
 
-    p=MultivariatePolynomial<RoundedFloatDP>();
-    p=MultivariatePolynomial<RoundedFloatDP>(3);
-    p=MultivariatePolynomial<RoundedFloatDP>(cp);
+    p=MultivariatePolynomial<ApproximateDouble>();
+    p=MultivariatePolynomial<ApproximateDouble>(3);
+    p=MultivariatePolynomial<ApproximateDouble>(cp);
 
-    p=MultivariatePolynomial<RoundedFloatDP>({ {{0,0,0},1}, {{1,0,0},2}, {{0,0,0},3}, {{0,0,1},5.0} });
+    p=MultivariatePolynomial<ApproximateDouble>({ {{0,0,0},1}, {{1,0,0},2}, {{0,0,0},3}, {{0,0,1},5.0} });
 
-    //p=MultivariatePolynomial<RoundedFloatDP>::variable(3u,0u);
-    //p=MultivariatePolynomial<RoundedFloatDP>::variables(3u)[0u];
+    //p=MultivariatePolynomial<ApproximateDouble>::variable(3u,0u);
+    //p=MultivariatePolynomial<ApproximateDouble>::variables(3u)[0u];
 
     p=x;
 
@@ -136,7 +137,7 @@ Void TestPolynomial::test_cleanup()
             value=reinterpret_cast<double&>(v[3*i+1]);
         }
 
-        typedef Expansion<RoundedFloatDP>::Iterator Iterator;
+        typedef Expansion<ApproximateDouble>::Iterator Iterator;
         Iterator iter1(3,&*v.begin());
         Iterator iter2(3,&*v.end());
         std::sort(iter1,iter2);
@@ -154,7 +155,7 @@ Void TestPolynomial::test_cleanup()
     // Since these are used in the constructors, we can't use the main constructors to test this
     MultiIndex a(3);
     MultiIndex b(3); ++b;
-    MultivariatePolynomial<RoundedFloatDP> p(3);
+    MultivariatePolynomial<ApproximateDouble> p(3);
     for(Nat i=0; i!=2; ++i) {
         if(i%2) { p.expansion().append(a,1/(1.+i)); ++b; ++b; a=b; ++b; } else { p.expansion().append(b,1/(1.+i));}
     }
@@ -167,20 +168,20 @@ Void TestPolynomial::test_cleanup()
 Void TestPolynomial::test_constructors()
 {
     // Empty polynomial
-    ARIADNE_TEST_CONSTRUCT(UnivariatePolynomial<RoundedFloatDP>,q1,);
+    ARIADNE_TEST_CONSTRUCT(UnivariatePolynomial<ApproximateDouble>,q1,);
     // Dense polynomial
-    ARIADNE_TEST_CONSTRUCT(UnivariatePolynomial<RoundedFloatDP>,q2,({ {0,0.}, {1,0.},{2,5.},{3,2.} }));
+    ARIADNE_TEST_CONSTRUCT(UnivariatePolynomial<ApproximateDouble>,q2,({ {0,0.}, {1,0.},{2,5.},{3,2.} }));
     ARIADNE_TEST_EQUAL(q2[1],0.0);
     ARIADNE_TEST_EQUAL(q2[2],5.0);
     ARIADNE_TEST_EQUAL(q2[3],2.0);
 
     // Empty polynomial
-    ARIADNE_TEST_CONSTRUCT(MultivariatePolynomial<RoundedFloatDP>,p1,(3));
+    ARIADNE_TEST_CONSTRUCT(MultivariatePolynomial<ApproximateDouble>,p1,(3));
     // Dense polynomial
-    ARIADNE_TEST_CONSTRUCT(MultivariatePolynomial<RoundedFloatDP>,p2,({ {{0,0,0},0.}, {{1,0,0},0.},{{0,1,0},0.},{{0,0,1},0.}, {{2,0,0},5.},{{1,1,0},2.},{{1,0,1},0.},{{0,2,0},0.},{{0,1,2},3.},{{0,0,2},0.} }));
+    ARIADNE_TEST_CONSTRUCT(MultivariatePolynomial<ApproximateDouble>,p2,({ {{0,0,0},0.}, {{1,0,0},0.},{{0,1,0},0.},{{0,0,1},0.}, {{2,0,0},5.},{{1,1,0},2.},{{1,0,1},0.},{{0,2,0},0.},{{0,1,2},3.},{{0,0,2},0.} }));
     ARIADNE_TEST_EQUAL(p2[MultiIndex({2,0,0})],5.0);
     // Sparse polynomial with unordered indiced
-    ARIADNE_TEST_CONSTRUCT(MultivariatePolynomial<RoundedFloatDP>,p3,({ {{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0} }));
+    ARIADNE_TEST_CONSTRUCT(MultivariatePolynomial<ApproximateDouble>,p3,({ {{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0} }));
     ARIADNE_TEST_EQUAL(p3[MultiIndex({1,2})],5.0);
     ARIADNE_TEST_EQUAL(p3[MultiIndex({0,0})],2.0);
 
@@ -193,8 +194,8 @@ Void TestPolynomial::test_constructors()
 
 Void TestPolynomial::test_indexing()
 {
-    MultivariatePolynomial<RoundedFloatDP> p({ {{0,0,0},2.0},  {{1,0,0},3.0}, {{1,0,1},5.0}, {{2,1,0},7.0} });
-    const MultivariatePolynomial<RoundedFloatDP>& pc=p;
+    MultivariatePolynomial<ApproximateDouble> p({ {{0,0,0},2.0},  {{1,0,0},3.0}, {{1,0,1},5.0}, {{2,1,0},7.0} });
+    const MultivariatePolynomial<ApproximateDouble>& pc=p;
     ARIADNE_TEST_EQUAL(p[MultiIndex({1,0,0})],3.0);
 
     p[MultiIndex({1,0,0})]-=0.5;
@@ -203,7 +204,7 @@ Void TestPolynomial::test_indexing()
     p[MultiIndex({1,1,0})]=11.0;
     ARIADNE_TEST_EQUAL(p[MultiIndex({1,1,0})],11.0);
 
-    MultivariatePolynomial<RoundedFloatDP> q(3);
+    MultivariatePolynomial<ApproximateDouble> q(3);
     q[MultiIndex({0,0,0})]=2.0;
     q[MultiIndex({0,1,0})]=3.0;
     ARIADNE_TEST_EQUALS(q.number_of_terms(),2);
@@ -231,7 +232,7 @@ Void TestPolynomial::test_indexing()
     p.expansion().graded_sort();
     ARIADNE_TEST_PRINT(p.expansion());
 
-    MultivariatePolynomial<RoundedFloatDP>::ConstIterator iter=p.begin();
+    MultivariatePolynomial<ApproximateDouble>::ConstIterator iter=p.begin();
     ARIADNE_TEST_EQUALS(iter->index(),MultiIndex({0,0,0}));
     ARIADNE_TEST_EQUALS(iter->coefficient(),7.0);
     ++iter;
@@ -251,14 +252,14 @@ Void TestPolynomial::test_arithmetic()
     ARIADNE_TEST_EQUAL(P(3)+P({ {{2,1,0},2.0} }),P({ {{2,1,0},2.0} }));
     ARIADNE_TEST_EQUAL(P(3)+P({ {{2,1,0},2.0}, {{0,1,0},3.0}, {{1,1,0},5.0} }), P({ {{0,1,0},3.0}, {{1,1,0},5.0}, {{2,1,0},2.0} }));
 
-    MultivariatePolynomial<RoundedFloatDP> x0(3); x0[MultiIndex({1,0,0})]=1.0;
-    MultivariatePolynomial<RoundedFloatDP> x1(3); x1[MultiIndex({0,1,0})]=1.0;
-    MultivariatePolynomial<RoundedFloatDP> x2=MultivariatePolynomial<RoundedFloatDP>::coordinate(3,2);
-    UnivariatePolynomial<RoundedFloatDP> y=UnivariatePolynomial<RoundedFloatDP>::coordinate(SizeOne(),IndexZero());
-    y=UnivariatePolynomial<RoundedFloatDP>::coordinate();
+    MultivariatePolynomial<ApproximateDouble> x0(3); x0[MultiIndex({1,0,0})]=1.0;
+    MultivariatePolynomial<ApproximateDouble> x1(3); x1[MultiIndex({0,1,0})]=1.0;
+    MultivariatePolynomial<ApproximateDouble> x2=MultivariatePolynomial<ApproximateDouble>::coordinate(3,2);
+    UnivariatePolynomial<ApproximateDouble> y=UnivariatePolynomial<ApproximateDouble>::coordinate(SizeOne(),IndexZero());
+    y=UnivariatePolynomial<ApproximateDouble>::coordinate();
 
-    RoundedFloatDP w(3);
-    Vector<RoundedFloatDP> v({3,5,2});
+    ApproximateDouble w(3);
+    Vector<ApproximateDouble> v({3,5,2});
 
     ARIADNE_TEST_EQUALS(evaluate(2*x0*x0-1,v),2*v[0]*v[0]-1);
 
@@ -270,33 +271,33 @@ Void TestPolynomial::test_arithmetic()
 
 Void TestPolynomial::test_variables()
 {
-    Vector< MultivariatePolynomial<RoundedFloatDP> > x=MultivariatePolynomial<RoundedFloatDP>::variables(3);
-    Array< Vector<RoundedFloatDP> > e=Vector<RoundedFloatDP>::basis(2);
+    Vector< MultivariatePolynomial<ApproximateDouble> > x=MultivariatePolynomial<ApproximateDouble>::variables(3);
+    Array< Vector<ApproximateDouble> > e=Vector<ApproximateDouble>::basis(2);
 
-    MultivariatePolynomial<RoundedFloatDP> p1=x[1]*3.0;
-    MultivariatePolynomial<RoundedFloatDP> p2=p1+x[0]; p2=x[1]*3,0+x[0];
-    MultivariatePolynomial<RoundedFloatDP> p3=x[0]*p2; p3=x[0]*(x[1]*3.0+x[0]);
-    MultivariatePolynomial<RoundedFloatDP> p4=x[1]*x[2];
-    MultivariatePolynomial<RoundedFloatDP> p5=p3+p4;
-    MultivariatePolynomial<RoundedFloatDP> p=x[0]*(x[1]*3.0+x[0])+x[1]*x[2];
+    MultivariatePolynomial<ApproximateDouble> p1=x[1]*3.0;
+    MultivariatePolynomial<ApproximateDouble> p2=p1+x[0]; p2=x[1]*3,0+x[0];
+    MultivariatePolynomial<ApproximateDouble> p3=x[0]*p2; p3=x[0]*(x[1]*3.0+x[0]);
+    MultivariatePolynomial<ApproximateDouble> p4=x[1]*x[2];
+    MultivariatePolynomial<ApproximateDouble> p5=p3+p4;
+    MultivariatePolynomial<ApproximateDouble> p=x[0]*(x[1]*3.0+x[0])+x[1]*x[2];
 
-    ARIADNE_TEST_EQUAL(x[0], MultivariatePolynomial<RoundedFloatDP>({ {{1,0,0},1.0} }));
-    ARIADNE_TEST_EQUAL(x[1], MultivariatePolynomial<RoundedFloatDP>({ {{0,1,0},1.0} }));
-    ARIADNE_TEST_EQUAL(x[2], MultivariatePolynomial<RoundedFloatDP>({ {{0,0,1},1.0} }));
-    ARIADNE_TEST_EQUAL(x[0]+x[1], MultivariatePolynomial<RoundedFloatDP>({ {{1,0,0},1.0}, {{0,1,0},1.0} }));
-    ARIADNE_TEST_EQUAL(x[0]*x[1], MultivariatePolynomial<RoundedFloatDP>({ {{1,1,0},1.0} }));
+    ARIADNE_TEST_EQUAL(x[0], MultivariatePolynomial<ApproximateDouble>({ {{1,0,0},1.0} }));
+    ARIADNE_TEST_EQUAL(x[1], MultivariatePolynomial<ApproximateDouble>({ {{0,1,0},1.0} }));
+    ARIADNE_TEST_EQUAL(x[2], MultivariatePolynomial<ApproximateDouble>({ {{0,0,1},1.0} }));
+    ARIADNE_TEST_EQUAL(x[0]+x[1], MultivariatePolynomial<ApproximateDouble>({ {{1,0,0},1.0}, {{0,1,0},1.0} }));
+    ARIADNE_TEST_EQUAL(x[0]*x[1], MultivariatePolynomial<ApproximateDouble>({ {{1,1,0},1.0} }));
     ARIADNE_TEST_EVALUATE(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]);
-    ARIADNE_TEST_EQUAL((x[0]*(x[1]*3.0+x[0])+x[1]*x[2]), MultivariatePolynomial<RoundedFloatDP>({ {{1,1,0},3.0}, {{2,0,0},1.0}, {{0,1,1},1.0} }));
-    ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[1], MultivariatePolynomial<RoundedFloatDP>({ {{1,1,0},3.0}, {{2,0,0},1.0}, {{0,1,1},1.0} }));
+    ARIADNE_TEST_EQUAL((x[0]*(x[1]*3.0+x[0])+x[1]*x[2]), MultivariatePolynomial<ApproximateDouble>({ {{1,1,0},3.0}, {{2,0,0},1.0}, {{0,1,1},1.0} }));
+    ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[1], MultivariatePolynomial<ApproximateDouble>({ {{1,1,0},3.0}, {{2,0,0},1.0}, {{0,1,1},1.0} }));
     ARIADNE_TEST_PRINT((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[0]);
-    ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[0], MultivariatePolynomial<RoundedFloatDP>(3));
-    ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[0], MultivariatePolynomial<RoundedFloatDP>({ {{3,0,0},0.0} }));
+    ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[0], MultivariatePolynomial<ApproximateDouble>(3));
+    ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[0], MultivariatePolynomial<ApproximateDouble>({ {{3,0,0},0.0} }));
 
 }
 
 Void TestPolynomial::test_find()
 {
-    MultivariatePolynomial<RoundedFloatDP> p({ {{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0} });
+    MultivariatePolynomial<ApproximateDouble> p({ {{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0} });
     MultiIndex a(2);
     a[0]=1; a[1]=2;
     ARIADNE_TEST_PRINT(p);

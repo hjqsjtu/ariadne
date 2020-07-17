@@ -144,6 +144,9 @@ class Polynomial
     template<class XX> explicit Polynomial(const Expansion<I,XX>& e);
     //! \brief A sparse polynomial with coefficients given by an initializer list of indices and coefficients.
     Polynomial(InitializerList<Pair<IndexInitializerType,X>> lst);
+    //! \brief A sparse polynomial with coefficients given by an initializer list of indices and double-precision coefficients.
+    template<class PR, EnableIf<IsConstructible<X,Dbl,PR>> =dummy>
+        Polynomial(InitializerList<Pair<IndexInitializerType,Dbl>> lst, PR prs);
     //@}
 
     //! \brief Create the null polynomial in the same number of variables.

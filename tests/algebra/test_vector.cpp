@@ -84,13 +84,13 @@ TestVector::test_concept()
 Void
 TestVector::test_constructors()
 {
-    ARIADNE_TEST_CONSTRUCT( Vector<RoundedFloatDP>, v0, (3) );
+    ARIADNE_TEST_CONSTRUCT( Vector<ApproximateDouble>, v0, (3) );
     ARIADNE_TEST_ASSERT( v0.size()==3 );
     ARIADNE_TEST_ASSERT( v0[0]==0.0 );
     ARIADNE_TEST_ASSERT( v0[1]==0.0 );
     ARIADNE_TEST_ASSERT( v0[2]==0.0 );
 
-    ARIADNE_TEST_CONSTRUCT( Vector<RoundedFloatDP>, v1, ({3.25,-0.75,0.0,1.375}) );
+    ARIADNE_TEST_CONSTRUCT( Vector<ApproximateDouble>, v1, ({3.25,-0.75,0.0,1.375}) );
     ARIADNE_TEST_ASSERT( v1.size()==4 );
     ARIADNE_TEST_ASSERT( v1[0]==3.25 );
     ARIADNE_TEST_ASSERT( v1[1]==-0.75 );
@@ -102,25 +102,25 @@ TestVector::test_constructors()
 Void
 TestVector::test_comparisons()
 {
-    Vector<RoundedFloatDP> v(2); v[0]=1.25; v[1]=-1.375;
+    Vector<ApproximateDouble> v(2); v[0]=1.25; v[1]=-1.375;
     ARIADNE_TEST_PRINT( v );
-    ARIADNE_TEST_COMPARE( v , ==, Vector<RoundedFloatDP>({1.25,-1.375}) );
-    ARIADNE_TEST_COMPARE( v , !=, Vector<RoundedFloatDP>({1.25,-1.625}) );
+    ARIADNE_TEST_COMPARE( v , ==, Vector<ApproximateDouble>({1.25,-1.375}) );
+    ARIADNE_TEST_COMPARE( v , !=, Vector<ApproximateDouble>({1.25,-1.625}) );
 }
 
 
 Void
 TestVector::test_arithmetic()
 {
-    ARIADNE_TEST_EQUAL( + Vector<RoundedFloatDP>({2.0,-3.0,5.0}) , Vector<RoundedFloatDP>({2.0,-3.0,5.0}) );
-    ARIADNE_TEST_EQUAL( - Vector<RoundedFloatDP>({2.0,-3.0,5.0}) , Vector<RoundedFloatDP>({-2.0,+3.0,-5.0}) );
-    ARIADNE_TEST_EQUAL( Vector<RoundedFloatDP>({2.0,-3.0,5.0}) + Vector<RoundedFloatDP>({1.25,2.75,-3.5}), Vector<RoundedFloatDP>({3.25,-0.25,1.5}) );
-    ARIADNE_TEST_EQUAL( Vector<RoundedFloatDP>({2.0,-3.0,5.0}) - Vector<RoundedFloatDP>({1.25,2.75,-3.5}), Vector<RoundedFloatDP>({0.75,-5.75,8.5}) );
-    ARIADNE_TEST_EQUAL( RoundedFloatDP(4.0) * Vector<RoundedFloatDP>({2.0,-3.0,5.0}), Vector<RoundedFloatDP>({8.0,-12.0,20.0}) );
-    ARIADNE_TEST_EQUAL( Vector<RoundedFloatDP>({2.0,-3.0,5.0}) * RoundedFloatDP(4.0), Vector<RoundedFloatDP>({8.0,-12.0,20.0}) );
-    ARIADNE_TEST_EQUAL( Vector<RoundedFloatDP>({2.0,-3.0,5.0}) / RoundedFloatDP(4.0), Vector<RoundedFloatDP>({0.5,-0.75,1.25}) );
+    ARIADNE_TEST_EQUAL( + Vector<ApproximateDouble>({2.0,-3.0,5.0}) , Vector<ApproximateDouble>({2.0,-3.0,5.0}) );
+    ARIADNE_TEST_EQUAL( - Vector<ApproximateDouble>({2.0,-3.0,5.0}) , Vector<ApproximateDouble>({-2.0,+3.0,-5.0}) );
+    ARIADNE_TEST_EQUAL( Vector<ApproximateDouble>({2.0,-3.0,5.0}) + Vector<ApproximateDouble>({1.25,2.75,-3.5}), Vector<ApproximateDouble>({3.25,-0.25,1.5}) );
+    ARIADNE_TEST_EQUAL( Vector<ApproximateDouble>({2.0,-3.0,5.0}) - Vector<ApproximateDouble>({1.25,2.75,-3.5}), Vector<ApproximateDouble>({0.75,-5.75,8.5}) );
+    ARIADNE_TEST_EQUAL( ApproximateDouble(4.0) * Vector<ApproximateDouble>({2.0,-3.0,5.0}), Vector<ApproximateDouble>({8.0,-12.0,20.0}) );
+    ARIADNE_TEST_EQUAL( Vector<ApproximateDouble>({2.0,-3.0,5.0}) * ApproximateDouble(4.0), Vector<ApproximateDouble>({8.0,-12.0,20.0}) );
+    ARIADNE_TEST_EQUAL( Vector<ApproximateDouble>({2.0,-3.0,5.0}) / ApproximateDouble(4.0), Vector<ApproximateDouble>({0.5,-0.75,1.25}) );
 
-    ARIADNE_TEST_EQUAL( sup_norm(Vector<RoundedFloatDP>({2.0,-3.0,1.0})), RoundedFloatDP(3.0) )
+    ARIADNE_TEST_EQUAL( sup_norm(Vector<ApproximateDouble>({2.0,-3.0,1.0})), ApproximateDouble(3.0) )
 }
 
 

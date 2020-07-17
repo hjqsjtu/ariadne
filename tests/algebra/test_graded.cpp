@@ -53,6 +53,21 @@ class TestGraded
         for(DegreeType d=2; d<=deg; ++d) { r.append(z); }
         return r; }
 
+    static Graded<X> variable(Dbl v0, DegreeType deg) {
+        assert(deg>=1); X z(0.0); X x0(v0); Graded<X> r(x0); r.append(z+1);
+        for(DegreeType d=2; d<=deg; ++d) { r.append(z); }
+        return r; }
+
+    static Graded<X> graded(InitializerList<Dbl> lst) {
+        assert(lst.size()>=2); Graded<X> r;
+        for(Double x : lst) { r.append(X(x)); }
+        return r; }
+
+    static Graded<X> graded(InitializerList<X> lst) {
+        assert(lst.size()>=2); Graded<X> r;
+        for(X x : lst) { r.append(x); }
+        return r; }
+
     template<class OP> Graded<X> apply(OP op, Graded<X> const& a) {
         Graded<X> r;
         while(r.size()!=a.size()) { compute(r,op,a); }
@@ -82,15 +97,15 @@ class TestGraded
     }
 
     void test_sqr() {
-        ARIADNE_TEST_EQUALS(apply(Sqr(),variable(2.0,5u)), (Graded<X>{4.0,4.0,1.0,0.0,0.0,0.0}));
-        ARIADNE_TEST_EQUALS(apply(Sqr(),Graded<X>{3.0,2.0,1.0,0.0,0.0,0.0}), (Graded<X>{9.0,12.0,10.0,4.0,1.0,0.0}) );
+        ARIADNE_TEST_EQUALS(apply(Sqr(),variable(2.0,5u)), (graded({4.0,4.0,1.0,0.0,0.0,0.0})));
+        ARIADNE_TEST_EQUALS(apply(Sqr(),graded({3.0,2.0,1.0,0.0,0.0,0.0})), (graded({9.0,12.0,10.0,4.0,1.0,0.0})) );
     }
 
     void test_rec() {
-        ARIADNE_TEST_EQUALS(apply(Rec(),variable(2.0,5u)), (Graded<X>{0.5,-0.25,0.125,-0.0625,0.03125,-0.015625}) );
-        ARIADNE_TEST_EQUALS(apply(Rec(),variable(1.0,5u)), (Graded<X>{1.0,-1.0,1.0,-1.0,1.0,-1.0}) );
-        ARIADNE_TEST_EQUALS(apply(Rec(),variable(0.5,5u)), (Graded<X>{2.0,-4.0,8.0,-16.0,32.0,-64.0}) );
-        ARIADNE_TEST_EQUALS(apply(Rec(),variable(-1.0,5u)), (Graded<X>{-1.0,-1.0,-1.0,-1.0,-1.0,-1.0}) );
+        ARIADNE_TEST_EQUALS(apply(Rec(),variable(2.0,5u)), (graded({0.5,-0.25,0.125,-0.0625,0.03125,-0.015625})) );
+        ARIADNE_TEST_EQUALS(apply(Rec(),variable(1.0,5u)), (graded({1.0,-1.0,1.0,-1.0,1.0,-1.0})) );
+        ARIADNE_TEST_EQUALS(apply(Rec(),variable(0.5,5u)), (graded({2.0,-4.0,8.0,-16.0,32.0,-64.0})) );
+        ARIADNE_TEST_EQUALS(apply(Rec(),variable(-1.0,5u)), (graded({-1.0,-1.0,-1.0,-1.0,-1.0,-1.0})) );
     }
 
     void test_pow() {
@@ -102,17 +117,17 @@ class TestGraded
         ARIADNE_TEST_EQUAL (apply(Pow(),variable(2.0,7u),6), (apply(Pow(),apply(Sqr(),variable(2,7u)),3)) )
         ARIADNE_TEST_EQUAL (apply(Pow(),variable(2.0,7u),6), (apply(Sqr(),apply(Pow(),variable(2,7u),3))) )
 
-        ARIADNE_TEST_EQUALS(apply(Pow(),variable(3.0,5u),0), (Graded<X>{1.0,0.0,0.0,0.0,0.0,0.0}) );
-        ARIADNE_TEST_EQUALS(apply(Pow(),variable(3.0,5u),1), (Graded<X>{3.0,1.0,0.0,0.0,0.0,0.0}) );
-        ARIADNE_TEST_EQUALS(apply(Pow(),variable(3.0,5u),2), (Graded<X>{9.0,6.0,1.0,0.0,0.0,0.0}) );
-        ARIADNE_TEST_EQUALS(apply(Pow(),variable(1.0,5u),5), (Graded<X>{1.0,5.0,10.0,10.0,5.0,1.0}) );
-        ARIADNE_TEST_EQUALS(apply(Pow(),variable(3.0,5u),5), (Graded<X>{243.0,405.0,270.0,90.0,15.0,1.0}) );
-        ARIADNE_TEST_EQUALS(apply(Pow(),variable(-3.0,5u),5), (Graded<X>{-243.0,405.0,-270.0,90.0,-15.0,1.0}) );
+        ARIADNE_TEST_EQUALS(apply(Pow(),variable(3.0,5u),0), (graded({1.0,0.0,0.0,0.0,0.0,0.0})) );
+        ARIADNE_TEST_EQUALS(apply(Pow(),variable(3.0,5u),1), (graded({3.0,1.0,0.0,0.0,0.0,0.0})) );
+        ARIADNE_TEST_EQUALS(apply(Pow(),variable(3.0,5u),2), (graded({9.0,6.0,1.0,0.0,0.0,0.0})) );
+        ARIADNE_TEST_EQUALS(apply(Pow(),variable(1.0,5u),5), (graded({1.0,5.0,10.0,10.0,5.0,1.0})) );
+        ARIADNE_TEST_EQUALS(apply(Pow(),variable(3.0,5u),5), (graded({243.0,405.0,270.0,90.0,15.0,1.0})) );
+        ARIADNE_TEST_EQUALS(apply(Pow(),variable(-3.0,5u),5), (graded({-243.0,405.0,-270.0,90.0,-15.0,1.0})) );
         ARIADNE_TEST_EQUAL (apply(Pow(),variable(-3.0,7u),2), (apply(Sqr(),variable(-3,7u))) )
         ARIADNE_TEST_EQUAL (apply(Pow(),variable(2.0,7u),6), (apply(Sqr(),apply(Pow(),variable(2,7u),3))) )
-        ARIADNE_TEST_EQUALS(apply(Pow(),Graded<X>{2.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0},3), (Graded<X>{8.0,0.0,12.0,0.0,6.0,0.0,1.0,0.0}) );
+        ARIADNE_TEST_EQUALS(apply(Pow(),graded({2.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0}),3), (graded({8.0,0.0,12.0,0.0,6.0,0.0,1.0,0.0})) );
 
-        ARIADNE_TEST_EQUAL (apply(Pow(),Graded<X>{4.0,4.0,1.0, 0,0,0,0,0},3), (Graded<X>{64.0,192.0,240.0, 160.0,60.0,12.0,1.0,0.0}));
+        ARIADNE_TEST_EQUAL (apply(Pow(),graded({4.0,4.0,1.0, 0,0,0,0,0}),3), (graded({64.0,192.0,240.0, 160.0,60.0,12.0,1.0,0.0})) );
 
         ARIADNE_TEST_EQUAL (apply(Pow(),variable(2.0,5u),-1), apply(Rec(),variable(2.0,5u)) );
         ARIADNE_TEST_EQUAL (apply(Pow(),variable(2.0,5u),-6), apply(Rec(),apply(Pow(),variable(2.0,5u),6)) );
@@ -121,47 +136,48 @@ class TestGraded
 
     void test_sqrt() {
         ARIADNE_TEST_EQUALS( apply(Sqrt(),variable(4.0,5u)),
-                             (Graded<X>{2,0.25,-0.015625,0.001953125,-0.00030517578125,0.00005340576171875}) );
-        ARIADNE_TEST_EQUALS(apply(Sqrt(),variable(1.0,5u)), (Graded<X>{1,0.5,-0.125,0.0625,-0.0390625,0.02734375}) );
-        ARIADNE_TEST_EQUALS(apply(Sqrt(),variable(0.25,5u)), (Graded<X>{0.5,1.0,-1.0,2.0,-5.0,14.0}) );
+                             (graded({2,0.25,-0.015625,0.001953125,-0.00030517578125,0.00005340576171875})) );
+        ARIADNE_TEST_EQUALS(apply(Sqrt(),variable(1.0,5u)), (graded({1,0.5,-0.125,0.0625,-0.0390625,0.02734375})) );
+        ARIADNE_TEST_EQUALS(apply(Sqrt(),variable(0.25,5u)), (graded({0.5,1.0,-1.0,2.0,-5.0,14.0})) );
     }
 
     void test_exp() {
         static const X exp1=exp(X(1));
         ARIADNE_TEST_EQUALS( apply(Exp(),variable(0.0,5u)),
-                             (Graded<X>{1.0,1.0,1.0/2,1.0/6,1.0/24,1.0/120}) );
+                             (graded({1.0,1.0,1.0/2,1.0/6,1.0/24,1.0/120})) );
         ARIADNE_TEST_EQUALS( apply(Exp(),variable(1.0,5u)),
-                             (Graded<X>{exp1,exp1/1,exp1/2,exp1/6,exp1/24,exp1/120}) );
+                             (graded({exp1,exp1/1,exp1/2,exp1/6,exp1/24,exp1/120})) );
     }
 
     void test_log() {
-        static const X log2=log(2);
+        static const X log2=log(X(2));
+        static const X one(1);
         ARIADNE_TEST_EQUALS( apply(Log(),variable(1.0,5u)),
-                             (Graded<X>{0.0,1.0,-1.0/2,1.0/3,-1.0/4,1.0/5}) );
+                             (graded({0.0,1.0,-1.0/2,1.0/3,-1.0/4,1.0/5})) );
         ARIADNE_TEST_EQUALS( apply(Log(),variable(2.0,5u)),
-                             (Graded<X>{log2,1.0/2,-1.0/8,1.0/24,-1.0/64,1.0/160}) );
+                             (graded({log2,one/2,-one/8,one/24,-one/64,one/160})) );
     }
 
     void test_sin() {
-        const X one=1;
+        const X one=X(1);
         const X sin1=sin(one);
         const X cos1=cos(one);
 
         ARIADNE_TEST_EQUALS( apply(Sin(),variable(0.0,5u)),
-                             (Graded<X>{0.0,1.0,0.0,-1.0/6,0.0,1.0/120}) );
+                             (graded({0.0,1.0,0.0,-1.0/6,0.0,1.0/120})) );
         ARIADNE_TEST_EQUALS ( apply(Sin(),variable(1.0,5u)),
-                             (Graded<X>{sin1,cos1,-sin1/2,-cos1/6,sin1/24,cos1/120}) );
+                             (graded({sin1,cos1,-sin1/2,-cos1/6,sin1/24,cos1/120})) );
     }
 
     void test_cos() {
-        const X one=1;
+        const X one=X(1);
         const X sin1=sin(one);
         const X cos1=cos(one);
         ARIADNE_TEST_EQUALS( apply(Cos(),variable(0.0,5u)),
-                             (Graded<X>{1.0,0.0,-1.0/2,0.0,1.0/24,0.0}) );
+                             (graded({1.0,0.0,-1.0/2,0.0,1.0/24,0.0})) );
         // Only go to degree 4 here due to roundoff error
         ARIADNE_TEST_EQUALS ( apply(Cos(),variable(1.0,4u)),
-                             (Graded<X>{cos1,-sin1,-cos1/2,sin1/6,cos1/24}) );
+                             (graded({cos1,-sin1,-cos1/2,sin1/6,cos1/24})) );
     }
 
 };

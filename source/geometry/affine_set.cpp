@@ -43,15 +43,6 @@
 
 namespace Ariadne {
 
-#warning
-// FIXME: Unsafe arithmetic operators on raw float
-inline FloatDP operator+(FloatDP const& x1, FloatDP const& x2) { return x1.dbl + x2.dbl; }
-inline FloatDP operator-(FloatDP const& x1, FloatDP const& x2) { return x1.dbl - x2.dbl; }
-inline FloatDP operator*(FloatDP const& x1, FloatDP const& x2) { return x1.dbl * x2.dbl; }
-inline FloatDP operator/(FloatDP const& x1, FloatDP const& x2) { return x1.dbl / x2.dbl; }
-inline FloatDP& operator+=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl + x2.dbl; return x1; }
-
-
 typedef Vector<FloatDP> RawFloatVector;
 typedef Vector<ExactIntervalType> ExactIntervalVectorType;
 
@@ -647,7 +638,7 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
 class PerturbationGenerator {
   public:
     PerturbationGenerator() : _n(0) { }
-    double operator()() { _n=_n+3; if(_n>19) { _n=_n-37; } return _n*1e-13; }
+    RoundedFloatDP operator()() { _n=_n+3; if(_n>19) { _n=_n-37; } return RoundedFloatDP( _n*1e-13 ); }
   private:
     Int _n;
 };
@@ -659,12 +650,12 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
 
     ARIADNE_LOG_PRINTLN("xind="<<xind<<", yind="<<yind);
 
-    SimplexSolver<FloatDP> lpsolver;
+    SimplexSolver<RoundedFloatDP> lpsolver;
     PerturbationGenerator eps;
 
     static const Int MAX_STEPS=1000;
     static const double ERROR_TOLERANCE = std::numeric_limits<float>::epsilon();
-    static const FloatDP _inf = Ariadne::inf;
+    static const RoundedFloatDP _inf ( Ariadne::inf );
 
     const SizeType nx=_domain.size();
     const SizeType ne=2u;
@@ -676,16 +667,16 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     ValidatedAffineModelDP const& ya=this->_space_models[yind];
 
     // The set is given by pt=Gx+h, where Ax=b and l<=x<=u
-    Matrix<FloatDP> G=Matrix<FloatDP>::zero(ne,np);
+    Matrix<RoundedFloatDP> G=Matrix<RoundedFloatDP>::zero(ne,np);
     for(Nat j=0; j!=nx; ++j) {
-        G[0][j]=numeric_cast<FloatDP>(xa.gradient(j))+eps();
-        G[1][j]=numeric_cast<FloatDP>(ya.gradient(j))+eps();
+        G[0][j]=numeric_cast<RoundedFloatDP>(xa.gradient(j))+eps();
+        G[1][j]=numeric_cast<RoundedFloatDP>(ya.gradient(j))+eps();
     }
-    G[0][nx+nc+0]=numeric_cast<FloatDP>(1.0);
-    G[1][nx+nc+1]=numeric_cast<FloatDP>(1.0);
-    Vector<FloatDP> h(ne);
-    h[0]=numeric_cast<FloatDP>(xa.value());
-    h[1]=numeric_cast<FloatDP>(ya.value());
+    G[0][nx+nc+0]=numeric_cast<RoundedFloatDP>(1.0);
+    G[1][nx+nc+1]=numeric_cast<RoundedFloatDP>(1.0);
+    Vector<RoundedFloatDP> h(ne);
+    h[0]=numeric_cast<RoundedFloatDP>(xa.value());
+    h[1]=numeric_cast<RoundedFloatDP>(ya.value());
     ARIADNE_LOG_PRINTLN("G="<<G)
     ARIADNE_LOG_PRINTLN("h="<<h);
 
@@ -693,44 +684,44 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     // Since the parameter domain is given by cl<=Ay+b+/-e<=cu, -1<=y<=+1, introduce slack variables z such that z-Ay=b, with cl-e<=z<=cu+e
     // Need to keep point error variables, introduce extra variables
 
-    Matrix<FloatDP> A(nc,np);
-    Vector<FloatDP> b(nc);
-    Vector<FloatDP> l(np);
-    Vector<FloatDP> u(np);
+    Matrix<RoundedFloatDP> A(nc,np);
+    Vector<RoundedFloatDP> b(nc);
+    Vector<RoundedFloatDP> l(np);
+    Vector<RoundedFloatDP> u(np);
 
     for(Nat j=0; j!=nx; ++j) {
-        l[j]=numeric_cast<FloatDP>(-1.0);
-        u[j]=numeric_cast<FloatDP>(+1.0);
+        l[j]=numeric_cast<RoundedFloatDP>(-1.0);
+        u[j]=numeric_cast<RoundedFloatDP>(+1.0);
     }
 
     for(Nat i=0; i!=nc; ++i) {
         for(Nat j=0; j!=nx; ++j) {
-            A[i][j] = neg( numeric_cast<FloatDP>(this->_constraint_models[i].function().gradient(j)) );
+            A[i][j] = neg( numeric_cast<RoundedFloatDP>(this->_constraint_models[i].function().gradient(j)) );
         }
         for(Nat j=nx; j!=nx+nc+ne; ++j) {
-            A[i][j] = numeric_cast<FloatDP>(0.0);
+            A[i][j] = numeric_cast<RoundedFloatDP>(0.0);
         }
-        A[i][nx+i]=numeric_cast<FloatDP>(1.0);
-        FloatDP fb=numeric_cast<FloatDP>(this->_constraint_models[i].function().value());
-        FloatDP fe=numeric_cast<FloatDP>(this->_constraint_models[i].function().error().raw());
-        FloatDP cl=numeric_cast<FloatDP>(this->_constraint_models[i].lower_bound().value());
-        FloatDP cu=numeric_cast<FloatDP>(this->_constraint_models[i].upper_bound().value());
+        A[i][nx+i]=numeric_cast<RoundedFloatDP>(1.0);
+        RoundedFloatDP fb=numeric_cast<RoundedFloatDP>(this->_constraint_models[i].function().value());
+        RoundedFloatDP fe=numeric_cast<RoundedFloatDP>(this->_constraint_models[i].function().error().raw());
+        RoundedFloatDP cl=numeric_cast<RoundedFloatDP>(this->_constraint_models[i].lower_bound().value());
+        RoundedFloatDP cu=numeric_cast<RoundedFloatDP>(this->_constraint_models[i].upper_bound().value());
         b[i]=fb+eps();
         l[nx+i]=cl-fe;
         u[nx+i]=cu+fe;
     }
 
-    l[nx+nc]=static_cast<FloatDP>(-xa.error().raw());
-    u[nx+nc]=static_cast<FloatDP>(+xa.error().raw());
-    l[nx+nc+1]=static_cast<FloatDP>(-ya.error().raw());
-    u[nx+nc+1]=static_cast<FloatDP>(+ya.error().raw());
+    l[nx+nc]=static_cast<RoundedFloatDP>(-xa.error().raw());
+    u[nx+nc]=static_cast<RoundedFloatDP>(+xa.error().raw());
+    l[nx+nc+1]=static_cast<RoundedFloatDP>(-ya.error().raw());
+    u[nx+nc+1]=static_cast<RoundedFloatDP>(+ya.error().raw());
     ARIADNE_LOG_PRINTLN("A="<<A<<" b="<<b<<" l="<<l<<" u="<<u);
 
     List<Point2d> vertices;
 
     // Set up simplex algorithm working variables
-    Array<Slackness> vt(0); Array<SizeType> p(nc); Matrix<FloatDP> B(nc,nc);
-    Vector<FloatDP> x(np); Vector<FloatDP> y(nc);
+    Array<Slackness> vt(0); Array<SizeType> p(nc); Matrix<RoundedFloatDP> B(nc,nc);
+    Vector<RoundedFloatDP> x(np); Vector<RoundedFloatDP> y(nc);
 
     // Find an initial feasible point
     ValidatedKleenean feasible = lpsolver.hotstarted_feasible(l,u,A,b, vt, p,B, x,y);
@@ -741,7 +732,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     // If problem not feasible, then set is empty; return empty list
     if(!possibly(feasible)) { return vertices; }
 
-    Vector<FloatDP> c(np,0.0);
+    Vector<RoundedFloatDP> c(np,0.0);
     for(Nat j=0; j!=np; ++j) { c[j]=G[0][j]; }
 
     // Find a point on the boundary; choose the point minimising the spacial x-coordinate
@@ -758,13 +749,13 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     Int STEPS=0;
     Array<Slackness> initial_variable_type=vt;
 
-    Vector<FloatDP> pt=G*x+h; // The current point in space
-    Vector<FloatDP> last_vec({0.0,-1.0}); // The direction in space of the last step along the boundary
+    Vector<RoundedFloatDP> pt=G*x+h; // The current point in space
+    Vector<RoundedFloatDP> last_vec({0,-1},double_precision); // The direction in space of the last step along the boundary
                                         // Should be set orthogonal to the direction (+1,0) which is minimised in finding first boundary point
-    Vector<FloatDP> best_next_vec(2);
-    Vector<FloatDP> trial_vec(2);
-    Vector<FloatDP> Aj(nc); // The jth column of A
-    Vector<FloatDP> BAj(nc); // The jth column of A
+    Vector<RoundedFloatDP> best_next_vec(2);
+    Vector<RoundedFloatDP> trial_vec(2);
+    Vector<RoundedFloatDP> Aj(nc); // The jth column of A
+    Vector<RoundedFloatDP> BAj(nc); // The jth column of A
 
     Nat last_exiting_variable=np; // Last variable to exit the basis
 
@@ -773,7 +764,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
 
     do {
         ++STEPS;
-        FloatDP cot_theta_max=-_inf;
+        RoundedFloatDP cot_theta_max=-_inf;
         Nat s=np; // The index giving the variable x[p[s]] to enter the basis
 
         // Compute direction the point Gx moves in when variable x[j]=x[p[k]] enters the basis
@@ -787,7 +778,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
                 BAj=B*Aj;
 
                 // Compute the direction the point in space moves for x[j] entering the basis
-                Vector<FloatDP> d(np,0.0); // The direction x moves in in changing the basis
+                Vector<RoundedFloatDP> d(np,0.0); // The direction x moves in in changing the basis
                 d[j] = (vt[j]==Slackness::LOWER ? +1 : -1);
                 for(Nat i=0; i!=nc; ++i) {
                     d[p[i]]=-BAj[i]*d[j];
@@ -799,9 +790,9 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
                 //   positive means an obtuse angle i.e. the same general direction.
                 // cross compares whether we turn to the left or the right.
                 // Since we traverse the boundary anticlockwise, cross should be positive.
-                FloatDP dot=last_vec[0]*trial_vec[0]+last_vec[1]*trial_vec[1];
-                FloatDP cross=last_vec[0]*trial_vec[1]-last_vec[1]*trial_vec[0];
-                FloatDP cot_theta=dot/cross;
+                RoundedFloatDP dot=last_vec[0]*trial_vec[0]+last_vec[1]*trial_vec[1];
+                RoundedFloatDP cross=last_vec[0]*trial_vec[1]-last_vec[1]*trial_vec[0];
+                RoundedFloatDP cot_theta=dot/cross;
                 ARIADNE_LOG_PRINTLN_AT(1,"k="<<k<<" p[k]="<<p[k]<<" d="<<d<<" trial_vec="<<trial_vec<<" last_vec="<<last_vec<<
                               " dot="<<dot<<" cross="<<cross<<" cot="<<cot_theta);
 
@@ -837,7 +828,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
         ARIADNE_LOG_PRINTLN_AT(2,"G="<<G<<" h="<<h<<" x="<<x<<" pt="<<pt);
         ARIADNE_LOG_PRINTLN_AT(1,"A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x<<" pt="<<pt<<" vec="<<best_next_vec);
 
-        vertices.push_back(Point2d(pt[0],pt[1]));
+        vertices.push_back(Point2d(pt[0].raw(),pt[1].raw()));
 
     } while(STEPS<MAX_STEPS && vt!=initial_variable_type);
 

@@ -252,8 +252,8 @@ struct RoundApproximately {
     constexpr operator MPFRRoundingModeType() const { return MPFR_RNDN; }
 };
 
-struct CurrentRoundingMode {
-};
+struct CurrentRoundingMode { };
+static const CurrentRoundingMode rounded = CurrentRoundingMode();
 
 //! \brief General rounding mode class. \ingroup NumericModule
 class Rounding {

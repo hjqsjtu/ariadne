@@ -34,11 +34,6 @@ template<class X> Matrix<X>::Matrix(SizeType m, SizeType n, const X* p)
     : _zero(0), _rs(m), _cs(n), _ary(p,p+m*n) {
 }
 
-template<class X> Matrix<X> Matrix<X>::zero(SizeType m, SizeType n) {
-    Matrix<X> A(m,n,X(0));
-    return A;
-}
-
 template<class X> Matrix<X> Matrix<X>::identity(SizeType n) {
     Matrix<X> A(n,n,X(0));
     for(SizeType i=0; i!=n; ++i) { A.at(i,i)=1; }

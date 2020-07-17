@@ -336,6 +336,10 @@ double sub_rnd(double x1, double x2) { return x1-x2; }
 double mul_rnd(double x1, double x2) { return x1*x2; }
 double div_rnd(double x1, double x2) { return x1/x2; }
 
+double abs_rnd(double x) { return std::abs(x); }
+double max_rnd(double x1, double x2) { return std::max(x1,x2); }
+double min_rnd(double x1, double x2) { return std::min(x1,x2); }
+
 double add_opp(double x, double y) { double t=(-x)-y; return -t; }
 double sub_opp(double x, double y) { double t=(-x)+y; return -t; }
 double mul_opp(double x, double y) { double t=(-x)*y; return -t; }
@@ -858,8 +862,14 @@ template<> String class_name<double>() { return "double"; }
 
 template<> String class_name<FloatDP>() { return "FloatDP"; }
 
-template<> String class_name<Rounded<FloatDP>>() { return "Rounded<FloatDP>"; }
+} // namespace Ariadne
 
+
+#include "rounded_float.hpp"
+
+namespace Ariadne {
+
+template<> String class_name<Rounded<FloatDP>>() { return "Rounded<FloatDP>"; }
 
 template<class X> class Value { X _v; public: X const& raw() const { return this->_v; } };
 template<class X> class Approximation { X _a; public: X const& raw() const { return this->_a; } };

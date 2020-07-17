@@ -481,6 +481,11 @@ template<class X> Matrix<X>::Matrix(SizeType m, SizeType n, const X& x)
     : _zero(create_zero(x)), _rs(m), _cs(n), _ary(m*n,x) {
 }
 
+template<class X> Matrix<X> Matrix<X>::zero(SizeType m, SizeType n) {
+    return Matrix<X>(m,n,X(0u));
+}
+
+
 template<class X> inline Void Matrix<X>::_check_data_access(SizeType i, SizeType j) const {
     ARIADNE_PRECONDITION_MSG(i<this->row_size()&&j<this->column_size(),"A="<<*this<<" i="<<i<<" j="<<j);
 }

@@ -44,17 +44,56 @@ namespace Ariadne {
 struct ExactTag;
 enum class Comparison : char;
 
+template<class D> struct HasGetD {
+    template<class DD, class=decltype(std::declval<DD>().get_d())> static std::true_type test(int);
+    template<class DD> static std::false_type test(...);
+    static const bool value = decltype(test<D>(1))::value;
+};
+
 class ApproximateDouble {
     double _d;
   public:
     typedef ApproximateTag Paradigm;
+    typedef ApproximateDouble NumericType;
     ApproximateDouble() : _d() { }
     ApproximateDouble(int n) : _d(n) { }
     template<class X, EnableIf<IsBuiltinArithmetic<X>> =dummy> ApproximateDouble(X const& x) : _d(x) { }
-    template<class X, DisableIf<IsBuiltinArithmetic<X>> =dummy> ApproximateDouble(X const& x) : _d(x.get_d()) { }
+    template<class X, EnableIf<HasGetD<X>> =dummy> ApproximateDouble(X const& x) : _d(x.get_d()) { }
+    explicit operator double() const { return _d; }
+
+    friend ApproximateDouble nul(ApproximateDouble x) { return ApproximateDouble(0.0); }
+    friend ApproximateDouble pos(ApproximateDouble x) { return ApproximateDouble(+x._d); }
+    friend ApproximateDouble neg(ApproximateDouble x) { return ApproximateDouble(-x._d); }
+    friend ApproximateDouble add(ApproximateDouble x1, ApproximateDouble x2) { return ApproximateDouble(x1._d+x2._d); }
+    friend ApproximateDouble sub(ApproximateDouble x1, ApproximateDouble x2) { return ApproximateDouble(x1._d-x2._d); }
+    friend ApproximateDouble mul(ApproximateDouble x1, ApproximateDouble x2) { return ApproximateDouble(x1._d*x2._d); }
+    friend ApproximateDouble div(ApproximateDouble x1, ApproximateDouble x2) { return ApproximateDouble(x1._d/x2._d); }
+    friend ApproximateDouble abs(ApproximateDouble x) { return ApproximateDouble(x._d>=0?x._d:-x._d); }
+    friend ApproximateDouble max(ApproximateDouble x1, ApproximateDouble x2) { return ApproximateDouble(x1._d>=x2._d?x1._d:x2._d); }
+    friend ApproximateDouble min(ApproximateDouble x1, ApproximateDouble x2) { return ApproximateDouble(x1._d<=x2._d?x1._d:x2._d); }
+#warning
+    friend ApproximateDouble mag(ApproximateDouble x) { return abs(x); }
+
     friend ApproximateDouble operator+(ApproximateDouble x) { return ApproximateDouble(+x._d); }
     friend ApproximateDouble operator-(ApproximateDouble x) { return ApproximateDouble(-x._d); }
-    operator double() const { return _d; }
+    friend ApproximateDouble operator+(ApproximateDouble x1, ApproximateDouble x2) { return ApproximateDouble(x1._d+x2._d); }
+    friend ApproximateDouble operator-(ApproximateDouble x1, ApproximateDouble x2) { return ApproximateDouble(x1._d-x2._d); }
+    friend ApproximateDouble operator*(ApproximateDouble x1, ApproximateDouble x2) { return ApproximateDouble(x1._d*x2._d); }
+    friend ApproximateDouble operator/(ApproximateDouble x1, ApproximateDouble x2) { return ApproximateDouble(x1._d/x2._d); }
+    friend ApproximateDouble& operator+=(ApproximateDouble& x1, ApproximateDouble x2) { x1._d+=x2._d; return x1; }
+    friend ApproximateDouble& operator-=(ApproximateDouble& x1, ApproximateDouble x2) { x1._d-=x2._d; return x1; }
+    friend ApproximateDouble& operator*=(ApproximateDouble& x1, ApproximateDouble x2) { x1._d*=x2._d; return x1; }
+    friend ApproximateDouble& operator/=(ApproximateDouble& x1, ApproximateDouble x2) { x1._d/=x2._d; return x1; }
+
+    friend Bool same(ApproximateDouble x1, ApproximateDouble x2) { return x1._d==x2._d; }
+    friend Bool operator==(ApproximateDouble x1, ApproximateDouble x2) { return x1._d==x2._d; }
+    friend Bool operator!=(ApproximateDouble x1, ApproximateDouble x2) { return x1._d!=x2._d; }
+    friend Bool operator> (ApproximateDouble x1, ApproximateDouble x2) { return x1._d> x2._d; }
+    friend Bool operator< (ApproximateDouble x1, ApproximateDouble x2) { return x1._d< x2._d; }
+    friend Bool operator>=(ApproximateDouble x1, ApproximateDouble x2) { return x1._d>=x2._d; }
+    friend Bool operator<=(ApproximateDouble x1, ApproximateDouble x2) { return x1._d<=x2._d; }
+
+    friend OutputStream& operator<<(OutputStream& os, ApproximateDouble x) { return os << x._d; }
 };
 
 //! \ingroup NumericModule
