@@ -847,22 +847,6 @@ template<class AX> Matrix<decltype(cast_exact(declval<AX>()))> cast_exact(Matrix
 }
 
 
-#warning
-// FIXME: Unsafe arithmetic operators on raw float
-inline FloatDP operator+(FloatDP x1, FloatDP x2) { return x1.dbl + x2.dbl; }
-inline FloatDP operator-(FloatDP x1, FloatDP x2) { return x1.dbl - x2.dbl; }
-inline FloatDP operator*(FloatDP x1, FloatDP x2) { return x1.dbl * x2.dbl; }
-inline FloatDP operator/(FloatDP x1, FloatDP x2) { return x1.dbl / x2.dbl; }
-inline FloatDP& operator+=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl + x2.dbl; return x1; }
-inline FloatDP& operator-=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl - x2.dbl; return x1; }
-inline FloatDP& operator*=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl * x2.dbl; return x1; }
-inline FloatDP& operator/=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl / x2.dbl; return x1; }
-inline FloatDP rec(FloatDP x) { return 1.0/x.dbl; }
-template class Matrix<FloatDP>;
-template Matrix<FloatDP> inverse(const Matrix<FloatDP>&);
-template Vector<FloatDP> solve(const Matrix<FloatDP>&, const Vector<FloatDP>&);
-template Void normalise_rows(Matrix<FloatDP>&);
-
 template class Matrix<RoundedFloatDP>;
 template Matrix<RoundedFloatDP> inverse(const Matrix<RoundedFloatDP>&);
 template Vector<RoundedFloatDP> solve(const Matrix<RoundedFloatDP>&, const Vector<RoundedFloatDP>&);
