@@ -47,14 +47,6 @@
 
 namespace Ariadne {
 
-#warning
-// FIXME: Unsafe arithmetic operators on raw float
-inline FloatDP operator+(FloatDP const& x1, FloatDP const& x2) { return x1.dbl + x2.dbl; }
-inline FloatDP operator-(FloatDP const& x1, FloatDP const& x2) { return x1.dbl - x2.dbl; }
-inline FloatDP operator*(FloatDP const& x1, FloatDP const& x2) { return x1.dbl * x2.dbl; }
-inline FloatDP operator/(FloatDP const& x1, FloatDP const& x2) { return x1.dbl / x2.dbl; }
-inline FloatDP& operator+=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl + x2.dbl; return x1; }
-
 typedef Vector<FloatDPApproximation> FloatApproximationVector;
 typedef Vector<FloatDPValue> ExactFloatVector;
 
@@ -74,6 +66,14 @@ inline Sign sign(const ExactIntervalType& ivl) {
     else { return Sign::ZERO; }
 }
 
+template<class X> inline Approximation<X> affine(Approximation<X> const& l, Approximation<X> const& u, Approximation<X> const& s) {
+    return fma(s,u-l,l);
+}
+
+// Computes the value i/n of the way from l to u
+template<class X> inline Approximation<X> affine(LowerBound<X> const& l, UpperBound<X> const& u, Nat i, Nat n) {
+    return (l*(n-i)+u*i)/n;
+}
 
 inline OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) {
     if(c.bounds().lower()==c.bounds().upper()) { return os << c.function() << "==" << c.bounds().upper(); }
@@ -218,7 +218,7 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
 
 Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const
 {
-    const FloatDP MINIMUM_REDUCTION = 0.75;
+    const PositiveFloatDPValue MINIMUM_REDUCTION (0.75_x,dp);
     ARIADNE_ASSERT(function.argument_size()==domain.size());
     ARIADNE_ASSERT(function.result_size()==codomain.size());
 
@@ -247,7 +247,7 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorMultiva
         for(Nat j=0; j!=domain.size(); ++j) {
             domain_magnitude+=domain[j].width();
         }
-    } while(domain_magnitude.raw() < old_domain_magnitude.raw() * MINIMUM_REDUCTION);
+    } while( refines(domain_magnitude,old_domain_magnitude * MINIMUM_REDUCTION) );
 
     return false;
 }
@@ -263,7 +263,7 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const List<ValidatedConstrai
 {
     static const Bool USE_BOX_REDUCE = false;
 
-    const double MINIMUM_REDUCTION = 0.75;
+    const PositiveFloatDPValue MINIMUM_REDUCTION (0.75_x,dp);
 
     if(definitely(domain.is_empty())) { return true; }
 
@@ -293,7 +293,7 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const List<ValidatedConstrai
         for(Nat j=0; j!=domain.size(); ++j) {
             domain_magnitude+=domain[j].width();
         }
-    } while(domain_magnitude.raw() < old_domain_magnitude.raw() * MINIMUM_REDUCTION);
+    } while( refines(domain_magnitude,old_domain_magnitude * MINIMUM_REDUCTION) );
 
     return false;
 }
@@ -359,7 +359,7 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
     Box<UpperIntervalType> subdomain=domain;
 
     static const Int MAX_STEPS=3;
-    const FloatDP threshold = lower.width().raw() / (1<<MAX_STEPS);
+    const FloatDP threshold = div(near, lower.width().raw() , (1<<MAX_STEPS) );
     do {
         FloatDPUpperBound ub; FloatDPUpperInterval ivl; FloatDPValue val; ub=val;
 
@@ -438,8 +438,8 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMul
     // Try to reduce the size of the set by "shaving" off along a coordinate axis
     //
     UpperIntervalType interval=domain[variable];
-    RawFloatDP l=interval.lower().raw();
-    RawFloatDP u=interval.upper().raw();
+    FloatDPLowerBound l=interval.lower();
+    FloatDPUpperBound u=interval.upper();
     ExactIntervalType subinterval;
     UpperIntervalType new_interval(interval);
     Box<UpperIntervalType> slice=domain;
@@ -450,7 +450,7 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMul
     // Look for empty slices from below
     Nat imax = n;
     for(Nat i=0; i!=n; ++i) {
-        subinterval=ExactIntervalType((l*(n-i)+u*i)/n,(l*(n-i-1)+u*(i+1))/n);
+        subinterval=ExactIntervalType(cast_exact(affine(l,u,i,n)),cast_exact(affine(l,u,i+1,n)));
         slice[variable]=subinterval;
         UpperIntervalType slice_image=apply(function,slice);
         if(definitely(intersection(slice_image,bounds).is_empty())) {
@@ -468,7 +468,7 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMul
 
     // Look for empty slices from above; note that at least one nonempty slice has been found
     for(Nat j=n-1; j!=imax; --j) {
-        subinterval=ExactIntervalType((l*(n-j)+u*j)/n,(l*(n-j-1)+u*(j+1))/n);
+        subinterval=ExactIntervalType(cast_exact(affine(l,u,j,n)),cast_exact(affine(l,u,j+1,n)));
         slice[variable]=subinterval;
         UpperIntervalType slice_image=apply(function,slice);
         if(definitely(intersection(slice_image,bounds).is_empty())) {
