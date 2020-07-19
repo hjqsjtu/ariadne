@@ -46,20 +46,6 @@ template class UnivariateDifferential<FloatMPApproximation>;
 template class UnivariateDifferential<FloatMPBounds>;
 
 
-#warning
-// FIXME: Unsafe arithmetic operators on raw float
-inline FloatDP operator+(FloatDP x1, FloatDP x2) { return x1.dbl + x2.dbl; }
-inline FloatDP operator-(FloatDP x1, FloatDP x2) { return x1.dbl - x2.dbl; }
-inline FloatDP operator*(FloatDP x1, FloatDP x2) { return x1.dbl * x2.dbl; }
-inline FloatDP operator/(FloatDP x1, FloatDP x2) { return x1.dbl / x2.dbl; }
-inline FloatDP& operator+=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl + x2.dbl; return x1; }
-inline FloatDP& operator-=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl - x2.dbl; return x1; }
-inline FloatDP& operator*=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl * x2.dbl; return x1; }
-inline FloatDP& operator/=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl / x2.dbl; return x1; }
-inline FloatDP rec(FloatDP x) { return 1.0/x.dbl; }
-template class Differential<FloatDP>;
-template class Vector<Differential<FloatDP>>;
-
 template class Differential<RoundedFloatDP>;
 template class Differential<FloatDPBounds>;
 template class Differential<FloatDPApproximation>;
