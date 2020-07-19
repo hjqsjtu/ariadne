@@ -31,14 +31,6 @@
 
 namespace Ariadne {
 
-#warning
-// FIXME: Unsafe arithmetic operators on raw float
-inline FloatDP operator+(FloatDP x1, FloatDP x2) { return x1.dbl + x2.dbl; }
-inline FloatDP operator-(FloatDP x1, FloatDP x2) { return x1.dbl - x2.dbl; }
-inline FloatDP operator*(FloatDP x1, FloatDP x2) { return x1.dbl * x2.dbl; }
-inline FloatDP operator/(FloatDP x1, FloatDP x2) { return x1.dbl / x2.dbl; }
-inline FloatDP& operator+=(FloatDP& x1, FloatDP x2) { x1.dbl = x1.dbl + x2.dbl; return x1; }
-
 /*
 FloatDP volume(Vector<IntervalValidatedRangeType> const& box) {
     FloatDP result = 1.0;
@@ -313,11 +305,11 @@ Void LohnerReconditioner::update_from(InclusionEvolverState const& state) {
     auto n = _number_of_variables;
     auto m = _number_of_inputs;
 
-    FloatDP npk = 0;
-    FloatDP rho = _ratio_of_parameters_to_keep;
+    FloatDPApproximation npk(0,dp);
+    FloatDPApproximation rho(_ratio_of_parameters_to_keep);
     for (auto entry: state.local_optima_count()) {
         SizeType ppi = entry.first.num_params_per_input();
-        FloatDP partial = n + rho*(n+2*m) + (freq-1)*m*(2 - ppi);
+        FloatDPApproximation partial = n + rho*(n+2*m) + (freq-1)*m*(2 - ppi);
         npk += partial*entry.second/freq;
     }
 
